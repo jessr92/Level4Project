@@ -2,28 +2,29 @@
 
 \documentclass{l4proj}
 
-%
-% put any packages here
-%
-
 \begin{document}
-\title{How to Produce a Level 4 Project Report}
-\author{Patrick Prosser}
-\date{October 18, 2012}
+\title{GPU-Accelerated Document Filtering}
+\author{Gordon Reid}
+\date{March 28, 2014}
 \maketitle
 
 \begin{abstract}
-We show how to produce a level 4 project report using latex and pdflatex using the
-style file l4proj.cls
+Document filtering is problem of growing importance. The advent of the Internet
+has resulted in a massive surge in the transfer and storage of data and
+information. A prime example is email where hundreds of billions are sent every
+day. Emails, and other kinds of documents, require to be filtered. This problem
+is highly data parallel in nature as the classification of one document does
+not affect the classification of another. This report investigates the viability
+of using GPUs rather than CPUs for the classification. GPUs are designed with
+parallel problems in mind and thus have the potential to allow for significantly
+higher throughput compared with CPUs.
+
+The results show that...
 \end{abstract}
 
 \educationalconsent
-%
-%NOTE: if you include the educationalconsent (above) and your project is graded an A then
-%      it may be entered in the CS Hall of Fame
-%
+
 \tableofcontents
-%==============================================================================
 
 \chapter{Introduction}
 \pagenumbering{arabic}
