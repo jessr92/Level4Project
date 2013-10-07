@@ -213,3 +213,13 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+# Specific to project
+
+# LaTeX
+1002536r-Document-Filtering.pdf
+*.aux
+*.bbl
+*.blg
+*.synctex.gz
+*.toc
