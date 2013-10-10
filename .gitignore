@@ -223,3 +223,10 @@ pip-log.txt
 *.blg
 *.synctex.gz
 *.toc
+*.raw
+
+*.bin
+
+Code/test_reading_files
+
+*.o
