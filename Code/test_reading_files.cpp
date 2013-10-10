@@ -1,18 +1,6 @@
-#include <algorithm>
-#include <ios>
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <vector>
-#include <iomanip>
-#include <iterator>
-#include <string>
-#include <time.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <stdlib.h>
 
 typedef uint64_t word_t;
 
