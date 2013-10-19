@@ -25,7 +25,7 @@ unsigned long *singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
         unsigned int id = docAddresses->at(document);
         unsigned long score = 0;
         unsigned int numberOfTerms = docAddresses->at(document + 1) - id;
-        for (unsigned int number = id + 2; number < id + numberOfTerms; ++number)
+        for (unsigned int number = id; number < id + numberOfTerms; ++number)
         {
             // Get number-th term of document from collection.
             word_t term = collection->at(number);
