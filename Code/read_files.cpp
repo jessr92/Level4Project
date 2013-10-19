@@ -11,7 +11,7 @@ const std::vector<word_t> *loadParsedCollectionFromFile(std::string collection_f
     }
     fh >> std::hex;
     word_t word;
-    while (  fh >> word)
+    while (fh >> word)
     {
         collection->push_back(word);
     }
@@ -34,7 +34,7 @@ const std::vector<word_t> *readProfileFromFile(std::string memcontent_file)
         bfh.read((char *)(&w), sizeof(w)) ;
         profile->push_back(w);
     }
-    bfh.close ();
+    bfh.close();
     return profile;
 }
 
@@ -63,7 +63,7 @@ std::vector<unsigned int> *getDocumentAddresses(const std::vector<word_t> *colle
     }
     // Store the length of the collection (in bytes) at the end of the vector
     // so we know where the collection and thus last document ends.
-    docAddresses->push_back(collection->size() * sizeof(word_t)); // NEEDED?
+    docAddresses->push_back(collection->size() * sizeof(word_t));
     // Update the 0th element of the vector that was originally a placeholder
     // to the total number of documents in the vector
     docAddresses->at(0) = numberOfDocuments;

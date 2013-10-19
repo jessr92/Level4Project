@@ -25,7 +25,7 @@ unsigned long *singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
         unsigned int id = docAddresses->at(document);
         unsigned long score = 0;
         unsigned int numberOfTerms = docAddresses->at(document + 1) - id;
-        for (unsigned int number = id; number < id + numberOfTerms && number < collection->size()   ; ++number)
+        for (unsigned int number = id; number < id + numberOfTerms && number < collection->size(); ++number)
         {
             // Get number-th term of document from collection.
             word_t term = collection->at(number);
@@ -34,7 +34,7 @@ unsigned long *singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
             // Left shift by 2 since we need to check four profile entries from
             // this address.
             unsigned int profileAddress = ((term >> 42) & PROF_MASK) << 2;
-            // Get profile entry (4 per term?) and add score to total document score
+            // Get profile entry and add score to total document score
             word_t profileEntry = profile->at(profileAddress);
             score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
             profileEntry = profile->at(profileAddress + 1);
