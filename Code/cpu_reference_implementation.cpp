@@ -16,32 +16,45 @@
  */
 unsigned long *singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
         const std::vector<word_t> *profile,
-        const std::vector<unsigned int> *docAddresses,
+        const std::vector<word_t> *docAddresses,
         unsigned long *scores)
 {
-    unsigned int numberOfDocuments = docAddresses->at(0);
-    for (unsigned int document = 1; document <= numberOfDocuments; ++document)
+    word_t numberOfDocuments = docAddresses->at(0);
+    for (word_t document = 1; document <= numberOfDocuments; ++document)
     {
-        unsigned int id = docAddresses->at(document);
+        word_t id = docAddresses->at(document);
         unsigned long score = 0;
-        unsigned int numberOfTerms = docAddresses->at(document + 1) - id;
-        for (unsigned int number = id; number < id + numberOfTerms; ++number)
+        word_t numberOfTerms = docAddresses->at(document + 1) - id;
+        for (word_t number = id; number < id + numberOfTerms; ++number)
         {
             // Get number-th term of document from collection.
             word_t term = collection->at(number);
-            unsigned int rest = (term >> 4) & PROF_ADDR_LENGTH;
+            word_t rest = (term >> 4) & PROF_ADDR_LENGTH;
             // Profile address is the 22 most significant bits.
             // Left shift by 2 since we need to check four profile entries from
-            // this address.
-            unsigned int profileAddress = ((term >> 42) & PROF_MASK) << 2;
+            // this address (this is instead of having a ulong4 structure to
+            // match the OpenCL API and looking at each element.)
+            word_t profileAddress = ((term >> 42) & PROF_MASK) << 2;
             // Get profile entry and add score to total document score
             word_t profileEntry = profile->at(profileAddress);
+            if ((((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) == 1) {
+                printf("%llu\t\t%llu\t\t0\t\t\t%llu\n", document, number - id, (profileEntry & PROF_WEIGHT));
+            }
             score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
             profileEntry = profile->at(profileAddress + 1);
+            if ((((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) == 1) {
+                printf("%llu\t\t%llu\t\t1\t\t\t%llu\n", document, number - id, (profileEntry & PROF_WEIGHT));
+            }
             score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
             profileEntry = profile->at(profileAddress + 2);
+            if ((((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) == 1) {
+                printf("%llu\t\t%llu\t\t2\t\t\t%llu\n", document, number - id, (profileEntry & PROF_WEIGHT));
+            }
             score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
             profileEntry = profile->at(profileAddress + 3);
+            if ((((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) == 1) {
+                printf("%llu\t\t%llu\t\t3\t\t\t%llu\n", document, number - id, (profileEntry & PROF_WEIGHT));
+            }
             score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
         }
         scores[document - 1] = score;
@@ -51,16 +64,17 @@ unsigned long *singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
 
 void executeReferenceImplementation(const std::vector<word_t> *collection,
                                     const std::vector<word_t> *profile,
-                                    const std::vector<unsigned int> *docAddresses)
+                                    const std::vector<word_t> *docAddresses)
 {
-    unsigned long int *scores = new unsigned long int[docAddresses->at(0)];
+    unsigned long *scores = new unsigned long[docAddresses->at(0)];
+    printf("DocNum\tTermNum\tProfOffset\tScore\n");
     scores = singleThreadCPUNoThreshold(collection, profile, docAddresses, scores);
-    unsigned long int hamCount = 0;
-    unsigned long int spamCount = 0;
-    for (unsigned int i = 0; i < docAddresses->at(0); ++i)
+    unsigned long hamCount = 0;
+    unsigned long spamCount = 0;
+    for (word_t i = 0; i < docAddresses->at(0); ++i)
     {
         scores[i] > THRESHOLD ? ++spamCount : ++hamCount;
-        std::cout << "Document at " << i << " has score " << scores[i] << std::endl;
+        std::cout << "Document " << i + 1 << " has score " << scores[i] << std::endl;
     }
     std::cout << "Ham documents: " << hamCount << std::endl;
     std::cout << "Spam documents " << spamCount << std::endl;
@@ -75,7 +89,7 @@ int main()
     std::cout << "collection.raw: " << collection->size() << std::endl;
     const std::vector<word_t> *profile = readProfileFromFile("profile.bin");
     std::cout << "profile.bin: " << profile->size() << std::endl;
-    const std::vector<unsigned int> *docAddresses = getDocumentAddresses(collection);
+    const std::vector<word_t> *docAddresses = getDocumentAddresses(collection);
     std::cout << "docAddresses: " << docAddresses->at(0) << std::endl;
     executeReferenceImplementation(collection, profile, docAddresses);
     return 0;

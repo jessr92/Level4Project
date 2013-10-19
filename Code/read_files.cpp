@@ -31,19 +31,19 @@ const std::vector<word_t> *readProfileFromFile(std::string memcontent_file)
     word_t w = 0;
     while (!bfh.eof())
     {
-        bfh.read((char *)(&w), sizeof(w)) ;
+        bfh.read((char *)(&w), sizeof(w));
         profile->push_back(w);
     }
     bfh.close();
     return profile;
 }
 
-std::vector<unsigned int> *getDocumentAddresses(const std::vector<word_t> *collection)
+std::vector<word_t> *getDocumentAddresses(const std::vector<word_t> *collection)
 {
-    std::vector<unsigned int> *docAddresses = new std::vector<unsigned int>;
+    std::vector<word_t> *docAddresses = new std::vector<word_t>;
     // Address represents the word in collection the document id resides in.
-    unsigned int address = 0;
-    unsigned int numberOfDocuments = 0;
+    word_t address = 0;
+    word_t numberOfDocuments = 0;
     // Placeholder at beginning of vector until we know true value.
     docAddresses->push_back(numberOfDocuments);
     // Loop over the entire collection to find the words representing documents

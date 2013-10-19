@@ -8,4 +8,4 @@ const std::vector<word_t> *loadParsedCollectionFromFile(std::string collection_f
 
 const std::vector<word_t> *readProfileFromFile(std::string memcontent_file);
 
-std::vector<unsigned int> *getDocumentAddresses(const std::vector<word_t> *collection);
+std::vector<word_t> *getDocumentAddresses(const std::vector<word_t> *collection);
