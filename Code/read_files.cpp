@@ -63,7 +63,7 @@ std::vector<unsigned int> *getDocumentAddresses(const std::vector<word_t> *colle
     }
     // Store the length of the collection (in bytes) at the end of the vector
     // so we know where the collection and thus last document ends.
-    docAddresses->push_back(collection->size() * sizeof(word_t));
+    docAddresses->push_back(collection->size());
     // Update the 0th element of the vector that was originally a placeholder
     // to the total number of documents in the vector
     docAddresses->at(0) = numberOfDocuments;
