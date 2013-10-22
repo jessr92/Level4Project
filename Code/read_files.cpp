@@ -38,9 +38,9 @@ const std::vector<word_t> *readProfileFromFile(std::string memcontent_file)
     return profile;
 }
 
-std::vector<word_t> *getDocumentAddresses(const std::vector<word_t> *collection)
+std::vector<unsigned int> *getDocumentAddresses(const std::vector<word_t> *collection)
 {
-    std::vector<word_t> *docAddresses = new std::vector<word_t>;
+    std::vector<unsigned int> *docAddresses = new std::vector<unsigned int>;
     // Address represents the word in collection the document id resides in.
     word_t address = 0;
     word_t numberOfDocuments = 0;
