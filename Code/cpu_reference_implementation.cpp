@@ -242,13 +242,14 @@ void executeReferenceImplementation(const std::vector<word_t> *collection,
         std::cout << "Document " << i + 1 << " has score " << scores[i] << std::endl;
     }
 #else
-    unsigned long *scores = new unsigned long[docAddresses->at(0) * 2];
-    for (word_t i = 0; i < docAddresses->at(0) * 2; i++)
+    unsigned long *scores = new unsigned long[(docAddresses->at(0) + 1) * 2];
+    for (word_t i = 0; i < (docAddresses->at(0) + 1) * 2; i++)
     {
         scores[i] = 0;
     }
+    scores[0] = 2;
     compute_reference(NTH, collection, docAddresses, profile, bloomFilter, scores, THRESHOLD);
-    for (word_t i = 0; i < docAddresses->at(0) * 2; i = i + 2)
+    for (word_t i = 2; i < (docAddresses->at(0) + 1) * 2; i = i + 2)
     {
         scores[i + 1] > THRESHOLD ? ++spamCount : ++hamCount;
         std::cout << "Document " << scores[i] << " has score " << scores[i + 1] << std::endl;
