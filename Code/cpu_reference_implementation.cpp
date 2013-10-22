@@ -91,13 +91,13 @@ void compute_reference(unsigned int nunits,
         unsigned int start_docids = core_id * range + 1; // address 0 stores ndocs
         unsigned int end_docids = start_docids + range;
         //- loop over array of doc addresses
-        //      printf("**** Docs from %d to %d\n",start_docids,end_docids-1);
+        // printf("**** Docs from %d to %d\n",start_docids,end_docids-1);
         for (unsigned int ii = start_docids; ii < end_docids; ii++)
         {
             unsigned int docaddr = docaddrs->at(ii); // this address contains the docid
 
             word_t docid = collection_p->at(docaddr) >> 4;
-            //          printf("**** %d: %lu\n",docaddr,docid);
+            // printf("**** %d: %lu\n",docaddr,docid);
             unsigned int docscore;
             docscore = 0;
             unsigned int nterms = docaddrs->at(ii + 1) - docaddr;
@@ -107,17 +107,17 @@ void compute_reference(unsigned int nunits,
             //- loop over terms per doc, which we know by looking at the next address, split loop over nthreads
             //int th_scores[NTH];
             unsigned int th_score = 0; // maybe real?
-            //          printf("**** Terms from %d to %d\n",start_terms,stop_terms-1);
+            // printf("**** Terms from %d to %d\n",start_terms,stop_terms-1);
             for (unsigned int jj = start_terms; jj < stop_terms; jj++)
             {
                 // here do the actual lookup & compute the score for the document
                 // get the term
                 unsigned long term = collection_p->at(docaddr + jj);
-                //                  printf("**** Term at %d: %x\n",docaddr+jj,term);
+                // printf("**** Term at %d: %x\n",docaddr+jj,term);
                 // does it occur in the profile?
                 // Bloom filter check
                 unsigned int isHit = check_Bloom_filter(term, bloom_filter_p);
-                //                  printf("isHit: %d\n",isHit); // OK in TEST: all hits
+                // printf("isHit: %d\n",isHit); // OK in TEST: all hits
                 if (isHit == 1)
                 {
                     // the naive way: take the 22 MSbs, use as address
@@ -148,7 +148,7 @@ void compute_reference(unsigned int nunits,
             }
             if (th_score != 0)
             {
-                //printf("**** Score per thread: %d\n", th_score);
+                printf("**** Score per thread: %d\n", th_score);
             }
             //th_scores[th_id]=th_score;
             for (unsigned short tth = 0; tth < NTH; tth++)
@@ -209,28 +209,12 @@ void singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
             word_t profileAddress = ((term >> 42) & PROF_MASK) << 2;
             // Get profile entry and add score to total document score
             word_t profileEntry = profile->at(profileAddress);
-            if ((((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) == 1)
-            {
-                printf("%llu\t\t%llu\t\t0\t\t\t%llu\n", document, number - id, (profileEntry & PROF_WEIGHT));
-            }
             score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
             profileEntry = profile->at(profileAddress + 1);
-            if ((((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) == 1)
-            {
-                printf("%llu\t\t%llu\t\t1\t\t\t%llu\n", document, number - id, (profileEntry & PROF_WEIGHT));
-            }
             score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
             profileEntry = profile->at(profileAddress + 2);
-            if ((((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) == 1)
-            {
-                printf("%llu\t\t%llu\t\t2\t\t\t%llu\n", document, number - id, (profileEntry & PROF_WEIGHT));
-            }
             score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
             profileEntry = profile->at(profileAddress + 3);
-            if ((((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) == 1)
-            {
-                printf("%llu\t\t%llu\t\t3\t\t\t%llu\n", document, number - id, (profileEntry & PROF_WEIGHT));
-            }
             score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
         }
         scores[document - 1] = score;
@@ -266,7 +250,7 @@ void executeReferenceImplementation(const std::vector<word_t> *collection,
     compute_reference(NTH, collection, docAddresses, profile, bloomFilter, scores, THRESHOLD);
     for (word_t i = 0; i < docAddresses->at(0) * 2; i = i + 2)
     {
-        scores[i+1] > THRESHOLD ? ++spamCount : ++hamCount;
+        scores[i + 1] > THRESHOLD ? ++spamCount : ++hamCount;
         std::cout << "Document " << scores[i] << " has score " << scores[i + 1] << std::endl;
     }
 #endif
