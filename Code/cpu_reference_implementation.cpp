@@ -91,13 +91,13 @@ void compute_reference(unsigned int nunits,
         unsigned int start_docids = core_id * range + 1; // address 0 stores ndocs
         unsigned int end_docids = start_docids + range;
         //- loop over array of doc addresses
-        // printf("**** Docs from %d to %d\n",start_docids,end_docids-1);
+        //      printf("**** Docs from %d to %d\n",start_docids,end_docids-1);
         for (unsigned int ii = start_docids; ii < end_docids; ii++)
         {
             unsigned int docaddr = docaddrs->at(ii); // this address contains the docid
 
             word_t docid = collection_p->at(docaddr) >> 4;
-            // printf("**** %d: %lu\n",docaddr,docid);
+            //          printf("**** %d: %lu\n",docaddr,docid);
             unsigned int docscore;
             docscore = 0;
             unsigned int nterms = docaddrs->at(ii + 1) - docaddr;
@@ -107,17 +107,17 @@ void compute_reference(unsigned int nunits,
             //- loop over terms per doc, which we know by looking at the next address, split loop over nthreads
             //int th_scores[NTH];
             unsigned int th_score = 0; // maybe real?
-            // printf("**** Terms from %d to %d\n",start_terms,stop_terms-1);
+            //          printf("**** Terms from %d to %d\n",start_terms,stop_terms-1);
             for (unsigned int jj = start_terms; jj < stop_terms; jj++)
             {
                 // here do the actual lookup & compute the score for the document
                 // get the term
                 unsigned long term = collection_p->at(docaddr + jj);
-                // printf("**** Term at %d: %x\n",docaddr+jj,term);
+                //                  printf("**** Term at %d: %x\n",docaddr+jj,term);
                 // does it occur in the profile?
                 // Bloom filter check
                 unsigned int isHit = check_Bloom_filter(term, bloom_filter_p);
-                // printf("isHit: %d\n",isHit); // OK in TEST: all hits
+                //                  printf("isHit: %d\n",isHit); // OK in TEST: all hits
                 if (isHit == 1)
                 {
                     // the naive way: take the 22 MSbs, use as address
@@ -132,8 +132,8 @@ void compute_reference(unsigned int nunits,
                     {
                         if (profile_p->at(prof_entry_addr + ii) != 0)
                         {
-                            //printf("**** Profile entry at %x (%d): %x\n", prof_entry_addr, ii, profile_p->at(prof_entry_addr) );
-                            //printf("**** (%x==%x)*(%x)\n", ((prof_entry.s0 >> 26) & 0x3FFFFFFFFF), rest, prof_entry.s0 & 0x3FFFFFF);
+                            printf("**** Profile entry at %x (%d): %x\n", prof_entry_addr, ii, profile_p->at(prof_entry_addr) );
+                            printf("**** (%x==%x)*(%x)\n", ((prof_entry.s0 >> 26) & 0x3FFFFFFFFF), rest, prof_entry.s0 & 0x3FFFFFF);
                         }
                     }
 
@@ -160,12 +160,12 @@ void compute_reference(unsigned int nunits,
             }
             if (docscore != 0)
             {
-                printf("**** Score per doc for %llu: %u\n", docid, docscore);
+                printf("**** Score per doc for %lu: %u\n", docid, docscore);
             }
             // So now somehow return the score for this doc, maybe with a threshold
             if (docscore > threshold)
             {
-                //printf("DocId: %lu Score: %u\n", docid, docscore);
+                printf("DocId: %lu Score: %u\n", docid, docscore);
                 // Basically use a stack of scores per thread, stored in a single array
                 // Means we have a limit on the number of scores per core/ total
                 // read stack pointer
