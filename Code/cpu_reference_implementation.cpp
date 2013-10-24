@@ -3,9 +3,9 @@
 #include <vector>
 #include "read_files.h"
 
-#define PROF_MASK 0x3FFFFF
-#define PROF_WEIGHT 0x3FFFFFF
-#define PROF_ADDR_LENGTH 0x3FFFFFFFFF
+#define PROF_MASK 0x3FFFFF // 22 bits
+#define PROF_WEIGHT 0x3FFFFFF // 26 bits
+#define PROF_REST_LENGTH 0x3FFFFFFFFF // 38 bits
 
 #define THRESHOLD 0
 
@@ -201,21 +201,25 @@ void singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
         {
             // Get number-th term of document from collection.
             word_t term = collection->at(number);
-            word_t rest = (term >> 4) & PROF_ADDR_LENGTH;
+            // Rest = bits representing the actual term from the collection
+            word_t rest = (term >> 4) & PROF_REST_LENGTH;
             // Profile address is the 22 most significant bits.
             // Left shift by 2 since we need to check four profile entries from
             // this address (this is instead of having a ulong4 structure to
             // match the OpenCL API and looking at each element.)
             word_t profileAddress = ((term >> 42) & PROF_MASK) << 2;
             // Get profile entry and add score to total document score
+            // score = Lowest 26th elements of the profile entry.
+            // The upper 38 bits represent the specific term which needs to
+            // match rest (the actual term) from the collection.
             word_t profileEntry = profile->at(profileAddress);
-            score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
+            score += (((profileEntry >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
             profileEntry = profile->at(profileAddress + 1);
-            score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
+            score += (((profileEntry >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
             profileEntry = profile->at(profileAddress + 2);
-            score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
+            score += (((profileEntry >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
             profileEntry = profile->at(profileAddress + 3);
-            score += (((profileEntry >> 26) & PROF_ADDR_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
+            score += (((profileEntry >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
         }
         scores[document - 1] = score;
     }
