@@ -185,6 +185,9 @@ void compute_reference(unsigned int nunits,
  * Scores all documents and returns the results. Primarily used as a test of
  * the scoring algorithm as there is no threshold or categorisation of the
  * documents.
+ *
+ * Does not return the document ID with scores. This is a highly simplified
+ * implementation.
  */
 void singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
                                 const std::vector<word_t> *profile,
@@ -192,12 +195,17 @@ void singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
                                 unsigned long *scores)
 {
     word_t numberOfDocuments = docAddresses->at(0);
+    // Loop over all documents
     for (word_t document = 1; document <= numberOfDocuments; ++document)
     {
+        // Item in docAddresses stores the index of the first term for document
+        // so the next element denotes the upper bound (exclusive) for terms
+        // in this document.
         word_t id = docAddresses->at(document);
+        word_t endIndex = docAddresses->at(document + 1);
         unsigned long score = 0;
-        word_t numberOfTerms = docAddresses->at(document + 1) - id;
-        for (word_t number = id; number < id + numberOfTerms; ++number)
+        // Loop over all terms in the document
+        for (word_t number = id; number < endIndex; ++number)
         {
             // Get number-th term of document from collection.
             word_t term = collection->at(number);
@@ -208,7 +216,7 @@ void singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
             // this address (this is instead of having a ulong4 structure to
             // match the OpenCL API and looking at each element.)
             word_t profileAddress = ((term >> 42) & PROF_MASK) << 2;
-            // Get profile entry and add score to total document score
+            // Get profile entry and add score to total document score.
             // score = Lowest 26th elements of the profile entry.
             // The upper 38 bits represent the specific term which needs to
             // match rest (the actual term) from the collection.
@@ -217,11 +225,14 @@ void singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
             profileEntry.s1 = profile->at(profileAddress + 1);
             profileEntry.s2 = profile->at(profileAddress + 2);
             profileEntry.s3 = profile->at(profileAddress + 3);
+            // Only one of these will add something non-zero to the score.
+            // The left hand side of the * operator will either be 0 or 1.
             score += (((profileEntry.s0 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s0 & PROF_WEIGHT);
             score += (((profileEntry.s1 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s1 & PROF_WEIGHT);
             score += (((profileEntry.s2 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s2 & PROF_WEIGHT);
             score += (((profileEntry.s3 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s3 & PROF_WEIGHT);
         }
+        // Since document starts at 1, store the ith document in ith-1 position.
         scores[document - 1] = score;
     }
 }
@@ -233,6 +244,7 @@ void executeReferenceImplementation(const std::vector<word_t> *collection,
 {
     unsigned long hamCount = 0;
     unsigned long spamCount = 0;
+#define GR
 #ifdef GR
     unsigned long *scores = new unsigned long[docAddresses->at(0)];
     printf("DocNum\tTermNum\tProfOffset\tScore\n");
