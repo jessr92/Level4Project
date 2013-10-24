@@ -212,14 +212,15 @@ void singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
             // score = Lowest 26th elements of the profile entry.
             // The upper 38 bits represent the specific term which needs to
             // match rest (the actual term) from the collection.
-            word_t profileEntry = profile->at(profileAddress);
-            score += (((profileEntry >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
-            profileEntry = profile->at(profileAddress + 1);
-            score += (((profileEntry >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
-            profileEntry = profile->at(profileAddress + 2);
-            score += (((profileEntry >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
-            profileEntry = profile->at(profileAddress + 3);
-            score += (((profileEntry >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry & PROF_WEIGHT);
+            ulong4 profileEntry;
+            profileEntry.s0 = profile->at(profileAddress);
+            profileEntry.s1 = profile->at(profileAddress + 1);
+            profileEntry.s2 = profile->at(profileAddress + 2);
+            profileEntry.s3 = profile->at(profileAddress + 3);
+            score += (((profileEntry.s0 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s0 & PROF_WEIGHT);
+            score += (((profileEntry.s1 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s1 & PROF_WEIGHT);
+            score += (((profileEntry.s2 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s2 & PROF_WEIGHT);
+            score += (((profileEntry.s3 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s3 & PROF_WEIGHT);
         }
         scores[document - 1] = score;
     }
