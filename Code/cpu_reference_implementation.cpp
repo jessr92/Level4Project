@@ -29,25 +29,10 @@
 #define BF_SZ_ULONG 2048
 #endif
 
-struct ScoreTup
-{
-    unsigned long docId;
-    unsigned long score;
-};
-
-// Compatibility with OpenCL types
-struct uchar8
-{
-    unsigned char s0, s1, s2, s3, s4, s5, s6, s7;
-};
 
 struct ulong4
 {
     unsigned long s0, s1, s2, s3;
-};
-struct ulong2
-{
-    unsigned long s0, s1;
 };
 
 // Bloom filter check
@@ -247,7 +232,6 @@ void executeReferenceImplementation(const std::vector<word_t> *collection,
 #define GR
 #ifdef GR
     unsigned long *scores = new unsigned long[docAddresses->at(0)];
-    printf("DocNum\tTermNum\tProfOffset\tScore\n");
     for (word_t i = 0; i < docAddresses->at(0); i++)
     {
         scores[i] = 0;
