@@ -1,5 +1,5 @@
 CPPFLAGS=-W -Wall -pedantic -std=c++11
-CFLAGS=$(CPPFLAGS) -framework OpenCL
+CFLAGS=$(CPPFLAGS)
 PROGS=cpu_reference_implementation
 OBJS=cpu_reference_implementation.o read_files.o
 
