@@ -196,6 +196,7 @@ void executeReferenceImplementation(const std::vector<word_t> *collection,
     }
     std::cout << "Ham documents: " << hamCount << std::endl;
     std::cout << "Spam documents " << spamCount << std::endl;
+    delete [] scores;
 }
 
 int main()
@@ -209,5 +210,9 @@ int main()
     std::vector<unsigned int> *docAddresses = getDocumentAddresses(collection);
     std::cout << "docAddresses: " << docAddresses->at(0) << std::endl;
     executeReferenceImplementation(collection, profile, docAddresses, bloomFilter);
+    delete bloomFilter;
+    delete collection;
+    delete profile;
+    delete docAddresses;
     return 0;
 }
