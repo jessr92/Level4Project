@@ -9,6 +9,9 @@
 
 #define BF15
 
+#define COLLECTION_FILE "collection.raw"
+#define PROFILE_FILE "profile.bin"
+
 #ifdef BF15
 #define BLOOM_FILTER_FILE "bloomfilter.raw"
 #define ADDR_BITS 15

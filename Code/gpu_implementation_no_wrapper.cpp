@@ -32,9 +32,9 @@ int main()
 {
     const std::vector<word_t> *bloomFilter = loadParsedCollectionFromFile(BLOOM_FILTER_FILE);
     std::cout << "bloomfilter.raw: " << bloomFilter->size() << std::endl;
-    const std::vector<word_t> *collection = loadParsedCollectionFromFile("collection.raw");
+    const std::vector<word_t> *collection = loadParsedCollectionFromFile(COLLECTION_FILE);
     std::cout << "collection.raw: " << collection->size() << std::endl;
-    const std::vector<word_t> *profile = readProfileFromFile("profile.bin");
+    const std::vector<word_t> *profile = readProfileFromFile(PROFILE_FILE);
     std::cout << "profile.bin: " << profile->size() << std::endl;
     std::vector<unsigned int> *docAddresses = getDocumentAddresses(collection);
     std::cout << "docAddresses: " << docAddresses->at(0) << std::endl;

@@ -17,10 +17,10 @@ struct ulong4
  * Does not return the document ID with scores. This is a highly simplified
  * implementation.
  */
-void singleThreadCPUNoThreshold(const std::vector<word_t> *collection,
-                                const std::vector<word_t> *profile,
-                                std::vector<unsigned int> *docAddresses,
-                                unsigned long *scores)
+void singleThreadCPUNoThresholdOrBloom(const std::vector<word_t> *collection,
+                                       const std::vector<word_t> *profile,
+                                       std::vector<unsigned int> *docAddresses,
+                                       unsigned long *scores)
 {
     word_t numberOfDocuments = docAddresses->at(0);
     // Loop over all documents
@@ -100,11 +100,11 @@ unsigned char checkBloomFilter(unsigned long term, const std::vector<word_t> *bl
  * Does not return the document ID with scores. This is a highly simplified
  * implementation.
  */
-void singleThreadCPUBloom(const std::vector<word_t> *collection,
-                          const std::vector<word_t> *profile,
-                          const std::vector<word_t> *bloomFilter,
-                          std::vector<unsigned int> *docAddresses,
-                          unsigned long *scores)
+void singleThreadCPUBloomNoThreshold(const std::vector<word_t> *collection,
+                                     const std::vector<word_t> *profile,
+                                     const std::vector<word_t> *bloomFilter,
+                                     std::vector<unsigned int> *docAddresses,
+                                     unsigned long *scores)
 {
     word_t numberOfDocuments = docAddresses->at(0);
     // Loop over all documents
@@ -167,9 +167,9 @@ void executeReferenceImplementation(const std::vector<word_t> *collection,
         scores[i] = 0;
     }
 #ifdef BLOOM_FILTER
-    singleThreadCPUBloom(collection, profile, bloomFilter, docAddresses, scores);
+    singleThreadCPUBloomNoThreshold(collection, profile, bloomFilter, docAddresses, scores);
 #else
-    singleThreadCPUNoThreshold(collection, profile, docAddresses, scores);
+    singleThreadCPUNoThresholdOrBloom(collection, profile, docAddresses, scores);
 #endif
     for (word_t i = 0; i < docAddresses->at(0); ++i)
     {
@@ -185,9 +185,9 @@ int main()
 {
     const std::vector<word_t> *bloomFilter = loadParsedCollectionFromFile(BLOOM_FILTER_FILE);
     std::cout << "bloomfilter.raw: " << bloomFilter->size() << std::endl;
-    const std::vector<word_t> *collection = loadParsedCollectionFromFile("collection.raw");
+    const std::vector<word_t> *collection = loadParsedCollectionFromFile(COLLECTION_FILE);
     std::cout << "collection.raw: " << collection->size() << std::endl;
-    const std::vector<word_t> *profile = readProfileFromFile("profile.bin");
+    const std::vector<word_t> *profile = readProfileFromFile(PROFILE_FILE);
     std::cout << "profile.bin: " << profile->size() << std::endl;
     std::vector<unsigned int> *docAddresses = getDocumentAddresses(collection);
     std::cout << "docAddresses: " << docAddresses->at(0) << std::endl;
