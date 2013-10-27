@@ -26,6 +26,9 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
     {
         scores[i] = 0;
     }
+    // No idea why I need this but it'll crash otherwise.
+    word_t *tempProfile = new word_t[profile->size()];
+    std::copy(profile->begin(), profile->end(), tempProfile);
     try
     {
         // Get the available platforms.
@@ -55,19 +58,13 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         int scoresSize = sizeof(scores) * docAddresses->at(0);
         cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
         // Copy the input data to the input buffers using the command queue
-        std::cout << "Going to write buffers" << std::endl;
         queue.enqueueWriteBuffer(d_collection, CL_TRUE, 0, collectionSize, collection);
-        std::cout << "Written collection" << std::endl;
-        queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, profile);
-        std::cout << "Written profile" << std::endl;
+        queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
         queue.enqueueWriteBuffer(d_docAddresses, CL_TRUE, 0, docAddressesSize, docAddresses);
-        std::cout << "Written docAddresses" << std::endl;
 #ifdef BLOOM_FILTER
         queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, bloomFilter);
-        std::cout << "Written bloomFilter" << std::endl;
 #endif
         queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
-        std::cout << "Written buffers" << std::endl;
         // Read the program source
         std::ifstream sourceFile(KERNEL_FILE);
         std::string sourceCode(std::istreambuf_iterator < char > (sourceFile),
@@ -91,10 +88,11 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
 #endif
         // Execute the kernel
         cl::NDRange global(docAddresses->at(0));
-        cl::NDRange local(256);
-        queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
+        queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         // Copy the output data back to the host
+        std::cout << "Just about to read scores" << std::endl;
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
+        std::cout << "Read scores" << std::endl;
     }
     catch (cl::Error error)
     {
@@ -108,6 +106,7 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
     std::cout << "Ham documents: " << hamCount << std::endl;
     std::cout << "Spam documents " << spamCount << std::endl;
     delete [] scores;
+    delete [] tempProfile;
 }
 
 int main()
