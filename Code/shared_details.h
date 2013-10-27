@@ -12,6 +12,12 @@
 #define COLLECTION_FILE "collection.raw"
 #define PROFILE_FILE "profile.bin"
 
+#ifdef BLOOM_FILTER
+#define KERNEL_FILE "gpu_kernel_bloom.cl"
+#else
+#define KERNEL_FILE "gpu_kernel_no_bloom.cl"
+#endif
+
 #ifdef BF15
 #define BLOOM_FILTER_FILE "bloomfilter.raw"
 #define ADDR_BITS 15
