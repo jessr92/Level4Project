@@ -232,3 +232,5 @@ Code/test_reading_files
 *.o
 
 Code/cpu_reference_implementation
+
+Code/gpu_implementation_no_wrapper
