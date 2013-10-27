@@ -11,7 +11,7 @@ __kernel void scoreCollectionNoBloom(__global const ulong *collection,
     // in this document.
     uint id = docAddresses[document];
     uint endIndex = docAddresses[document + 1];
-    unsigned long score = 0;
+    ulong score = 0;
     // Loop over all terms in the document
     for (uint number = id; number < endIndex; ++number)
     {
@@ -37,6 +37,7 @@ __kernel void scoreCollectionNoBloom(__global const ulong *collection,
         score += (((profileEntry.s3 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s3 & PROF_WEIGHT);
     }
     // Since document starts at 1, store the ith document in ith-1 position.
-    printf("%d:%d\n", document, score);
-    scores[document - 1] = score;
+    //printf("%d\n", score);
+    //scores[document - 1] = score;
+    scores[document -1] = document;
 }

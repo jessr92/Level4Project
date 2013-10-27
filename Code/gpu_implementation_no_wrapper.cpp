@@ -89,6 +89,7 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         // Execute the kernel
         cl::NDRange global(docAddresses->at(0));
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
+        queue.finish();
         // Copy the output data back to the host
         std::cout << "Just about to read scores" << std::endl;
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
