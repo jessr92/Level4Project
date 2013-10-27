@@ -14,8 +14,10 @@
 
 #ifdef BLOOM_FILTER
 #define KERNEL_FILE "gpu_kernel_bloom.cl"
+#define KERNEL_NAME "scoreCollectionBloom"
 #else
 #define KERNEL_FILE "gpu_kernel_no_bloom.cl"
+#define KERNEL_NAME "scoreCollectionNoBloom"
 #endif
 
 #ifdef BF15
