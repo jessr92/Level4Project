@@ -9,7 +9,7 @@ GPU_NO_WRAPPER_OBJS_LIB=$(GPU_NO_WRAPPER_OBJS) -lOpenCL
 OBJS = $(CPU_OBJS) $(GPU_NO_WRAPPER_OBJS)
 
 ifeq "$(shell uname)" "Darwin"
-CFLAGS=-W -Wall -pedantic -std=c++11 -framework OpenCL -g
+CFLAGS+=-framework OpenCL
 GPU_NO_WRAPPER_OBJS_LIB=$(GPU_NO_WRAPPER_OBJS)
 endif
 
