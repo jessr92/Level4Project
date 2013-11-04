@@ -1,0 +1,10 @@
+from OclBuilder import initOcl
+
+sources=Split("""
+gpu_implementation_wrapper.cpp
+read_files.cpp
+""")
+
+env = initOcl()
+env.Program('gpu_implementation_wrapper',sources)
+

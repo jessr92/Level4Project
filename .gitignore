@@ -234,3 +234,9 @@ Code/test_reading_files
 Code/cpu_reference_implementation
 
 Code/gpu_implementation_no_wrapper
+
+*.dblite
+
+*.a
+
+Code/gpu_implementation_wrapper
