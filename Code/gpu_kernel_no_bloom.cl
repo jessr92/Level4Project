@@ -38,6 +38,6 @@ __kernel void scoreCollectionNoBloom(__global const ulong *collection,
     }
     // Since document starts at 1, store the ith document in ith-1 position.
     //printf("%d\n", score);
-    //scores[document - 1] = score;
-    scores[document -1] = document;
+    scores[document - 1] = score;
+    // scores[document -1] = document;
 }

@@ -22,7 +22,26 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
     // No idea why I need this but it'll crash otherwise.
     word_t *tempProfile = new word_t[profile->size()];
     std::copy(profile->begin(), profile->end(), tempProfile);
+    // Sizes
+    int collectionSize = sizeof(collection) * collection->size();
+    int profileSize = sizeof(profile) * profile->size();
+    int docAddressesSize = sizeof(docAddresses) * docAddresses->size();
+    int bloomFilterSize = sizeof(bloomFilter) * bloomFilter->size();
+    int scoresSize = sizeof(scores) * docAddresses->at(0);
     // Insert OcLWrapper stuff here
+    OclWrapper ocl;
+    ocl.initOclWrapper(KERNEL_FILE, KERNEL_NAME, "");
+    cl::Buffer d_scores = ocl.makeReadWriteBuffer(scoresSize, scores, CL_MEM_READ_WRITE | CL_MEM_READ_MODE);
+    cl::Buffer d_profile = ocl.makeReadBuffer(profileSize, (void *)tempProfile, CL_MEM_READ_ONLY | CL_MEM_READ_MODE);
+    cl::Buffer d_collection = ocl.makeReadBuffer(collectionSize, &collection[0], CL_MEM_READ_ONLY | CL_MEM_READ_MODE);
+    cl::Buffer d_docAddresses = ocl.makeReadBuffer(docAddressesSize, &docAddresses[0], CL_MEM_READ_ONLY | CL_MEM_READ_MODE);
+    ocl.writeBuffer(d_scores, scoresSize, scores);
+    ocl.writeBuffer(d_profile, profileSize, tempProfile);
+    ocl.writeBuffer(d_collection, collectionSize, &collection[0]);
+    ocl.writeBuffer(d_docAddresses, docAddressesSize, &docAddresses[0]);
+    ocl.enqueueNDRange(cl::NDRange(docAddresses->at(0)), cl::NDRange(1));
+    ocl.runKernel(d_collection, d_profile, d_docAddresses, d_scores).wait();
+    ocl.readBuffer(d_scores, scoresSize, scores);
     for (word_t i = 0; i < docAddresses->at(0); ++i)
     {
         scores[i] > THRESHOLD ? ++spamCount : ++hamCount;
