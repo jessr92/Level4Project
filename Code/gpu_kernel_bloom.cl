@@ -35,11 +35,11 @@ uchar checkBloomFilterUnrolled(uint term, __global uchar8 *bloomFilter)
     // i = 1 results in addr right shifting by 34 places, leaving 30 bits.
     // i = 2 results in addr right shifting by 19 places, leaving 45 bits.
     // i = 3 results in addr right shifting by  4 places, leaving 60 bits.
-    uint i = 1, addr = 0;
+    uint i = 0, addr = 0;
     uchar byte = 0, bit = 0;
     // Obtain the corret ADDR_BITS bits of term that respresent the address
     // ADDR_MASK ensures only the last ADDR_BITS can be 1.
-    addr = (term >> (64 - (ADDR_BITS * (i++)) ) & ADDR_MASK);
+    addr = (term >> (64 - (ADDR_BITS * (++i)) ) & ADDR_MASK);
     // The byte is stored at the address without the three least
     // significant bits.
     byte = bloomFilter[addr >> 3];
@@ -48,15 +48,15 @@ uchar checkBloomFilterUnrolled(uint term, __global uchar8 *bloomFilter)
     bit = (byte >> (addr & 0x7)) & 0x1;
     // isHit is 1 only if both itself and the bloom filter bit at 1.
     isHit = isHit & bit;
-    addr = (term >> (64 - (ADDR_BITS * (i++)) ) & ADDR_MASK);
+    addr = (term >> (64 - (ADDR_BITS * (++i)) ) & ADDR_MASK);
     byte = bloomFilter[addr >> 3];
     bit = (byte >> (addr & 0x7)) & 0x1;
     isHit = isHit & bit;
-    addr = (term >> (64 - (ADDR_BITS * (i++)) ) & ADDR_MASK);
+    addr = (term >> (64 - (ADDR_BITS * (++i)) ) & ADDR_MASK);
     byte = bloomFilter[addr >> 3];
     bit = (byte >> (addr & 0x7)) & 0x1;
     isHit = isHit & bit;
-    addr = (term >> (64 - (ADDR_BITS * (i++)) ) & ADDR_MASK);
+    addr = (term >> (64 - (ADDR_BITS * (++i)) ) & ADDR_MASK);
     byte = bloomFilter[addr >> 3];
     bit = (byte >> (addr & 0x7)) & 0x1;
     isHit = isHit & bit;
