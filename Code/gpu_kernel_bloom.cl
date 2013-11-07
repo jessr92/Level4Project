@@ -26,6 +26,43 @@ uchar checkBloomFilter(uint term, __global uchar8 *bloomFilter)
     return isHit;
 }
 
+uchar checkBloomFilterUnrolled(uint term, __global uchar8 *bloomFilter)
+{
+    // Initialise result to 1 (found), this becomes and stays 0 if any of the
+    // corresponding bloom filter location bits is 0.
+    uchar isHit = 1;
+    // i = 0 results in addr right shifting by 49 places, leaving 15 bits.
+    // i = 1 results in addr right shifting by 34 places, leaving 30 bits.
+    // i = 2 results in addr right shifting by 19 places, leaving 45 bits.
+    // i = 3 results in addr right shifting by  4 places, leaving 60 bits.
+    uint i = 1, addr = 0;
+    uchar byte = 0, bit = 0;
+    // Obtain the corret ADDR_BITS bits of term that respresent the address
+    // ADDR_MASK ensures only the last ADDR_BITS can be 1.
+    addr = (term >> (64 - (ADDR_BITS * (i++)) ) & ADDR_MASK);
+    // The byte is stored at the address without the three least
+    // significant bits.
+    byte = bloomFilter[addr >> 3];
+    // 0x7 ensures byte is right shifted at most 7 places.
+    // 0x1 ensures only the last bit can be 1.
+    bit = (byte >> (addr & 0x7)) & 0x1;
+    // isHit is 1 only if both itself and the bloom filter bit at 1.
+    isHit = isHit & bit;
+    addr = (term >> (64 - (ADDR_BITS * (i++)) ) & ADDR_MASK);
+    byte = bloomFilter[addr >> 3];
+    bit = (byte >> (addr & 0x7)) & 0x1;
+    isHit = isHit & bit;
+    addr = (term >> (64 - (ADDR_BITS * (i++)) ) & ADDR_MASK);
+    byte = bloomFilter[addr >> 3];
+    bit = (byte >> (addr & 0x7)) & 0x1;
+    isHit = isHit & bit;
+    addr = (term >> (64 - (ADDR_BITS * (i++)) ) & ADDR_MASK);
+    byte = bloomFilter[addr >> 3];
+    bit = (byte >> (addr & 0x7)) & 0x1;
+    isHit = isHit & bit;
+    return isHit;
+}
+
 __kernel void scoreCollectionNoBloom(__global const ulong *collection,
                                      __global const ulong4 *profile,
                                      __global const uint *docAddresses,
@@ -44,7 +81,11 @@ __kernel void scoreCollectionNoBloom(__global const ulong *collection,
     {
         // Get number-th term of document from collection.
         uint term = collection[number];
+#ifdef UNROLLED
+        uchar isHit = checkBloomFilterUnrolled(term, bloomFilter);
+#else
         uchar isHit = checkBloomFilter(term, bloomFilter);
+#endif
         if (isHit)
         {
             // Rest = bits representing the actual term from the collection
