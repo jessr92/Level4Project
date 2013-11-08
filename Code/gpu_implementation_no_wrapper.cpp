@@ -122,7 +122,7 @@ int main()
     std::cout << PROFILE_FILE << ": " << profile->size() << std::endl;
     std::vector<unsigned int> *docAddresses = getDocumentAddresses(collection);
     std::cout << "docAddresses: " << docAddresses->at(0) << std::endl;
-    executeGPUImplementation(collection, profile, docAddresses, bloomFilter);
+    executeGPUImplementation(collection, profile, bloomFilter, docAddresses);
     delete bloomFilter;
     delete collection;
     delete profile;
