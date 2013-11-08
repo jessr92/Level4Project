@@ -166,11 +166,15 @@ void executeReferenceImplementation(const std::vector<word_t> *collection,
     {
         scores[i] = 0;
     }
+    clock_t begin = clock();
 #ifdef BLOOM_FILTER
     singleThreadCPUBloomNoThreshold(collection, profile, bloomFilter, docAddresses, scores);
 #else
     singleThreadCPUNoThresholdOrBloom(collection, profile, docAddresses, scores);
 #endif
+    clock_t end = clock();
+    double seconds = double(end - begin) / CLOCKS_PER_SEC;
+    std::cout << seconds << " seconds to score documents." << std::endl;
     for (word_t i = 0; i < docAddresses->at(0); ++i)
     {
         scores[i] > THRESHOLD ? ++spamCount : ++hamCount;

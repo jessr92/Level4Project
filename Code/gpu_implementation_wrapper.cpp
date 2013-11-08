@@ -40,9 +40,13 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
     ocl.writeBuffer(d_profile, profileSize, tempProfile);
     ocl.writeBuffer(d_collection, collectionSize, tempCollection);
     ocl.writeBuffer(d_docAddresses, docAddressesSize, tempDocAddresses);
+    clock_t begin = clock();
     ocl.enqueueNDRange(cl::NDRange(docAddresses->at(0)), cl::NDRange(1));
     ocl.runKernel(d_collection, d_profile, d_docAddresses, d_scores).wait();
     ocl.readBuffer(d_scores, scoresSize, scores);
+    clock_t end = clock();
+    double seconds = double(end - begin) / CLOCKS_PER_SEC;
+    std::cout << seconds << " seconds to score documents." << std::endl;
     for (word_t i = 0; i < docAddresses->at(0); ++i)
     {
         scores[i] > THRESHOLD ? ++spamCount : ++hamCount;
