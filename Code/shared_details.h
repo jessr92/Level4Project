@@ -1,6 +1,8 @@
 #ifndef __SHARED_DETAILS__
 #define __SHARED_DETAILS__
 
+#define __CL_ENABLE_EXCEPTIONS
+
 #define PROF_MASK 0x3FFFFF // 22 bits
 #define PROF_WEIGHT 0x3FFFFFF // 26 bits
 #define PROF_REST_LENGTH 0x3FFFFFFFFF // 38 bits

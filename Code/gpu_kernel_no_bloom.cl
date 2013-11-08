@@ -16,14 +16,12 @@ __kernel void scoreCollectionNoBloom(__global const ulong *collection,
     for (uint number = id; number < endIndex; ++number)
     {
         // Get number-th term of document from collection.
-        uint term = collection[number];
+        ulong term = collection[number];
         // Rest = bits representing the actual term from the collection
-        uint rest = (term >> 4) & PROF_REST_LENGTH;
+        ulong rest = (term >> 4) & PROF_REST_LENGTH;
         // Profile address is the 22 most significant bits.
-        // Left shift by 2 since we need to check four profile entries from
-        // this address (this is instead of having a ulong4 structure to
-        // match the OpenCL API and looking at each element.)
-        uint profileAddress = ((term >> 42) & PROF_MASK) << 2;
+        // Left shift not required in OpenCL Kernel since we're using vectors.
+        ulong profileAddress = ((term >> 42) & PROF_MASK);
         // Get profile entry and add score to total document score.
         // score = Lowest 26th elements of the profile entry.
         // The upper 38 bits represent the specific term which needs to
@@ -37,7 +35,5 @@ __kernel void scoreCollectionNoBloom(__global const ulong *collection,
         score += (((profileEntry.s3 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s3 & PROF_WEIGHT);
     }
     // Since document starts at 1, store the ith document in ith-1 position.
-    //printf("%d\n", score);
     scores[document - 1] = score;
-    // scores[document -1] = document;
 }
