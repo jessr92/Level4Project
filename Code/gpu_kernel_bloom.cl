@@ -92,6 +92,8 @@ __kernel void scoreCollectionNoBloom(__global const ulong *collection,
             uint rest = (term >> 4) & PROF_REST_LENGTH;
             // Profile address is the 22 most significant bits.
             // Left shift not required in OpenCL Kernel since we're using vectors.
+            // The ulong4 part has already been sorted by declaring profile in the
+            // kernel as ulong4.
             uint profileAddress = ((term >> 42) & PROF_MASK);
             // Get profile entry and add score to total document score.
             // score = Lowest 26th elements of the profile entry.
