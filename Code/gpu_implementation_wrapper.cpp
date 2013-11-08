@@ -5,8 +5,6 @@
 #include "shared_details.h"
 #include "OclWrapper.h"
 
-#define THRESHOLD 0
-
 void executeGPUImplementation(const std::vector<word_t> *collection,
                               const std::vector<word_t> *profile,
                               std::vector<unsigned int> *docAddresses,

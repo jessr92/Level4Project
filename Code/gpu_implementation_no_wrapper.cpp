@@ -12,8 +12,6 @@
 #endif
 #include "OpenCLUtils.h"
 
-#define THRESHOLD 0
-
 void executeGPUImplementation(const std::vector<word_t> *collection,
                               const std::vector<word_t> *profile,
                               const std::vector<word_t> *bloomFilter,
