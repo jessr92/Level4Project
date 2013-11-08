@@ -240,3 +240,5 @@ Code/gpu_implementation_no_wrapper
 *.a
 
 Code/gpu_implementation_wrapper
+
+*.txt
