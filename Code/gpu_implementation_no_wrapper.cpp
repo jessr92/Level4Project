@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <ctime>
 #include "read_files.h"
 #include "shared_details.h"
 #define __NO_STD_VECTOR // Use cl::vector instead of STL version
@@ -55,7 +54,7 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         int docAddressesSize = sizeof(unsigned int) * docAddresses->size();
         cl::Buffer d_docAddresses = cl::Buffer(context, CL_MEM_READ_ONLY, docAddressesSize);
 #ifdef BLOOM_FILTER
-        int bloomFilterSize = sizeof(word_t) * bloomFiler->size();
+        int bloomFilterSize = sizeof(word_t) * bloomFilter->size();
         cl::Buffer d_bloomFilter = cl::Buffer(context, CL_MEM_READ_ONLY, bloomFilterSize);
 #endif
         int scoresSize = sizeof(scores) * docAddresses->at(0);
@@ -89,16 +88,16 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
 #endif
         // Execute the kernel
         cl::NDRange global(docAddresses->at(0));
-	clock_t begin = clock();
+        clock_t begin = clock();
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.finish();
         // Copy the output data back to the host
         std::cout << "Just about to read scores" << std::endl;
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
         std::cout << "Read scores" << std::endl;
-	clock_t end = clock();
-	double seconds = double(end - begin) / CLOCKS_PER_SEC;
-	std::cout << seconds << " seconds to score documents." << std::endl;
+        clock_t end = clock();
+        double seconds = double(end - begin) / CLOCKS_PER_SEC;
+        std::cout << seconds << " seconds to score documents." << std::endl;
     }
     catch (cl::Error error)
     {
