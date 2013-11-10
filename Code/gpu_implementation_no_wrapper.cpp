@@ -16,7 +16,6 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
                               const std::vector<word_t> *profile,
                               const std::vector<word_t> *bloomFilter,
                               std::vector<unsigned int> *docAddresses)
-
 {
     unsigned long hamCount = 0;
     unsigned long spamCount = 0;
@@ -102,6 +101,7 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
     catch (cl::Error error)
     {
         std::cout << error.what() << "(" << clErrorString(error.err()) << ")" << std::endl;
+        return;
     }
     for (word_t i = 0; i < docAddresses->at(0); ++i)
     {
