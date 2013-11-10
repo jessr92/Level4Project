@@ -1,4 +1,4 @@
-CFLAGS=-W -Wall -pedantic -std=c++11 -g
+CFLAGS=-W -Wall -pedantic -std=c++11
 CXXFLAGS=$(CFLAGS)
 
 PROGS=cpu_reference_implementation gpu_implementation_no_wrapper clean
