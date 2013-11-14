@@ -58,6 +58,8 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
 #endif
         int scoresSize = sizeof(scores) * docAddresses->at(0);
         cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
+        clock_t begin = clock();
+        std::chrono::steady_clock::time_point clock_begin = std::chrono::steady_clock::now();
         // Copy the input data to the input buffers using the command queue
         queue.enqueueWriteBuffer(d_collection, CL_TRUE, 0, collectionSize, tempCollection);
         queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
@@ -87,9 +89,6 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
 #endif
         // Execute the kernel
         cl::NDRange global(docAddresses->at(0));
-        queue.finish();
-        clock_t begin = clock();
-        std::chrono::steady_clock::time_point clock_begin = std::chrono::steady_clock::now();
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
         queue.finish();
