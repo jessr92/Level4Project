@@ -39,7 +39,6 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         cl::vector<cl::Device> devices;
         platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
         std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
-        std::cout << "Device max mem alloc size: " << devices[0].getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>() << std::endl;
         // Create a context for the devices
         cl::Context context(devices);
         // Create a command queue for the first device
@@ -48,7 +47,6 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         int collectionSize = sizeof(word_t) * collection->size();
         cl::Buffer d_collection = cl::Buffer(context, CL_MEM_READ_ONLY, collectionSize);
         int profileSize = sizeof(word_t) * profile->size();
-        std::cout << "Profile size: " << profileSize << std::endl;
         cl::Buffer d_profile = cl::Buffer(context, CL_MEM_READ_ONLY, profileSize);
         int docAddressesSize = sizeof(unsigned int) * docAddresses->size();
         cl::Buffer d_docAddresses = cl::Buffer(context, CL_MEM_READ_ONLY, docAddressesSize);
