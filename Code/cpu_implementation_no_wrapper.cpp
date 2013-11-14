@@ -49,17 +49,17 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         cl::CommandQueue queue = cl::CommandQueue(context, devices[0]);
         // Create the memory buffers
         int collectionSize = sizeof(word_t) * collection->size();
-        cl::Buffer d_collection = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, collectionSize, tempCollection);
+        cl::Buffer d_collection = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, collectionSize, tempCollection);
         int profileSize = sizeof(word_t) * profile->size();
-        cl::Buffer d_profile = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, profileSize, tempProfile);
+        cl::Buffer d_profile = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, profileSize, tempProfile);
         int docAddressesSize = sizeof(unsigned int) * docAddresses->size();
-        cl::Buffer d_docAddresses = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, docAddressesSize, tempDocAddresses);
+        cl::Buffer d_docAddresses = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, docAddressesSize, tempDocAddresses);
 #ifdef BLOOM_FILTER
         int bloomFilterSize = sizeof(word_t) * bloomFilter->size();
-        cl::Buffer d_bloomFilter = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, bloomFilterSize, tempBloomFilter);
+        cl::Buffer d_bloomFilter = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, bloomFilterSize, tempBloomFilter);
 #endif
         int scoresSize = sizeof(scores) * docAddresses->at(0);
-        cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, scoresSize, scores);
+        cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, scoresSize, scores);
         // Copy the input data to the input buffers using the command queue
         queue.enqueueMapBuffer(d_collection, CL_TRUE, CL_MAP_READ, 0, collectionSize);
         queue.enqueueMapBuffer(d_profile, CL_TRUE, CL_MAP_READ, 0, profileSize);
@@ -92,8 +92,6 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         clock_t begin = clock();
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.finish();
-        // Copy the output data back to the host
-        queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
         clock_t end = clock();
         double seconds = double(end - begin) / CLOCKS_PER_SEC;
         std::cout << seconds << " seconds to score documents." << std::endl;
