@@ -87,8 +87,8 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
 #endif
         // Execute the kernel
         cl::NDRange global(docAddresses->at(0));
-        clock_t begin = clock();
         queue.finish();
+        clock_t begin = clock();
         std::chrono::steady_clock::time_point clock_begin = std::chrono::steady_clock::now();
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
