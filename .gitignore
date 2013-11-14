@@ -242,3 +242,5 @@ Code/gpu_implementation_no_wrapper
 Code/gpu_implementation_wrapper
 
 *.txt
+
+Code/cpu_implementation_no_wrapper
