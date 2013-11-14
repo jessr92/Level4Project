@@ -10,6 +10,8 @@
 #else
 #include <CL/cl.hpp>
 #endif
+#include <chrono>
+#include <ctime>
 #include "OpenCLUtils.h"
 
 void executeGPUImplementation(const std::vector<word_t> *collection,
@@ -90,11 +92,18 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         // Execute the kernel
         cl::NDRange global(docAddresses->at(0));
         clock_t begin = clock();
+        std::chrono::time_point<std::chrono::system_clock> start, end;
+        queue.finish();
+        start = std::chrono::system_clock::now();
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.finish();
-        clock_t end = clock();
-        double seconds = double(end - begin) / CLOCKS_PER_SEC;
-        std::cout << seconds << " seconds to score documents." << std::endl;
+        end = std::chrono::system_clock::now();
+        clock_t finish = clock();
+        double seconds = double(finish - begin) / CLOCKS_PER_SEC;
+        std::cout << seconds << " seconds to score documents with clock_t." << std::endl;
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+        std::cout << elapsed_seconds.count() << " seconds to score documents with chrono." << std::endl;
     }
     catch (cl::Error error)
     {
