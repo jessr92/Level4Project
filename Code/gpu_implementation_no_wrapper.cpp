@@ -89,9 +89,7 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.finish();
         // Copy the output data back to the host
-        std::cout << "Just about to read scores" << std::endl;
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
-        std::cout << "Read scores" << std::endl;
         clock_t end = clock();
         double seconds = double(end - begin) / CLOCKS_PER_SEC;
         std::cout << seconds << " seconds to score documents." << std::endl;

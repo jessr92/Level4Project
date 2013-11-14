@@ -59,12 +59,12 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         cl::Buffer d_bloomFilter = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, bloomFilterSize, tempBloomFilter);
 #endif
         int scoresSize = sizeof(scores) * docAddresses->at(0);
-        cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
+        cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, scoresSize, scores);
         // Copy the input data to the input buffers using the command queue
         queue.enqueueMapBuffer(d_collection, CL_TRUE, CL_MAP_READ, 0, collectionSize);
         queue.enqueueMapBuffer(d_profile, CL_TRUE, CL_MAP_READ, 0, profileSize);
         queue.enqueueMapBuffer(d_docAddresses, CL_TRUE, CL_MAP_READ, 0, docAddressesSize);
-        queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
+        queue.enqueueMapBuffer(d_scores, CL_TRUE, CL_MAP_WRITE, 0, scoresSize);
 #ifdef BLOOM_FILTER
         queue.enqueueMapBuffer(d_bloomFilter, CL_TRUE, CL_MAP_READ, 0, bloomFilterSize);
 #endif
@@ -93,9 +93,7 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.finish();
         // Copy the output data back to the host
-        std::cout << "Just about to read scores" << std::endl;
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
-        std::cout << "Read scores" << std::endl;
         clock_t end = clock();
         double seconds = double(end - begin) / CLOCKS_PER_SEC;
         std::cout << seconds << " seconds to score documents." << std::endl;
