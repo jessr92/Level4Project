@@ -1,4 +1,5 @@
 make
+./cpu_reference_implementation > cpuRef.txt
 ./cpu_implementation_no_wrapper > cpu.txt
 ./gpu_implementation_no_wrapper > gpu.txt
 echo "---------cpu.txt versus gpu.txt---------"
