@@ -31,7 +31,7 @@ inline void stop_time()
     time_elapsed = endt - startt;
 }
 
-void executeGPUImplementation(const std::vector<word_t> *collection,
+void executeCPUImplementation(const std::vector<word_t> *collection,
                               const std::vector<word_t> *profile,
                               const std::vector<word_t> *bloomFilter,
                               std::vector<unsigned int> *docAddresses)
@@ -55,6 +55,7 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
 #endif
     try
     {
+        mark_time();
         // Get the available platforms.
         cl::vector<cl::Platform> platforms;
         cl::Platform::get(&platforms);
@@ -80,7 +81,6 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         int scoresSize = sizeof(scores) * docAddresses->at(0);
         cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, scoresSize, scores);
         // Copy the input data to the input buffers using the command queue
-        mark_time();
         queue.enqueueMapBuffer(d_collection, CL_TRUE, CL_MAP_READ, 0, collectionSize);
         queue.enqueueMapBuffer(d_profile, CL_TRUE, CL_MAP_READ, 0, profileSize);
         queue.enqueueMapBuffer(d_docAddresses, CL_TRUE, CL_MAP_READ, 0, docAddressesSize);
@@ -140,7 +140,7 @@ int main()
     std::cout << PROFILE_FILE << ": " << profile->size() << std::endl;
     std::vector<unsigned int> *docAddresses = getDocumentAddresses(collection);
     std::cout << "docAddresses: " << docAddresses->at(0) << std::endl;
-    executeGPUImplementation(collection, profile, bloomFilter, docAddresses);
+    executeCPUImplementation(collection, profile, bloomFilter, docAddresses);
     delete bloomFilter;
     delete collection;
     delete profile;

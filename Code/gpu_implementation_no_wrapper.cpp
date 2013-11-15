@@ -51,6 +51,7 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
     std::copy(profile->begin(), profile->end(), tempProfile);
     try
     {
+        mark_time();
         // Get the available platforms.
         cl::vector<cl::Platform> platforms;
         cl::Platform::get(&platforms);
@@ -75,7 +76,6 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
 #endif
         int scoresSize = sizeof(scores) * docAddresses->at(0);
         cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
-        mark_time();
         // Copy the input data to the input buffers using the command queue
         queue.enqueueWriteBuffer(d_collection, CL_TRUE, 0, collectionSize, tempCollection);
         queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
