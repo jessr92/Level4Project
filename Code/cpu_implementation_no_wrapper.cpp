@@ -108,7 +108,7 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         kernel.setArg(4, d_bloomFilter);
 #endif
         // Execute the kernel
-        cl::NDRange global(docAddresses->at(0));
+        cl::NDRange global((docAddresses->at(0) / DOCS_PER_THREAD) + 1);
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.finish();
         stop_time();

@@ -3,6 +3,26 @@
 #include <vector>
 #include "read_files.h"
 #include "shared_details.h"
+#include <sys/time.h>
+#include "OpenCLUtils.h"
+
+double time_elapsed;
+double startt, endt;
+
+inline void mark_time()
+{
+    timeval tim;
+    gettimeofday(&tim, NULL);
+    startt = tim.tv_sec + (tim.tv_usec / static_cast<double>(USEC_PER_SEC));
+}
+
+inline void stop_time()
+{
+    timeval tim;
+    gettimeofday(&tim, NULL);
+    endt = tim.tv_sec + (tim.tv_usec / static_cast<double>(USEC_PER_SEC));
+    time_elapsed = endt - startt;
+}
 
 struct ulong4
 {
@@ -166,15 +186,14 @@ void executeReferenceImplementation(const std::vector<word_t> *collection,
     {
         scores[i] = 0;
     }
-    clock_t begin = clock();
+    mark_time();
 #ifdef BLOOM_FILTER
     singleThreadCPUBloomNoThreshold(collection, profile, bloomFilter, docAddresses, scores);
 #else
     singleThreadCPUNoThresholdOrBloom(collection, profile, docAddresses, scores);
 #endif
-    clock_t end = clock();
-    double seconds = double(end - begin) / CLOCKS_PER_SEC;
-    std::cout << seconds << " seconds to score documents." << std::endl;
+    stop_time();
+    std::cout << time_elapsed << " seconds to score documents." << std::endl;
     for (word_t i = 0; i < docAddresses->at(0); ++i)
     {
         scores[i] > THRESHOLD ? ++spamCount : ++hamCount;

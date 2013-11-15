@@ -11,6 +11,8 @@
 
 #define BF15
 
+#define DOCS_PER_THREAD 1
+
 #define COLLECTION_FILE "collection.raw"
 #define PROFILE_FILE "profile.bin"
 

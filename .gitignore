@@ -244,3 +244,5 @@ Code/gpu_implementation_wrapper
 *.txt
 
 Code/cpu_implementation_no_wrapper
+
+Code/i7-3615QM vs 650M
