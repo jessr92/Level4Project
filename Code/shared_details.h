@@ -9,6 +9,7 @@
 
 #define THRESHOLD 0
 
+//#define BLOOM_FILTER
 #define BF15
 
 #define DOCS_PER_THREAD 1

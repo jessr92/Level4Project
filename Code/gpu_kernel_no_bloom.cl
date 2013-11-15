@@ -10,7 +10,8 @@ __kernel void scoreCollectionNoBloom(__global const ulong *collection,
     // Item in docAddresses stores the index of the first term for document
     // so the next element denotes the upper bound (exclusive) for terms
     // in this document.
-    for (; document < endDoc; document++) {
+    for (; document < endDoc; document++)
+    {
         uint id = docAddresses[document];
         uint endIndex = docAddresses[document + 1];
         ulong score = 0;

@@ -85,7 +85,7 @@ void singleThreadCPUNoThresholdOrBloom(const std::vector<word_t> *collection,
     }
 }
 
-unsigned char checkBloomFilter(unsigned long term, const std::vector<word_t> *bloomFilter)
+unsigned char checkBloomFilter(word_t term, const std::vector<word_t> *bloomFilter)
 {
     // Initialise result to 1 (found), this becomes and stays 0 if any of the
     // corresponding bloom filter location bits is 0.
@@ -98,13 +98,13 @@ unsigned char checkBloomFilter(unsigned long term, const std::vector<word_t> *bl
     {
         // Obtain the correct ADDR_BITS of term that represent the address
         // ADDR_MASK ensures only the last ADD_RBITS can be 1.
-        unsigned int address = (term >> (64 - ADDR_BITS * (i + 1))) & ADDR_MASK;
+        word_t address = (term >> (64 - ADDR_BITS * (i + 1))) & ADDR_MASK;
         // The byte is stored at the address without the six least
         // significant bits. (2**6) = 64 and we have 64 bit words.
         word_t word = bloomFilter->at(address >> 6);
         // Which byte of the want to take (1 out of 8)
-        unsigned int byteAddress = (address >> 3) & 0x7;
-        unsigned int byte = (word >> byteAddress) & 0xFF;
+        word_t byteAddress = (address >> 3) & 0x7;
+        word_t byte = (word >> byteAddress) & 0xFF;
         // Get the appropriate bit to determine if there is a hit or not.
         unsigned char bit = (byte >> (address & 0x7)) & 0x1;
         isHit = isHit & bit;
@@ -142,7 +142,7 @@ void singleThreadCPUBloomNoThreshold(const std::vector<word_t> *collection,
             // Get number-th term of document from collection.
             word_t term = collection->at(number);
             // Check to see if term exists in bloom filter.
-            unsigned char isHit = checkBloomFilter(term, bloomFilter);
+            unsigned char isHit = 1;//checkBloomFilter(term, bloomFilter);
             if (isHit)
             {
                 // Rest = bits representing the actual term from the collection
