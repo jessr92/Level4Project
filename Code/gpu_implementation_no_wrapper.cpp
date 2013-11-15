@@ -10,9 +10,26 @@
 #else
 #include <CL/cl.hpp>
 #endif
-#include <chrono>
-#include <ctime>
+#include <sys/time.h>
 #include "OpenCLUtils.h"
+
+double time_elapsed;
+double startt, endt;
+
+inline void mark_time()
+{
+    timeval tim;
+    gettimeofday(&tim, NULL);
+    startt = tim.tv_sec + (tim.tv_usec / static_cast<double>(USEC_PER_SEC));
+}
+
+inline void stop_time()
+{
+    timeval tim;
+    gettimeofday(&tim, NULL);
+    endt = tim.tv_sec + (tim.tv_usec / static_cast<double>(USEC_PER_SEC));
+    time_elapsed = endt - startt;
+}
 
 void executeGPUImplementation(const std::vector<word_t> *collection,
                               const std::vector<word_t> *profile,
@@ -58,8 +75,7 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
 #endif
         int scoresSize = sizeof(scores) * docAddresses->at(0);
         cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
-        clock_t begin = clock();
-        std::chrono::steady_clock::time_point clock_begin = std::chrono::steady_clock::now();
+        mark_time();
         // Copy the input data to the input buffers using the command queue
         queue.enqueueWriteBuffer(d_collection, CL_TRUE, 0, collectionSize, tempCollection);
         queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
@@ -92,13 +108,8 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
         queue.finish();
-        std::chrono::steady_clock::time_point clock_end = std::chrono::steady_clock::now();
-        std::chrono::steady_clock::duration time_span = clock_end - clock_begin;
-        double nseconds = double(time_span.count()) * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
-        clock_t finish = clock();
-        double seconds = double(finish - begin) / CLOCKS_PER_SEC;
-        std::cout << seconds << " seconds to score documents with clock_t." << std::endl;
-        std::cout << nseconds << " seconds to score documents with chrono." << std::endl;
+        stop_time();
+        std::cout << time_elapsed << " seconds to score documents." << std::endl;
     }
     catch (cl::Error error)
     {
