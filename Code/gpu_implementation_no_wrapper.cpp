@@ -49,8 +49,6 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
     std::copy(docAddresses->begin(), docAddresses->end(), tempDocAddresses);
     word_t *tempProfile = new word_t[profile->size()];
     std::copy(profile->begin(), profile->end(), tempProfile);
-    word_t *tempBloomFilter = new word_t[bloomFilter->size()];
-    std::copy(bloomFilter->begin(), bloomFilter->end(), tempBloomFilter);
     try
     {
         mark_time();
@@ -84,7 +82,7 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         queue.enqueueWriteBuffer(d_docAddresses, CL_TRUE, 0, docAddressesSize, tempDocAddresses);
         queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
 #ifdef BLOOM_FILTER
-        queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, tempBloomFilter);
+        queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, bloomFilter);
 #endif
         // Read the program source
         std::ifstream sourceFile(KERNEL_FILE);
