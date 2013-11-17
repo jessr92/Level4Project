@@ -9,6 +9,8 @@
 
 #define THRESHOLD 0
 
+#define USEC_PER_SEC 1000000
+
 //#define BLOOM_FILTER
 #define BF15
 
