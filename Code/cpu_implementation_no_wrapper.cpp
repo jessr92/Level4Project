@@ -81,12 +81,12 @@ void executeCPUImplementation(const std::vector<word_t> *collection,
         int scoresSize = sizeof(scores) * docAddresses->at(0);
         cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, scoresSize, scores);
         // Copy the input data to the input buffers using the command queue
-        queue.enqueueMapBuffer(d_collection, CL_TRUE, CL_MAP_READ, 0, collectionSize);
-        queue.enqueueMapBuffer(d_profile, CL_TRUE, CL_MAP_READ, 0, profileSize);
-        queue.enqueueMapBuffer(d_docAddresses, CL_TRUE, CL_MAP_READ, 0, docAddressesSize);
-        queue.enqueueMapBuffer(d_scores, CL_TRUE, CL_MAP_WRITE, 0, scoresSize);
+        queue.enqueueMapBuffer(d_collection, CL_FALSE, CL_MAP_READ, 0, collectionSize);
+        queue.enqueueMapBuffer(d_profile, CL_FALSE, CL_MAP_READ, 0, profileSize);
+        queue.enqueueMapBuffer(d_docAddresses, CL_FALSE, CL_MAP_READ, 0, docAddressesSize);
+        queue.enqueueMapBuffer(d_scores, CL_FALSE, CL_MAP_WRITE, 0, scoresSize);
 #ifdef BLOOM_FILTER
-        queue.enqueueMapBuffer(d_bloomFilter, CL_TRUE, CL_MAP_READ, 0, bloomFilterSize);
+        queue.enqueueMapBuffer(d_bloomFilter, CL_FALSE, CL_MAP_READ, 0, bloomFilterSize);
 #endif
         // Read the program source
         std::ifstream sourceFile(KERNEL_FILE);
@@ -109,6 +109,7 @@ void executeCPUImplementation(const std::vector<word_t> *collection,
 #endif
         // Execute the kernel
         cl::NDRange global((docAddresses->at(0) / DOCS_PER_THREAD) + 1);
+        queue.finish();
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.finish();
         stop_time();
