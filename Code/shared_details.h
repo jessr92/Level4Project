@@ -11,6 +11,8 @@
 
 #define USEC_PER_SEC 1000000
 
+#define NUM_THREADS 9
+
 //#define BLOOM_FILTER
 #define BF15
 
