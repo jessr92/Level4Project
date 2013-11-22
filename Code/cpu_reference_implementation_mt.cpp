@@ -228,14 +228,22 @@ void executeReferenceImplementation(const std::vector<word_t> *collection,
     delete [] scores;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     bloomFilter = loadParsedCollectionFromFile(BLOOM_FILTER_FILE);
     std::cout << BLOOM_FILTER_FILE << ": " << bloomFilter->size() << std::endl;
     collection = loadParsedCollectionFromFile(COLLECTION_FILE);
     std::cout << COLLECTION_FILE << ": " << collection->size() << std::endl;
-    profile = readProfileFromFile(PROFILE_FILE);
-    std::cout << PROFILE_FILE << ": " << profile->size() << std::endl;
+    if (argc == 2)
+    {
+        profile = readProfileFromFile(argv[1]);
+        std::cout << argv[1] << ": " << profile->size() << std::endl;
+    }
+    else
+    {
+        profile = readProfileFromFile(PROFILE_FILE);
+        std::cout << PROFILE_FILE << ": " << profile->size() << std::endl;
+    }    std::cout << PROFILE_FILE << ": " << profile->size() << std::endl;
     docAddresses = getDocumentAddresses(collection);
     std::cout << "docAddresses: " << docAddresses->at(0) << std::endl;
     executeReferenceImplementation(collection, profile, docAddresses, bloomFilter);

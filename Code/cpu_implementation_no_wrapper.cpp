@@ -134,14 +134,23 @@ void executeCPUImplementation(const std::vector<word_t> *collection,
     delete [] tempProfile;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     const std::vector<word_t> *bloomFilter = loadParsedCollectionFromFile(BLOOM_FILTER_FILE);
     std::cout << BLOOM_FILTER_FILE << ": " << bloomFilter->size() << std::endl;
     const std::vector<word_t> *collection = loadParsedCollectionFromFile(COLLECTION_FILE);
     std::cout << COLLECTION_FILE << ": " << collection->size() << std::endl;
-    const std::vector<word_t> *profile = readProfileFromFile(PROFILE_FILE);
-    std::cout << PROFILE_FILE << ": " << profile->size() << std::endl;
+    const std::vector<word_t> *profile;
+    if (argc == 2)
+    {
+        profile = readProfileFromFile(argv[1]);
+        std::cout << argv[1] << ": " << profile->size() << std::endl;
+    }
+    else
+    {
+        profile = readProfileFromFile(PROFILE_FILE);
+        std::cout << PROFILE_FILE << ": " << profile->size() << std::endl;
+    }
     std::vector<unsigned int> *docAddresses = getDocumentAddresses(collection);
     std::cout << "docAddresses: " << docAddresses->at(0) << std::endl;
     executeCPUImplementation(collection, profile, bloomFilter, docAddresses);
