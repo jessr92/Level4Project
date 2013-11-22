@@ -16,7 +16,7 @@ gpu=("gpuMTEF.txt" "gpuMTEI.txt" "gpuMTEP.txt" "gpuMTEW.txt" \
      "gpuMTUF.txt" "gpuMTUI.txt" "gpuMTUP.txt" "gpuMTUW.txt")
 profiles=(profile?*.bin)
 echo "Sleeping..."
-#sleep 60
+sleep 60
 for i in "${!profiles[@]}"
 do
         echo "./cpu_reference_implementation ${profiles[$i]} > experimentRun/${cpuRef[$i]}"
