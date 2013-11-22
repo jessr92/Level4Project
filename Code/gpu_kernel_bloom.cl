@@ -72,7 +72,7 @@ uchar checkBloomFilter(ulong term, __global const uchar *bloomFilter)
         ulong addr = (term >> (64 - ADDR_BITS * (i + 1))) & ADDR_MASK;
         // The byte is stored at the address without the three least
         // significant bits.
-        ulong byte = bloomFilter[addr >> 3];
+        ulong byte = bloomFilter[1 + (addr >> 3)];
         // 0x7 ensures byte is right shifted at most 7 places.
         // 0x1 ensures only the last bit can be 1.
         ulong bit = (byte >> (addr & 0x7)) & 0x1;
@@ -98,22 +98,22 @@ uchar checkBloomFilterUnrolled(ulong term, __global const uchar *bloomFilter)
     addr = (term >> (64 - (ADDR_BITS * (++i)) ) & ADDR_MASK);
     // The byte is stored at the address without the three least
     // significant bits.
-    byte = bloomFilter[addr >> 3];
+    byte = bloomFilter[1 + (addr >> 3)];
     // 0x7 ensures byte is right shifted at most 7 places.
     // 0x1 ensures only the last bit can be 1.
     bit = (byte >> (addr & 0x7)) & 0x1;
     // isHit is 1 only if both itself and the bloom filter bit at 1.
     isHit = isHit & bit;
     addr = (term >> (64 - (ADDR_BITS * (++i)) ) & ADDR_MASK);
-    byte = bloomFilter[addr >> 3];
+    byte = bloomFilter[1 + (addr >> 3)];
     bit = (byte >> (addr & 0x7)) & 0x1;
     isHit = isHit & bit;
     addr = (term >> (64 - (ADDR_BITS * (++i)) ) & ADDR_MASK);
-    byte = bloomFilter[addr >> 3];
+    byte = bloomFilter[1 + (addr >> 3)];
     bit = (byte >> (addr & 0x7)) & 0x1;
     isHit = isHit & bit;
     addr = (term >> (64 - (ADDR_BITS * (++i)) ) & ADDR_MASK);
-    byte = bloomFilter[addr >> 3];
+    byte = bloomFilter[1 + (addr >> 3)];
     bit = (byte >> (addr & 0x7)) & 0x1;
     isHit = isHit & bit;
     return isHit;

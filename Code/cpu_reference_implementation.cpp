@@ -99,9 +99,11 @@ unsigned char checkBloomFilter(word_t term, const std::vector<word_t> *bloomFilt
         // Obtain the correct ADDR_BITS of term that represent the address
         // ADDR_MASK ensures only the last ADD_RBITS can be 1.
         word_t address = (term >> (64 - ADDR_BITS * (i + 1))) & ADDR_MASK;
+        //std::cout << "Address>>6:" << std::dec << (1 + (address >> 6)) << std::endl;
         // The byte is stored at the address without the six least
         // significant bits. (2**6) = 64 and we have 64 bit words.
-        word_t word = bloomFilter->at(address >> 6);
+        word_t word = bloomFilter->at(1 + (address >> 6)); // because 1st word is a marker
+        //std::cout << "word:" << std::hex << word << std::endl;
         // Which byte of the want to take (1 out of 8)
         word_t byteAddress = (address >> 3) & 0x7;
         word_t byte = (word >> byteAddress) & 0xFF;
@@ -142,9 +144,10 @@ void singleThreadCPUBloomNoThreshold(const std::vector<word_t> *collection,
             // Get number-th term of document from collection.
             word_t term = collection->at(number);
             // Check to see if term exists in bloom filter.
-            unsigned char isHit = 1;//checkBloomFilter(term, bloomFilter);
+            unsigned char isHit = checkBloomFilter(term, bloomFilter);
             if (isHit)
             {
+                //std::cout << "Hit" << std::endl;
                 // Rest = bits representing the actual term from the collection
                 word_t rest = (term >> 4) & PROF_REST_LENGTH;
                 // Profile address is the 22 most significant bits.

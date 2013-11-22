@@ -11,9 +11,11 @@
 
 #define USEC_PER_SEC 1000000
 
-#define NUM_THREADS 9
+#define NUM_THREADS 8
 
-//#define BLOOM_FILTER
+#define REPETITIONS 100
+
+#define BLOOM_FILTER
 #define BF15
 
 #define DOCS_PER_THREAD 1
