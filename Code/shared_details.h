@@ -13,7 +13,7 @@
 
 #define NUM_THREADS 8
 
-#define REPETITIONS 1
+#define REPETITIONS 1000
 
 //#define BLOOM_FILTER
 #define BF15
