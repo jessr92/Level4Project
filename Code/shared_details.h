@@ -15,7 +15,7 @@
 
 #define REPETITIONS 100
 
-#define BLOOM_FILTER
+//#define BLOOM_FILTER
 #define BF15
 
 #define DOCS_PER_THREAD 1
