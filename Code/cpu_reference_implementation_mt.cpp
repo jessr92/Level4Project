@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
     {
         profile = readProfileFromFile(PROFILE_FILE);
         std::cout << PROFILE_FILE << ": " << profile->size() << std::endl;
-    }    std::cout << PROFILE_FILE << ": " << profile->size() << std::endl;
+    }
     docAddresses = getDocumentAddresses(collection);
     std::cout << "docAddresses: " << docAddresses->at(0) << std::endl;
     executeReferenceImplementation(collection, profile, docAddresses, bloomFilter);
