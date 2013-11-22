@@ -49,8 +49,10 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
     std::copy(docAddresses->begin(), docAddresses->end(), tempDocAddresses);
     word_t *tempProfile = new word_t[profile->size()];
     std::copy(profile->begin(), profile->end(), tempProfile);
+#ifdef BLOOM_FILTER
     word_t *tempBloomFilter = new word_t[bloomFilter->size()];
     std::copy(bloomFilter->begin(), bloomFilter->end(), tempBloomFilter);
+#endif
     try
     {
         mark_time();
@@ -67,17 +69,17 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         cl::CommandQueue queue = cl::CommandQueue(context, devices[0]);
         // Create the memory buffers
         int collectionSize = sizeof(word_t) * collection->size();
-        cl::Buffer d_collection = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, collectionSize, tempCollection);
+        cl::Buffer d_collection = cl::Buffer(context, CL_MEM_READ_ONLY, collectionSize);
         int profileSize = sizeof(word_t) * profile->size();
-        cl::Buffer d_profile = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, profileSize, tempProfile);
+        cl::Buffer d_profile = cl::Buffer(context, CL_MEM_READ_ONLY, profileSize);
         int docAddressesSize = sizeof(unsigned int) * docAddresses->size();
-        cl::Buffer d_docAddresses = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, docAddressesSize, tempDocAddresses);
+        cl::Buffer d_docAddresses = cl::Buffer(context, CL_MEM_READ_ONLY, docAddressesSize);
 #ifdef BLOOM_FILTER
         int bloomFilterSize = sizeof(word_t) * bloomFilter->size();
-        cl::Buffer d_bloomFilter = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, bloomFilterSize, tempBloomFilter);
+        cl::Buffer d_bloomFilter = cl::Buffer(context, CL_MEM_READ_ONLY, bloomFilterSize);
 #endif
         int scoresSize = sizeof(scores) * docAddresses->at(0);
-        cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, scoresSize, scores);
+        cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
         // Copy the input data to the input buffers using the command queue
         queue.enqueueWriteBuffer(d_collection, CL_TRUE, 0, collectionSize, tempCollection);
         queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
