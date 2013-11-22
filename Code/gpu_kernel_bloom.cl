@@ -25,9 +25,9 @@ __kernel void scoreCollectionBloom(__global const ulong *collection,
             // Get number-th term of document from collection.
             ulong term = collection[number];
 #ifdef UNROLLED
-            uchar isHit = 1;//checkBloomFilterUnrolled(term, bloomFilter);
+            uchar isHit = checkBloomFilterUnrolled(term, bloomFilter);
 #else
-            uchar isHit = 1;//checkBloomFilter(term, bloomFilter);
+            uchar isHit = checkBloomFilter(term, bloomFilter);
 #endif
             if (isHit)
             {
