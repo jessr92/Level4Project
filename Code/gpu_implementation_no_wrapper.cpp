@@ -97,12 +97,12 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
 #ifdef BLOOM_FILTER
         kernel.setArg(4, d_bloomFilter);
 #endif
+        queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
         // Copy the input data to the input buffers using the command queue
         mark_time();
         for (int i = 0; i < REPETITIONS; i++)
         {
             queue.enqueueWriteBuffer(d_collection, CL_TRUE, 0, collectionSize, tempCollection);
-            queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
             queue.enqueueWriteBuffer(d_docAddresses, CL_TRUE, 0, docAddressesSize, tempDocAddresses);
             queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
 #ifdef BLOOM_FILTER
