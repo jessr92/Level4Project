@@ -79,6 +79,24 @@ void executeCPUImplementation(const std::vector<word_t> *collection,
 #endif
         int scoresSize = sizeof(scores) * docAddresses->at(0);
         cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, scoresSize, scores);
+        // Read the program source
+        std::ifstream sourceFile(KERNEL_FILE);
+        std::string sourceCode(std::istreambuf_iterator < char > (sourceFile), (std::istreambuf_iterator < char > ()));
+        cl::Program::Sources source(1, std::make_pair(sourceCode.c_str(), sourceCode.length() + 1));
+        // Make program from the source code
+        cl::Program program = cl::Program(context, source);
+        // Build the program for the devices
+        program.build(devices);
+        // Make kernel
+        cl::Kernel kernel(program, KERNEL_NAME);
+        // Set the kernel arguments
+        kernel.setArg(0, d_collection);
+        kernel.setArg(1, d_profile);
+        kernel.setArg(2, d_docAddresses);
+        kernel.setArg(3, d_scores);
+#ifdef BLOOM_FILTER
+        kernel.setArg(4, d_bloomFilter);
+#endif
         mark_time();
         for (int i = 0; i < REPETITIONS; i++)
         {
@@ -89,25 +107,6 @@ void executeCPUImplementation(const std::vector<word_t> *collection,
             queue.enqueueMapBuffer(d_scores, CL_FALSE, CL_MAP_WRITE, 0, scoresSize);
 #ifdef BLOOM_FILTER
             queue.enqueueMapBuffer(d_bloomFilter, CL_FALSE, CL_MAP_READ, 0, bloomFilterSize);
-#endif
-            // Read the program source
-            std::ifstream sourceFile(KERNEL_FILE);
-            std::string sourceCode(std::istreambuf_iterator < char > (sourceFile),
-                                   (std::istreambuf_iterator < char > ()));
-            cl::Program::Sources source(1, std::make_pair(sourceCode.c_str(), sourceCode.length() + 1));
-            // Make program from the source code
-            cl::Program program = cl::Program(context, source);
-            // Build the program for the devices
-            program.build(devices);
-            // Make kernel
-            cl::Kernel kernel(program, KERNEL_NAME);
-            // Set the kernel arguments
-            kernel.setArg(0, d_collection);
-            kernel.setArg(1, d_profile);
-            kernel.setArg(2, d_docAddresses);
-            kernel.setArg(3, d_scores);
-#ifdef BLOOM_FILTER
-            kernel.setArg(4, d_bloomFilter);
 #endif
             // Execute the kernel
             cl::NDRange global((docAddresses->at(0) / DOCS_PER_THREAD) + 1);
