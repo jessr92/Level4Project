@@ -1,13 +1,13 @@
 #include "shared_details.h"
 
-uchar checkBloomFilter(ulong term, __global const uchar *bloomFilter);
-uchar checkBloomFilterUnrolled(ulong term, __global const uchar *bloomFilter);
+uchar checkBloomFilter(ulong term, __global const ulong *bloomFilter);
+uchar checkBloomFilterUnrolled(ulong term, __global const ulong *bloomFilter);
 
 __kernel void scoreCollectionBloom(__global const ulong *collection,
                                    __global const ulong4 *profile,
                                    __global const uint *docAddresses,
                                    __global ulong *scores,
-                                   __global const uchar *bloomFilter)
+                                   __global const ulong *bloomFilter)
 {
     uint document = (get_global_id(0) * DOCS_PER_THREAD) + 1;
     uint endDoc = (document + DOCS_PER_THREAD > docAddresses[0]) ? docAddresses[0] + 1 : document + DOCS_PER_THREAD;
@@ -56,7 +56,7 @@ __kernel void scoreCollectionBloom(__global const ulong *collection,
     }
 }
 
-uchar checkBloomFilter(ulong term, __global const uchar *bloomFilter)
+uchar checkBloomFilter(ulong term, __global const ulong *bloomFilter)
 {
     // Initialise result to 1 (found), this becomes and stays 0 if any of the
     // corresponding bloom filter location bits is 0.
@@ -82,7 +82,7 @@ uchar checkBloomFilter(ulong term, __global const uchar *bloomFilter)
     return isHit;
 }
 
-uchar checkBloomFilterUnrolled(ulong term, __global const uchar *bloomFilter)
+uchar checkBloomFilterUnrolled(ulong term, __global const ulong *bloomFilter)
 {
     // Initialise result to 1 (found), this becomes and stays 0 if any of the
     // corresponding bloom filter location bits is 0.
