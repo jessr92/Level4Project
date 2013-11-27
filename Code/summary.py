@@ -9,7 +9,7 @@ for root, subFolders, files in os.walk(rootdir):
 		fileList.append(os.path.join(root, file))
 
 for file in fileList:
-	if file.endswith(".txt"):
+	if file.endswith(".txt") and "Summary" not in file:
 		filename = file.partition('.')[0]
 		command = "((head;tail) < \"" + file + "\") > \"" + filename + "Summary.txt\""
 		print command
