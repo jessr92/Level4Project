@@ -106,7 +106,7 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
             queue.enqueueWriteBuffer(d_docAddresses, CL_TRUE, 0, docAddressesSize, tempDocAddresses);
             queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
 #ifdef BLOOM_FILTER
-            queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, bloomFilter);
+            queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, tempBloomFilter);
 #endif
             // Execute the kernel
             cl::NDRange global((docAddresses->at(0) / DOCS_PER_THREAD) + 1);
