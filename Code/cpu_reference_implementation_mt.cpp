@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <thread>
 #include <vector>
 #include <pthread.h>
 #include "read_files.h"
@@ -9,6 +10,7 @@
 
 double time_elapsed;
 double startt, endt;
+int numberOfThreads = 8;
 
 const std::vector<word_t> *collection;
 const std::vector<word_t> *profile;
@@ -40,7 +42,7 @@ void *multiThreadCPUNoThresholdOrBloom(void *i)
 {
     word_t document = *(word_t *)i;
     word_t numberOfDocuments = docAddresses->at(0);
-    word_t end = document + (numberOfDocuments / NUM_THREADS);
+    word_t end = document + (numberOfDocuments / numberOfThreads);
     if (end > numberOfDocuments)
     {
         end = numberOfDocuments;
@@ -129,7 +131,7 @@ void *multiThreadCPUBloomNoThreshold(void *i)
 {
     word_t document = *(word_t *)i;
     word_t numberOfDocuments = docAddresses->at(0);
-    word_t end = document + (numberOfDocuments / NUM_THREADS);
+    word_t end = document + (numberOfDocuments / numberOfThreads);
     if (end > numberOfDocuments)
     {
         end = numberOfDocuments;
@@ -195,23 +197,22 @@ void executeReferenceImplementation(const std::vector<word_t> *collection,
     {
         scores[i] = 0;
     }
-    std::cout << "Threads" << NUM_THREADS << std::endl;
-    pthread_t *threads = new pthread_t[NUM_THREADS];
-    word_t *values = new word_t[NUM_THREADS];
-    word_t roundedDocs = docAddresses->at(0) + (docAddresses->at(0) % NUM_THREADS);
+    pthread_t *threads = new pthread_t[numberOfThreads];
+    word_t *values = new word_t[numberOfThreads];
+    word_t roundedDocs = docAddresses->at(0) + (docAddresses->at(0) % numberOfThreads);
     mark_time();
     for (int t = 0; t < REPETITIONS; t++)
     {
-        for (int i = 0; i < NUM_THREADS; i++)
+        for (int i = 0; i < numberOfThreads; i++)
         {
-            values[i] = ((roundedDocs / NUM_THREADS) * i) + 1;
+            values[i] = ((roundedDocs / numberOfThreads) * i) + 1;
 #ifdef BLOOM_FILTER
             pthread_create(&threads[i], NULL, multiThreadCPUBloomNoThreshold, (void *)&values[i]);
 #else
             pthread_create(&threads[i], NULL, multiThreadCPUNoThresholdOrBloom, (void *)&values[i]);
 #endif
         }
-        for (int i = 0; i < NUM_THREADS; i++)
+        for (int i = 0; i < numberOfThreads; i++)
         {
             pthread_join(threads[i], NULL);
         }
@@ -246,6 +247,12 @@ int main(int argc, char *argv[])
     }
     docAddresses = getDocumentAddresses(collection);
     std::cout << "docAddresses: " << docAddresses->at(0) << std::endl;
+    int threadCount = std::thread::hardware_concurrency();
+    if (threadCount != 0)
+    {
+        numberOfThreads = threadCount;
+    }
+    std::cout << "Threads " << numberOfThreads << std::endl;
     executeReferenceImplementation(collection, profile, docAddresses, bloomFilter);
     delete bloomFilter;
     delete collection;
