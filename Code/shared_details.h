@@ -36,10 +36,12 @@
 
 #ifdef BF15
 #define BLOOM_FILTER_FILE "bloomfilter.raw"
+#define BLOOM_SIZE 514
 #define ADDR_BITS 15
 #define ADDR_MASK 0x7FFF
 #else
 #define BLOOM_FILTER_FILE "bloomfilter_4k_17b.raw"
+#define BLOOM_SIZE 2050
 #define ADDR_BITS 17
 #define ADDR_MASK 0x1FFFF
 #endif
