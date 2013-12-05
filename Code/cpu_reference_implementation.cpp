@@ -29,7 +29,11 @@ struct ulong4
     unsigned long s0, s1, s2, s3;
 };
 
-
+/*
+ * Given a term and an array of the nth latest collection terms. Remove the
+ * oldest term and add the newest term to reg then generate the n-grams given
+ * the updated term list.
+ */
 void generateNGrams(word_t term, word_t *reg, word_t *ngrams)
 {
     // Shift the terms along, losing the oldest term.
@@ -76,15 +80,15 @@ void singleThreadCPUNoThresholdOrBloom(const std::vector<word_t> *collection,
 {
     word_t reg[NUM_NGRAMS];
     word_t ngrams[NUM_NGRAMS];
-    for (int i = 0; i < NUM_NGRAMS; i++)
-    {
-        reg[i] = 0;
-        ngrams[i] = 0;
-    }
     word_t numberOfDocuments = docAddresses->at(0);
     // Loop over all documents
     for (word_t document = 1; document <= numberOfDocuments; ++document)
     {
+        for (int i = 0; i < NUM_NGRAMS; i++)
+        {
+            reg[i] = 0;
+            ngrams[i] = 0;
+        }
         // Item in docAddresses stores the index of the first term for document
         // so the next element denotes the upper bound (exclusive) for terms
         // in this document.
@@ -175,15 +179,15 @@ void singleThreadCPUBloomNoThreshold(const std::vector<word_t> *collection,
 {
     word_t reg[NUM_NGRAMS];
     word_t ngrams[NUM_NGRAMS];
-    for (int i = 0; i < NUM_NGRAMS; i++)
-    {
-        reg[i] = 0;
-        ngrams[i] = 0;
-    }
     word_t numberOfDocuments = docAddresses->at(0);
     // Loop over all documents
     for (word_t document = 1; document <= numberOfDocuments; ++document)
     {
+        for (int i = 0; i < NUM_NGRAMS; i++)
+        {
+            reg[i] = 0;
+            ngrams[i] = 0;
+        }
         // Item in docAddresses stores the index of the first term for document
         // so the next element denotes the upper bound (exclusive) for terms
         // in this document.

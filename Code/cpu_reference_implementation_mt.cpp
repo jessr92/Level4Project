@@ -38,8 +38,46 @@ struct ulong4
     unsigned long s0, s1, s2, s3;
 };
 
+/*
+ * Given a term and an array of the nth latest collection terms. Remove the
+ * oldest term and add the newest term to reg then generate the n-grams given
+ * the updated term list.
+ */
+void generateNGrams(word_t term, word_t *reg, word_t *ngrams)
+{
+    // Shift the terms along, losing the oldest term.
+    for (int i = NUM_NGRAMS - 1; i > 0; --i)
+    {
+        reg[i] = reg[i - 1];
+    }
+    // Add new term to reg
+    reg[0] = term;
+    // Build ngrams
+    ngrams[0] = reg[0];
+    for (int i = 1; i < NUM_NGRAMS; ++i)
+    {
+        // Check if the (n-1)th ngram has already taken all 60 bits.
+        word_t oldLength = ngrams[i - 1] & LENGTH;
+        if (oldLength < 12)
+        {
+            // Previous ngram without length field
+            word_t temp = ngrams[i - 1] >> 4;
+            // Generate new ngram
+            ngrams[i] = (temp << ((reg[i] & LENGTH) * CHAR_SIZE + 4)) + reg[i];
+            // Compute length of ngram
+            word_t newLength = (reg[i] & LENGTH) + oldLength;
+            // Append next word to the ngram
+            newLength = (newLength > 12) ? 12 : newLength;
+            // Remove old length and append the new one
+            ngrams[i] = ((ngrams[i] >> 4) << 4) + newLength;
+        }
+    }
+}
+
 void *multiThreadCPUNoThresholdOrBloom(void *i)
 {
+    word_t reg[NUM_NGRAMS];
+    word_t ngrams[NUM_NGRAMS];
     word_t document = *(word_t *)i;
     word_t numberOfDocuments = docAddresses->at(0);
     word_t end = document + (numberOfDocuments / numberOfThreads);
@@ -50,6 +88,11 @@ void *multiThreadCPUNoThresholdOrBloom(void *i)
     // Loop over all documents
     for (; document <= end; ++document)
     {
+        for (int i = 0; i < NUM_NGRAMS; i++)
+        {
+            reg[i] = 0;
+            ngrams[i] = 0;
+        }
         // Item in docAddresses stores the index of the first term for document
         // so the next element denotes the upper bound (exclusive) for terms
         // in this document.
@@ -61,28 +104,34 @@ void *multiThreadCPUNoThresholdOrBloom(void *i)
         {
             // Get number-th term of document from collection.
             word_t term = collection->at(number);
-            // Rest = bits representing the actual term from the collection
-            word_t rest = (term >> 4) & PROF_REST_LENGTH;
-            // Profile address is the 22 most significant bits.
-            // Left shift by 2 since we need to check four profile entries from
-            // this address (this is instead of having a ulong4 structure to
-            // match the OpenCL API and looking at each element.)
-            word_t profileAddress = ((term >> 42) & PROF_MASK) << 2;
-            // Get profile entry and add score to total document score.
-            // score = Lowest 26th elements of the profile entry.
-            // The upper 38 bits represent the specific term which needs to
-            // match rest (the actual term) from the collection.
-            ulong4 profileEntry;
-            profileEntry.s0 = profile->at(profileAddress);
-            profileEntry.s1 = profile->at(profileAddress + 1);
-            profileEntry.s2 = profile->at(profileAddress + 2);
-            profileEntry.s3 = profile->at(profileAddress + 3);
-            // Only one of these will add something non-zero to the score.
-            // The left hand side of the * operator will either be 0 or 1.
-            score += (((profileEntry.s0 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s0 & PROF_WEIGHT);
-            score += (((profileEntry.s1 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s1 & PROF_WEIGHT);
-            score += (((profileEntry.s2 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s2 & PROF_WEIGHT);
-            score += (((profileEntry.s3 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s3 & PROF_WEIGHT);
+            // Generate the ngrams now we know of this term.
+            generateNGrams(term, reg, ngrams);
+            for (int i = 0; i < NUM_NGRAMS; i++)
+            {
+                term = ngrams[i];
+                // Rest = bits representing the actual term from the collection
+                word_t rest = (term >> 4) & PROF_REST_LENGTH;
+                // Profile address is the 22 most significant bits.
+                // Left shift by 2 since we need to check four profile entries from
+                // this address (this is instead of having a ulong4 structure to
+                // match the OpenCL API and looking at each element.)
+                word_t profileAddress = ((term >> 42) & PROF_MASK) << 2;
+                // Get profile entry and add score to total document score.
+                // score = Lowest 26th elements of the profile entry.
+                // The upper 38 bits represent the specific term which needs to
+                // match rest (the actual term) from the collection.
+                ulong4 profileEntry;
+                profileEntry.s0 = profile->at(profileAddress);
+                profileEntry.s1 = profile->at(profileAddress + 1);
+                profileEntry.s2 = profile->at(profileAddress + 2);
+                profileEntry.s3 = profile->at(profileAddress + 3);
+                // Only one of these will add something non-zero to the score.
+                // The left hand side of the * operator will either be 0 or 1.
+                score += (((profileEntry.s0 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s0 & PROF_WEIGHT);
+                score += (((profileEntry.s1 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s1 & PROF_WEIGHT);
+                score += (((profileEntry.s2 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s2 & PROF_WEIGHT);
+                score += (((profileEntry.s3 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s3 & PROF_WEIGHT);
+            }
         }
         // Since document starts at 1, store the ith document in ith-1 position.
         scores[document - 1] = score;
@@ -129,6 +178,8 @@ unsigned char checkBloomFilter(word_t term)
  */
 void *multiThreadCPUBloomNoThreshold(void *i)
 {
+    word_t reg[NUM_NGRAMS];
+    word_t ngrams[NUM_NGRAMS];
     word_t document = *(word_t *)i;
     word_t numberOfDocuments = docAddresses->at(0);
     word_t end = document + (numberOfDocuments / numberOfThreads);
@@ -139,6 +190,11 @@ void *multiThreadCPUBloomNoThreshold(void *i)
     // Loop over all documents
     for (; document <= end; ++document)
     {
+        for (int i = 0; i < NUM_NGRAMS; i++)
+        {
+            reg[i] = 0;
+            ngrams[i] = 0;
+        }
         // Item in docAddresses stores the index of the first term for document
         // so the next element denotes the upper bound (exclusive) for terms
         // in this document.
@@ -150,33 +206,39 @@ void *multiThreadCPUBloomNoThreshold(void *i)
         {
             // Get number-th term of document from collection.
             word_t term = collection->at(number);
-            // Check to see if term exists in bloom filter.
-            unsigned char isHit = checkBloomFilter(term);
-            if (isHit)
+            // Generate the ngrams now we know of this term.
+            generateNGrams(term, reg, ngrams);
+            for (int i = 0; i < NUM_NGRAMS; i++)
             {
-                //std::cout << "Hit" << std::endl;
-                // Rest = bits representing the actual term from the collection
-                word_t rest = (term >> 4) & PROF_REST_LENGTH;
-                // Profile address is the 22 most significant bits.
-                // Left shift by 2 since we need to check four profile entries from
-                // this address (this is instead of having a ulong4 structure to
-                // match the OpenCL API and looking at each element.)
-                word_t profileAddress = ((term >> 42) & PROF_MASK) << 2;
-                // Get profile entry and add score to total document score.
-                // score = Lowest 26th elements of the profile entry.
-                // The upper 38 bits represent the specific term which needs to
-                // match rest (the actual term) from the collection.
-                ulong4 profileEntry;
-                profileEntry.s0 = profile->at(profileAddress);
-                profileEntry.s1 = profile->at(profileAddress + 1);
-                profileEntry.s2 = profile->at(profileAddress + 2);
-                profileEntry.s3 = profile->at(profileAddress + 3);
-                // Only one of these will add something non-zero to the score.
-                // The left hand side of the * operator will either be 0 or 1.
-                score += (((profileEntry.s0 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s0 & PROF_WEIGHT);
-                score += (((profileEntry.s1 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s1 & PROF_WEIGHT);
-                score += (((profileEntry.s2 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s2 & PROF_WEIGHT);
-                score += (((profileEntry.s3 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s3 & PROF_WEIGHT);
+                term = ngrams[i];
+                // Check to see if term exists in bloom filter.
+                unsigned char isHit = checkBloomFilter(term);
+                if (isHit)
+                {
+                    //std::cout << "Hit" << std::endl;
+                    // Rest = bits representing the actual term from the collection
+                    word_t rest = (term >> 4) & PROF_REST_LENGTH;
+                    // Profile address is the 22 most significant bits.
+                    // Left shift by 2 since we need to check four profile entries from
+                    // this address (this is instead of having a ulong4 structure to
+                    // match the OpenCL API and looking at each element.)
+                    word_t profileAddress = ((term >> 42) & PROF_MASK) << 2;
+                    // Get profile entry and add score to total document score.
+                    // score = Lowest 26th elements of the profile entry.
+                    // The upper 38 bits represent the specific term which needs to
+                    // match rest (the actual term) from the collection.
+                    ulong4 profileEntry;
+                    profileEntry.s0 = profile->at(profileAddress);
+                    profileEntry.s1 = profile->at(profileAddress + 1);
+                    profileEntry.s2 = profile->at(profileAddress + 2);
+                    profileEntry.s3 = profile->at(profileAddress + 3);
+                    // Only one of these will add something non-zero to the score.
+                    // The left hand side of the * operator will either be 0 or 1.
+                    score += (((profileEntry.s0 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s0 & PROF_WEIGHT);
+                    score += (((profileEntry.s1 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s1 & PROF_WEIGHT);
+                    score += (((profileEntry.s2 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s2 & PROF_WEIGHT);
+                    score += (((profileEntry.s3 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s3 & PROF_WEIGHT);
+                }
             }
         }
         // Since document starts at 1, store the ith document in ith-1 position.
