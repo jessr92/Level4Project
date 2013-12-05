@@ -15,6 +15,10 @@
 
 #define REPETITIONS 1000
 
+#define NUM_NGRAMS 3
+#define CHAR_SIZE 5
+#define LENGTH 0xFUL //15 bits
+
 #define BLOOM_FILTER
 
 //#define UNROLLED
