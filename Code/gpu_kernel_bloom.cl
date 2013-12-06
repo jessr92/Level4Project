@@ -46,11 +46,7 @@ __kernel void scoreCollectionBloom(__global const ulong *collection,
             for (uint i = 0; i < NUM_NGRAMS; i++)
             {
                 term = ngrams[i];
-#ifdef UNROLLED
-                uchar isHit = checkBloomFilterUnrolled(term, localBloomFilter);
-#else
                 uchar isHit = checkBloomFilter(term, localBloomFilter);
-#endif
                 if (isHit)
                 {
                     // Rest = bits representing the actual term from the collection
@@ -103,46 +99,6 @@ uchar checkBloomFilter(ulong term, __local const ulong *bloomFilter)
         // isHit is 1 only if both itself and the bloom filter bit at 1.
         isHit = isHit & bit;
     }
-    return isHit;
-}
-
-uchar checkBloomFilterUnrolled(ulong term, __local const ulong *bloomFilter)
-{
-    // Initialise result to 1 (found), this becomes and stays 0 if any of the
-    // corresponding bloom filter location bits is 0.
-    uchar isHit = 1;
-    // i = 0 results in addr right shifting by 49 places, leaving 15 bits.
-    // i = 1 results in addr right shifting by 34 places, leaving 30 bits.
-    // i = 2 results in addr right shifting by 19 places, leaving 45 bits.
-    // i = 3 results in addr right shifting by  4 places, leaving 60 bits.
-    ulong i = 0, addr = 0, byte = 0, bit = 0;
-    // Obtain the correct ADDR_BITS bits of term that represent the address
-    // ADDR_MASK ensures only the last ADDR_BITS can be 1.
-    addr = (term >> (64 - (ADDR_BITS * (++i)) ) & ADDR_MASK);
-    // The byte is stored at the address without the six least
-    // significant bits.
-    byte = bloomFilter[1 + (addr >> 6)];
-    // 0x7 ensures byte is right shifted at most 7 places.
-    // 0x1 ensures only the last bit can be 1.
-    // Get the appropriate bit to determine if there is a hit or not.
-    bit = (byte >> (addr & 0x7)) & 0x1;
-    // isHit is 1 only if both itself and the bloom filter bit at 1.
-    isHit = isHit & bit;
-    // Next iteration
-    addr = (term >> (64 - (ADDR_BITS * (++i)) ) & ADDR_MASK);
-    byte = bloomFilter[1 + (addr >> 6)];
-    bit = (byte >> (addr & 0x7)) & 0x1;
-    isHit = isHit & bit;
-    // Next iteration
-    addr = (term >> (64 - (ADDR_BITS * (++i)) ) & ADDR_MASK);
-    byte = bloomFilter[1 + (addr >> 6)];
-    bit = (byte >> (addr & 0x7)) & 0x1;
-    isHit = isHit & bit;
-    // Next iteration
-    addr = (term >> (64 - (ADDR_BITS * (++i)) ) & ADDR_MASK);
-    byte = bloomFilter[1 + (addr >> 6)];
-    bit = (byte >> (addr & 0x7)) & 0x1;
-    isHit = isHit & bit;
     return isHit;
 }
 

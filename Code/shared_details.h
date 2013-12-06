@@ -21,8 +21,6 @@
 
 #define BLOOM_FILTER
 
-//#define UNROLLED
-
 #define BF15
 
 #define DOCS_PER_THREAD 1
