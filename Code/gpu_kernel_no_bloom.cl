@@ -62,7 +62,7 @@ __kernel void scoreCollectionNoBloom(__global const ulong *collection,
 void generateNGrams(ulong term, ulong *reg, ulong *ngrams)
 {
     // Shift the terms along, losing the oldest term.
-    for (int i = 0; i < NUM_NGRAMS; i++)
+    for (int i = NUM_NGRAMS; i > 0; --i)
     {
         reg[i] = reg[i - 1];
     }
@@ -70,7 +70,7 @@ void generateNGrams(ulong term, ulong *reg, ulong *ngrams)
     reg[0] = term;
     // Build ngrams
     ngrams[0] = reg[0];
-    for (uint i = 1; i < NUM_NGRAMS; i++)
+    for (uint i = 1; i < NUM_NGRAMS; ++i)
     {
         // Check if the (n-1)th ngram has already taken all 60 bits.
         ulong oldLength = ngrams[i - 1] & LENGTH;
@@ -89,3 +89,4 @@ void generateNGrams(ulong term, ulong *reg, ulong *ngrams)
         }
     }
 }
+
