@@ -12,4 +12,74 @@
 \date{December 20, 2013}
 \maketitle
 
+\section*{Project Description}
+
+With traditional CPUs experiencing slowdowns in improvements with clock speeds,
+the computing industry is looking for an alternative hardware and software
+paradigm to take us into the next era of computing performance. This has led to
+the increase in the number of cores on a single CPU die, with most commercial
+devices containing four cores allowing four individual threads of control to
+run simultaneously on a single chip. In addition to this the growth of
+computational power available in GPUs has led to the idea of using the GPUs for
+general purpose computing tasks (GPGPUs).
+
+The primary aim of the project is to take document filtering running on a CPU
+and investigate the use of a GPU with OpenCL to improve the overall performance
+of the system. This will begin with porting the scoring section of the document
+classifier from the CPU to the GPU and comparing performance with the all CPU
+version and the CPU and FPGA version. Further performance tests can be
+conducted by employing a bloom filter which is a small data structure which can
+be used to reduce the number of requests for memory in slow, global memory by
+sitting in faster, local memory and returning a bit value stating whether or
+not a given item is in global memory or not.
+
+Document filtering can place documents into two categories, with the canonical
+example being spam or not spam. Documents are given to the scorer as a
+collection of terms. For each term in a document, it is looked up in a profile
+of spam terms. Terms in a document that are typically detected in a spam
+document will have a score assigned to them in the profile, it is this score
+which is collected and added to the document's overall score. At the end of
+scoring, if the document has a high enough score, it is classed as spam,
+otherwise it is not spam.
+
+\section*{Progress}
+
+Currently code has been written for the scoring of documents in a single CPU
+thread, multiple CPU threads, and an OpenCL implementation for the CPU or GPU.
+Performance testing has been conducted on all four implementations, each over
+twelve profiles and four different forms of bloom filter: None, All Zero, All
+One, and Realistic. The different bloom filters has allowed conclusions
+regarding the range of performance metrics possible with different bloom filter
+occupancies to be made.
+
+\section*{Plan}
+
+The plan for the next semester is to measure metrics for the data transfer from
+the host CPU to the GPU device, this will allow timings to be known for the
+OpenCL scoring kernel execution on its own, as well as the overall scoring.
+
+The code I have written could be integrated within the existing parser system,
+to allow for full system performance metrics to be calculated. This will also
+allow for an extension to the OpenCL code base with the inclusion of the
+parsing stage. This will allow the investigation into how important accelerator
+chips such as GPUs are in improving overall system performance, rather than the
+individual task of scoring.
+
+\section*{Problems}
+
+I have experienced a few issues so far in the project, the primary issues
+revolved around OpenCL and the corresponding SDKs. My desktop machine has an
+Intel i5-2500K which is OpenCL capable however installing the Intel SDK has
+proved troublesome and thus far the CPU has only been used for the traditional
+C++ code.
+
+The OpenCL language and behaviour has been somewhat troublesome as well. OpenCL
+is roughly a subset of the C99 standard language however compiler errors and
+runtime error behaviour is significantly different from standard C/C++
+applications. An example of this was an out of bounds error early on in the
+project, instead of receiving a Segmentation Fault during kernel execution, an
+error was being thrown afterwards, when the result of the kernel was being
+written back to the host CPU. This unfamiliar behaviour led to a slower than
+expected debug process.
+
 \end{document}
