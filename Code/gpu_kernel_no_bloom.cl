@@ -62,7 +62,7 @@ __kernel void scoreCollectionNoBloom(__global const ulong *collection,
 void generateNGrams(ulong term, ulong *reg, ulong *ngrams)
 {
     // Shift the terms along, losing the oldest term.
-    for (int i = NUM_NGRAMS; i > 0; --i)
+    for (int i = NUM_NGRAMS - 1; i > 0; --i)
     {
         reg[i] = reg[i - 1];
     }
