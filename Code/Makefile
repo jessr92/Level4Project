@@ -30,6 +30,11 @@ ifeq "$(shell uname)" "Darwin"
 	DUMP_CL_OBJS_LIB=$(DUMP_CL_OBJS)
 endif
 
+ifeq "$(shell hostname)" "fara.dcs.gla.ac.uk"
+	CC = gcc-mp-4.8
+	CXX = g++-mp-4.8
+endif
+
 all: $(PROGS)
 
 cpu_reference_implementation: $(CPU_OBJS)

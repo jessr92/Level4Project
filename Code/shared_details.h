@@ -13,7 +13,7 @@
 
 #define NUM_THREADS 8
 
-#define REPETITIONS 1000
+#define REPETITIONS 10
 
 #define NUM_NGRAMS 3
 #define CHAR_SIZE 5

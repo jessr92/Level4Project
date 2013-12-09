@@ -15,20 +15,13 @@ gpu=("gpuEF.txt" "gpuEI.txt" "gpuEP.txt" "gpuEW.txt" \
      "gpuSF.txt" "gpuSI.txt" "gpuSP.txt" "gpuSW.txt" \
      "gpuUF.txt" "gpuUI.txt" "gpuUP.txt" "gpuUW.txt")
 profiles=(profile?*.bin)
-echo "Sleeping..."
 for i in "${!profiles[@]}"
 do
-        sleep 300
         echo "./cpu_reference_implementation ${profiles[$i]} > experimentRun/${cpuRef[$i]}"
         ./cpu_reference_implementation "${profiles[$i]}" > "experimentRun/${cpuRef[$i]}"
-        echo "Sleeping..."
-        sleep 300
         echo "./cpu_reference_implementation_mt ${profiles[$i]} > experimentRun/${cpuRefMT[$i]}"
         ./cpu_reference_implementation_mt "${profiles[$i]}" > "experimentRun/${cpuRefMT[$i]}"
-        echo "Sleeping..."
-        sleep 300
         echo "./gpu_implementation_no_wrapper ${profiles[$i]} > experimentRun/${gpu[$i]}"
         ./gpu_implementation_no_wrapper "${profiles[$i]}" > "experimentRun/${gpu[$i]}"
-        echo "Sleeping..."
 done
 echo "Finished experiment..."
