@@ -34,9 +34,13 @@
 #ifdef BLOOM_FILTER
 #define KERNEL_FILE "gpu_kernel_bloom.cl"
 #define KERNEL_NAME "scoreCollectionBloom"
+#define KERNEL_FULL_FILE "parse_and_score_bloom.cl"
+#define KERNEL_FULL_NAME "parse_and_score_bloom"
 #else
 #define KERNEL_FILE "gpu_kernel_no_bloom.cl"
 #define KERNEL_NAME "scoreCollectionNoBloom"
+#define KERNEL_FULL_FILE "parse_and_score.cl"
+#define KERNEL_FULL_NAME "parse_and_score"
 #endif
 
 #ifdef BF15
