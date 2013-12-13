@@ -69,3 +69,38 @@ std::vector<unsigned int> *getDocumentAddresses(const std::vector<word_t> *colle
     docAddresses->at(0) = numberOfDocuments;
     return docAddresses;
 }
+
+const std::string *readFile(std::string file)
+{
+    std::string *documents = new std::string();
+    std::ifstream in(file, std::ifstream::binary);
+    in.seekg(0, std::ios::end);
+    documents->reserve(in.tellg());
+    in.seekg(0, std::ios::beg);
+    // Read in file to string
+    documents->assign((std::istreambuf_iterator<char>(in)),
+                      std::istreambuf_iterator<char>());
+    in.close();
+    return documents;
+}
+
+const std::vector<word_t> *getMarkerPositions(const std::string *documents)
+{
+    std::vector<word_t> *positions = new std::vector<word_t>;
+    // Find all document endings, note their location (assuming valid file)
+    word_t pos = documents->find(DOCUMENT_MARKER, 0);
+    word_t numberOfDocuments = 0;
+    positions->push_back(numberOfDocuments); // Placeholder for actual value.
+    while (pos != std::string::npos)
+    {
+        // Add index of first character for substring match
+        positions->push_back(pos);
+        numberOfDocuments++;
+        pos = documents->find(DOCUMENT_MARKER, pos + 1);
+    }
+    // Add string length so positions.size() so last document knows where to end
+    positions->push_back(documents->size());
+    // Update 0th element to contain document count.
+    positions->at(0) = numberOfDocuments;
+    return positions;
+}

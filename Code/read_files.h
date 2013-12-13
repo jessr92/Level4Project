@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "shared_details.h"
 
 typedef uint64_t word_t;
 
@@ -12,5 +13,9 @@ const std::vector<word_t> *loadParsedCollectionFromFile(std::string collection_f
 const std::vector<word_t> *readProfileFromFile(std::string memcontent_file);
 
 std::vector<unsigned int> *getDocumentAddresses(const std::vector<word_t> *collection);
+
+const std::string *readFile(std::string file);
+
+const std::vector<word_t> *getMarkerPositions(const std::string *documents);
 
 #endif
