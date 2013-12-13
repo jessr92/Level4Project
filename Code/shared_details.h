@@ -28,6 +28,9 @@
 #define COLLECTION_FILE "collection.raw"
 #define PROFILE_FILE "profile.bin"
 
+#define DOCUMENT_FILE "sample.txt" // "TREC_all.txt"
+#define DOCUMENT_MARKER "<DOC>"
+
 #ifdef BLOOM_FILTER
 #define KERNEL_FILE "gpu_kernel_bloom.cl"
 #define KERNEL_NAME "scoreCollectionBloom"
