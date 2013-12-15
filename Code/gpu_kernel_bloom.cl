@@ -1,7 +1,6 @@
 #include "shared_details.h"
 
 uchar checkBloomFilter(ulong term, __local const ulong *bloomFilter);
-uchar checkBloomFilterUnrolled(ulong term, __local const ulong *bloomFilter);
 void generateNGrams(ulong term, ulong *reg, ulong *ngrams);
 
 __kernel void scoreCollectionBloom(__global const ulong *collection,
