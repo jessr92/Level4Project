@@ -31,6 +31,9 @@
 #define DOCUMENT_FILE "TREC_all.txt"
 #define DOCUMENT_MARKER "<DOC>"
 
+#define TERM_LENGTH 60
+#define CHARACTER_SIZE 5
+
 #ifdef BLOOM_FILTER
 #define KERNEL_FILE "gpu_kernel_bloom.cl"
 #define KERNEL_NAME "scoreCollectionBloom"
