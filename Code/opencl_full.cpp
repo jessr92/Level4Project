@@ -14,6 +14,24 @@
 #include <sys/time.h>
 #include "OpenCLUtils.h"
 
+double time_elapsed;
+double startt, endt;
+
+inline void mark_time()
+{
+    timeval tim;
+    gettimeofday(&tim, NULL);
+    startt = tim.tv_sec + (tim.tv_usec / static_cast<double>(USEC_PER_SEC));
+}
+
+inline void stop_time()
+{
+    timeval tim;
+    gettimeofday(&tim, NULL);
+    endt = tim.tv_sec + (tim.tv_usec / static_cast<double>(USEC_PER_SEC));
+    time_elapsed = endt - startt;
+}
+
 void executeFullOpenCL(const std::string *documents,
                        const std::vector<word_t> *profile,
                        const std::vector<word_t> *bloomFilter,
@@ -110,6 +128,7 @@ void executeFullOpenCL(const std::string *documents,
 
 int main(int argc, char *argv[])
 {
+    mark_time();
     const std::vector<word_t> *bloomFilter = loadParsedCollectionFromFile(BLOOM_FILTER_FILE);
     std::cout << BLOOM_FILTER_FILE << ": " << bloomFilter->size() << std::endl;
     const std::vector<word_t> *profile;
@@ -127,5 +146,7 @@ int main(int argc, char *argv[])
     const std::string *docs = readFile(DOCUMENT_FILE);
     const std::vector<word_t> *positions = getMarkerPositions(docs);
     executeFullOpenCL(docs, profile, bloomFilter, positions);
+    stop_time();
+    std::cout << time_elapsed << " seconds to score documents." << std::endl;
     return 0;
 }
