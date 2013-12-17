@@ -14,8 +14,6 @@ ulong score_term(ulong term,
 
 uchar to5BitEncoding(uchar c);
 
-enum state { SKIPPING = 0, WRITING = 1, FLUSHING = 2, INSIDE_TAG = 3};
-
 __kernel void parse_and_score(__global const uchar *documents,
                               __global const ulong4 *profile,
                               __global const ulong *positions,
@@ -30,15 +28,15 @@ __kernel void parse_and_score(__global const uchar *documents,
     ulong endParse = positions[document + 1];
     ulong score = 0;
     ulong termToScore = 0;
-    enum state nextState[5][5] =
+    int nextState[25] =
     {
-        {WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING},
-        {WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING},
-        {WRITING,    SKIPPING,   SKIPPING,   INSIDE_TAG, SKIPPING},
-        {INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, SKIPPING},
-        {WRITING,    SKIPPING,   SKIPPING,   SKIPPING,   SKIPPING}
+        1,    0,   2,   3,   0,
+        1,    0,   2,   3,   0,
+        1,    0,   0,   3,   0,
+        3,    3,   3,   3,   0,
+        1,    0,   0,   0,   0
     };
-    enum state currentState = SKIPPING;
+    int currentState = 0;
     ulong bitn = 0;
     for (ulong pos = startParse; pos < endParse; pos++)
     {
@@ -46,8 +44,8 @@ __kernel void parse_and_score(__global const uchar *documents,
         // if isalnum(c)
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
         {
-            currentState = nextState[currentState][0];
-            if ((bitn < TERM_LENGTH - 4) && (currentState == WRITING))
+            currentState = nextState[5 * currentState];
+            if ((bitn < TERM_LENGTH - 4) && (currentState == 1))
             {
                 termToScore += to5BitEncoding(c) << (bitn + 4);
                 bitn += CHARACTER_SIZE;
@@ -56,8 +54,8 @@ __kernel void parse_and_score(__global const uchar *documents,
         // else if isspace(c)
         else if (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r')
         {
-            currentState = nextState[currentState][2];
-            if ((bitn > 0) && (currentState == FLUSHING))
+            currentState = nextState[(5 * currentState) + 2];
+            if ((bitn > 0) && (currentState == 2))
             {
                 termToScore += (bitn / CHARACTER_SIZE);
                 score += score_term(termToScore, profile, reg, ngrams);
@@ -67,15 +65,15 @@ __kernel void parse_and_score(__global const uchar *documents,
         }
         else if (c == '<')
         {
-            currentState = nextState[currentState][3];
+            currentState = nextState[(5 * currentState) + 3];
         }
         else if (c == '>')
         {
-            currentState = nextState[currentState][4];
+            currentState = nextState[(5 * currentState) + 4];
         }
         else
         {
-            currentState = nextState[currentState][1];
+            currentState = nextState[(5 * currentState) + 1];
         }
     }
     scores[document - 1] = score;
