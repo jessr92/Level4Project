@@ -19,7 +19,7 @@
 #define CHAR_SIZE 5
 #define LENGTH 0xFUL //15 bits
 
-#define BLOOM_FILTER
+//#define BLOOM_FILTER
 
 #define BF15
 

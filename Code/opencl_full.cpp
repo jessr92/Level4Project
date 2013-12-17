@@ -43,7 +43,7 @@ void executeFullOpenCL(const std::string *documents,
         cl::Platform::get(&platforms);
         // Get a list of devices on this platform.
         cl::vector<cl::Device> devices;
-        platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
+        platforms[0].getDevices(CL_DEVICE_TYPE_CPU, &devices);
         std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
         // Create a context for the devices
         cl::Context context(devices);

@@ -59,7 +59,7 @@ __kernel void parse_and_score_bloom(__global const uchar *documents,
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
         {
             currentState = nextState[currentState][0];
-            if ((bitn < TERM_LENGTH - 4) /*&& (currentState == WRITING) */)
+            if ((bitn < TERM_LENGTH - 4) && (currentState == WRITING))
             {
                 termToScore += to5BitEncoding(c) << (bitn + 4);
                 bitn += CHARACTER_SIZE;
@@ -69,7 +69,7 @@ __kernel void parse_and_score_bloom(__global const uchar *documents,
         else if (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r')
         {
             currentState = nextState[currentState][2];
-            if ((bitn > 0) /*&& (currentState == FLUSHING) */)
+            if ((bitn > 0) && (currentState == FLUSHING))
             {
                 termToScore += (bitn / CHARACTER_SIZE);
                 score += score_term(termToScore, profile, localBloomFilter, reg, ngrams);
