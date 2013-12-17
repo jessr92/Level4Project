@@ -50,13 +50,11 @@ Performance testing has been conducted on all four implementations, each over
 twelve profiles and four different forms of bloom filter: None, All Zero, All
 One, and Realistic. The different bloom filters has allowed conclusions
 regarding the range of performance metrics possible with different bloom filter
-occupancies to be made.
+occupancies to be made. Results for measuring the total transfer time between
+the host and device have been evaluated which has allowed for conclusions
+regarding the effect of PCI-E Bus Speed to be made.
 
 \section*{Plan}
-
-The plan for the next semester is to measure metrics for the data transfer from
-the host CPU to the GPU device, this will allow timings to be known for the
-OpenCL scoring kernel execution on its own, as well as the overall scoring.
 
 The code I have written could be integrated within the existing parser system,
 to allow for full system performance metrics to be calculated. This will also
@@ -71,7 +69,8 @@ I have experienced a few issues so far in the project, the primary issues
 revolved around OpenCL and the corresponding SDKs. My desktop machine has an
 Intel i5-2500K which is OpenCL capable however installing the Intel SDK has
 proved troublesome and thus far the CPU has only been used for the traditional
-C++ code.
+C++ code. This was rectified by the use of a University's Mac Pro which had an
+OpenCL supporting CPU and GPU allowing benchmark runs all on the one machine.
 
 The OpenCL language and behaviour has been somewhat troublesome as well. OpenCL
 is roughly a subset of the C99 standard language however compiler errors and
