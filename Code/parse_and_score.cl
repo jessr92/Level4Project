@@ -14,7 +14,7 @@ ulong score_term(ulong term,
 
 ulong to5BitEncoding(char c);
 
-__kernel void parse_and_score(__global const uchar *documents,
+__kernel void parse_and_score(__global const char *documents,
                               __global const ulong4 *profile,
                               __global const ulong *positions,
                               __global ulong *scores)
