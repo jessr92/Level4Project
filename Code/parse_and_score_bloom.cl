@@ -203,19 +203,20 @@ ulong to5BitEncoding(uchar c)
     case 'U':
         return 27UL; // u, U -> V
     }
+    ulong v = (ulong) c;
     if (c >= 'a' && c <= 'z')
     {
-        uchar tcode = c - ((c > 106) ? ((c > 111) ? ((c > 117) ? 4 : 3) : 2) : 0);
+        ulong tcode = v - ((v > 106) ? ((v > 111) ? ((v > 117) ? 4 : 3) : 2) : 0);
         return tcode - 87; // += 10 - 97;
     }
     else if (c >= 'A' && c <= 'Z')
     {
-        uchar tcode = c - ((c > 74) ? ((c > 79) ? ((c > 86) ? 4 : 3) : 2) : 0);
+        ulong tcode = v - ((v > 74) ? ((v > 79) ? ((v > 86) ? 4 : 3) : 2) : 0);
         return tcode - 55; // += 10 - 65;
     }
     else if (c >= '0' && c <= '9')
     {
-        return c - 48;
+        return v - 48;
     }
     return 0;
 }
