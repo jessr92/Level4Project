@@ -31,6 +31,11 @@
 #define DOCUMENT_FILE "TREC_all.txt"
 #define DOCUMENT_MARKER "<DOC>"
 
+#define SKIPPING 0
+#define WRITING 1
+#define FLUSHING 2
+#define INSIDE_TAG 3
+
 #define TERM_LENGTH 60
 #define CHARACTER_SIZE 5
 

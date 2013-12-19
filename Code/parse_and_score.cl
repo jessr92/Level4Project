@@ -12,7 +12,7 @@ ulong score_term(ulong term,
                  ulong *reg,
                  ulong *ngrams);
 
-ulong to5BitEncoding(uchar c);
+ulong to5BitEncoding(char c);
 
 __kernel void parse_and_score(__global const uchar *documents,
                               __global const ulong4 *profile,
@@ -28,24 +28,28 @@ __kernel void parse_and_score(__global const uchar *documents,
     ulong endParse = positions[document + 1];
     ulong score = 0;
     ulong termToScore = 0;
+    // 0 = Skipping
+    // 1 = Writing
+    // 2 = Flushing
+    // 3 = Inside Tag
     int nextState[25] =
     {
-        1,    0,   2,   3,   0,
-        1,    0,   2,   3,   0,
-        1,    0,   0,   3,   0,
-        3,    3,   3,   3,   0,
-        1,    0,   0,   0,   0
+        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
+        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
+        WRITING,    SKIPPING,   SKIPPING,   INSIDE_TAG, SKIPPING,
+        INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, SKIPPING,
+        WRITING,    SKIPPING,   SKIPPING,   SKIPPING,   SKIPPING
     };
-    int currentState = 0;
-    ulong bitn = 0;
+    int currentState = SKIPPING;
+    int bitn = 0;
     for (ulong pos = startParse; pos < endParse; pos++)
     {
-        uchar c = documents[pos];
+        char c = documents[pos];
         // if isalnum(c)
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
         {
             currentState = nextState[5 * currentState];
-            if ((bitn < TERM_LENGTH - 4) && (currentState == 1))
+            if ((bitn < TERM_LENGTH - 4) && (currentState == WRITING))
             {
                 termToScore += to5BitEncoding(c) << (bitn + 4);
                 bitn += CHARACTER_SIZE;
@@ -55,7 +59,7 @@ __kernel void parse_and_score(__global const uchar *documents,
         else if (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r')
         {
             currentState = nextState[(5 * currentState) + 2];
-            if ((bitn > 0) && (currentState == 2))
+            if ((bitn > 0) && (currentState == FLUSHING))
             {
                 termToScore += (bitn / CHARACTER_SIZE);
                 score += score_term(termToScore, profile, reg, ngrams);
@@ -143,7 +147,7 @@ void generateNGrams(ulong term, ulong *reg, ulong *ngrams)
     }
 }
 
-ulong to5BitEncoding(uchar c)
+ulong to5BitEncoding(char c)
 {
     switch (c)
     {
@@ -159,7 +163,7 @@ ulong to5BitEncoding(uchar c)
     case 'U':
         return 27UL; // u, U -> V
     }
-    ulong v = (ulong) c;
+    ulong v = convert_ulong(c);
     if (c >= 'a' && c <= 'z')
     {
         ulong tcode = v - ((v > 106) ? ((v > 111) ? ((v > 117) ? 4 : 3) : 2) : 0);
