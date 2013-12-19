@@ -13,7 +13,7 @@ ulong score_term(ulong term,
                  ulong *reg,
                  ulong *ngrams);
 
-uchar to5BitEncoding(uchar c);
+ulong to5BitEncoding(uchar c);
 
 __kernel void parse_and_score_bloom(__global const uchar *documents,
                                     __global const ulong4 *profile,
@@ -187,20 +187,20 @@ void generateNGrams(ulong term, ulong *reg, ulong *ngrams)
     }
 }
 
-uchar to5BitEncoding(uchar c)
+ulong to5BitEncoding(uchar c)
 {
     switch (c)
     {
-    case 73:
-    case 74:
-    case 105:
-    case 106:
+    case 'i':
+    case 'j':
+    case 'I':
+    case 'J':
         return 1UL; // i, j, I, J -> 1
-    case 79:
-    case 111:
+    case 'o':
+    case 'O':
         return 0UL; // o, O -> 0
-    case 85:
-    case 117:
+    case 'u':
+    case 'U':
         return 27UL; // u, U -> V
     }
     if (c >= 'a' && c <= 'z')
@@ -213,7 +213,7 @@ uchar to5BitEncoding(uchar c)
         uchar tcode = c - ((c > 74) ? ((c > 79) ? ((c > 86) ? 4 : 3) : 2) : 0);
         return tcode - 55; // += 10 - 65;
     }
-    else if (c >= 48 && c <= 57) // Between ASCII 0 and 9
+    else if (c >= '0' && c <= '9')
     {
         return c - 48;
     }
