@@ -1,8 +1,5 @@
 #include "shared_details.h"
 
-uchar checkBloomFilter(ulong term,
-                       __local const ulong *bloomFilter);
-
 void generateNGrams(ulong term,
                     ulong *reg,
                     ulong *ngrams);
