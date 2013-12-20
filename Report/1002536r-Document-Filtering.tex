@@ -31,7 +31,8 @@ version and the CPU and FPGA version. Further performance tests can be
 conducted by employing a bloom filter which is a small data structure which can
 be used to reduce the number of requests for memory in slow, global memory by
 sitting in faster, local memory and returning a bit value stating whether or
-not a given item is in global memory or not.
+not a given item is in global memory or not. This builds on previous work such
+as \cite{wimPaper}
 
 Document filtering can place documents into two categories, with the canonical
 example being spam or not spam. Documents are given to the scorer as a
@@ -69,7 +70,7 @@ I have experienced a few issues so far in the project, the primary issues
 revolved around OpenCL and the corresponding SDKs. My desktop machine has an
 Intel i5-2500K which is OpenCL capable however installing the Intel SDK has
 proved troublesome and thus far the CPU has only been used for the traditional
-C++ code. This was rectified by the use of a University's Mac Pro which had an
+C++ code. This was rectified by the use of a School's Mac Pro which had an
 OpenCL supporting CPU and GPU allowing benchmark runs all on the one machine.
 
 The OpenCL language and behaviour has been somewhat troublesome as well. OpenCL
@@ -80,5 +81,8 @@ project, instead of receiving a Segmentation Fault during kernel execution, an
 error was being thrown afterwards, when the result of the kernel was being
 written back to the host CPU. This unfamiliar behaviour led to a slower than
 expected debug process.
+
+\bibliographystyle{plain}
+\bibliography{1002536r-Document-Filtering}
 
 \end{document}

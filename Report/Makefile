@@ -2,6 +2,9 @@ all: 1002536r-Document-Filtering.pdf
 
 1002536r-Document-Filtering.pdf: 1002536r-Document-Filtering.tex
 	pdflatex 1002536r-Document-Filtering
+	bibtex 1002536r-Document-Filtering
+	pdflatex 1002536r-Document-Filtering
+	pdflatex 1002536r-Document-Filtering
 	rm -f *.log *.aux *.toc *.out
 	rm -f *.bbl *.blg
 
