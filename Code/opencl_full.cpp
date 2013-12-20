@@ -128,7 +128,6 @@ void executeFullOpenCL(const std::string *documents,
 
 int main(int argc, char *argv[])
 {
-    mark_time();
     const std::vector<word_t> *bloomFilter = loadParsedCollectionFromFile(BLOOM_FILTER_FILE);
     std::cout << BLOOM_FILTER_FILE << ": " << bloomFilter->size() << std::endl;
     const std::vector<word_t> *profile;
@@ -144,6 +143,7 @@ int main(int argc, char *argv[])
     }
     // Read in document file and find out where the documents start.
     const std::string *docs = readFile(DOCUMENT_FILE);
+    mark_time();
     const std::vector<word_t> *positions = getMarkerPositions(docs);
     executeFullOpenCL(docs, profile, bloomFilter, positions);
     stop_time();
