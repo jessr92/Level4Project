@@ -16,6 +16,7 @@
 
 double time_elapsed;
 double startt, endt;
+double totalt = 0;
 
 inline void mark_time()
 {
@@ -30,6 +31,7 @@ inline void stop_time()
     gettimeofday(&tim, NULL);
     endt = tim.tv_sec + (tim.tv_usec / static_cast<double>(USEC_PER_SEC));
     time_elapsed = endt - startt;
+    totalt += time_elapsed;
 }
 
 void executeFullOpenCL(const std::string *documents,
@@ -100,17 +102,24 @@ void executeFullOpenCL(const std::string *documents,
 #endif
         queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
         // Copy the input data to the input buffers using the command queue
+        mark_time();
         queue.enqueueWriteBuffer(d_docs, CL_TRUE, 0, docsSize, docs);
         queue.enqueueWriteBuffer(d_positions, CL_TRUE, 0, positionsSize, tempPositions);
         queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
+        stop_time();
+        std::cout << time_elapsed << " seconds to copy data HtoD." << std::endl;
 #ifdef BLOOM_FILTER
         queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, tempBloomFilter);
 #endif
         // Execute the kernel
+        mark_time();
         cl::NDRange global(positions->at(0));
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
         queue.finish();
+        stop_time();
+        std::cout << time_elapsed << " seconds to run kernel and get scores back." << std::endl;
+
     }
     catch (cl::Error error)
     {
@@ -145,8 +154,9 @@ int main(int argc, char *argv[])
     const std::string *docs = readFile(DOCUMENT_FILE);
     mark_time();
     const std::vector<word_t> *positions = getMarkerPositions(docs);
-    executeFullOpenCL(docs, profile, bloomFilter, positions);
     stop_time();
-    std::cout << time_elapsed << " seconds to score documents." << std::endl;
+    std::cout << time_elapsed << " seconds to get marker positions." << std::endl;
+    executeFullOpenCL(docs, profile, bloomFilter, positions);
+    std::cout << totalt << " seconds to score documents." << std::endl;
     return 0;
 }
