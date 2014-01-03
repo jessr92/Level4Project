@@ -117,9 +117,9 @@ ulong score_term(ulong term,
             // The ulong4 part has already been sorted by declaring profile in the
             // kernel as ulong4.
             // Hashing the term for better spread across the profile address space
-            ulong h1term = (term >> 32) ^ term;
-            ulong profileAddress = ((h1term >> 10) ^ (h1term & 0x3FFUL)) & PROF_MASK;
-            // ulong profileAddress = ((term >> 42) & PROF_MASK);
+            // ulong h1term = (term >> 32) ^ term;
+            // ulong profileAddress = ((h1term >> 10) ^ (h1term & 0x3FFUL)) & PROF_MASK;
+            ulong profileAddress = ((term >> 42) & PROF_MASK);
             // Get profile entry and add score to total document score.
             // score = Lowest 26th elements of the profile entry.
             // The upper 38 bits represent the specific term which needs to
