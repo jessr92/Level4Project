@@ -14,7 +14,8 @@ ulong to5BitEncoding(char c);
 __kernel void parse_and_score(__global const char *documents,
                               __global const ulong4 *profile,
                               __global const ulong *positions,
-                              __global ulong *scores)
+                              __global ulong *scores,
+                              __global ulong *result)
 {
     // Keep a record of terms that make up the ngrams, and the ngrams themselves
     ulong reg[NUM_NGRAMS];
@@ -25,6 +26,7 @@ __kernel void parse_and_score(__global const char *documents,
     ulong endParse = positions[document + 1];
     ulong score = 0;
     ulong termToScore = 0;
+    ulong loc = 0;
     // 0 = Skipping
     // 1 = Writing
     // 2 = Flushing
@@ -59,6 +61,10 @@ __kernel void parse_and_score(__global const char *documents,
             if ((bitn > 0) && (currentState == FLUSHING))
             {
                 termToScore += (bitn / CHARACTER_SIZE);
+                if (get_global_id(0) == 0)
+                {
+                    result[loc++] = termToScore;
+                }
                 score += score_term(termToScore, profile, reg, ngrams);
                 termToScore = 0;
                 bitn = 0;

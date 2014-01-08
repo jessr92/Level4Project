@@ -13,6 +13,7 @@
 #endif
 #include <sys/time.h>
 #include "OpenCLUtils.h"
+#include <sstream>
 
 double time_elapsed;
 double startt, endt;
@@ -32,6 +33,33 @@ inline void stop_time()
     endt = tim.tv_sec + (tim.tv_usec / static_cast<double>(USEC_PER_SEC));
     time_elapsed = endt - startt;
     totalt += time_elapsed;
+}
+
+std::string decode(unsigned long term)
+{
+    std::ostringstream outs;
+    char letters[12];
+    unsigned termSize = term & 0xFU;
+    for (unsigned i = 0; i < termSize; ++i)
+    {
+        letters[i] = (term >> (i * 5 + 4) & 0x1FUL);
+        // is letter?
+        if ((letters[i] > 9) && (letters[i] < 10 + 22 + 1 ))  // WV: this is wrong! it's 22 I think
+        {
+            letters[i] += (letters[i] > 17) ? ((letters[i] > 21) ? ((letters[i] > 27) ? 4 : 3) : 2) : 0;
+            letters[i] += 65 - 10;
+            // is digit?
+        }
+        else
+        {
+            letters[i] = letters[i] + 48;
+        }
+        outs << letters[i];
+    }
+    //  std::cout << std::endl;
+    //std::cout << "size: " << termSize << std::endl;
+    std::string os = outs.str();
+    return os;
 }
 
 void executeFullOpenCL(const std::string *documents,
@@ -82,6 +110,14 @@ void executeFullOpenCL(const std::string *documents,
 #endif
         int scoresSize = sizeof(scores) * positions->at(0);
         cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
+        int docLength = positions->at(2) - positions->at(1);
+        unsigned long *result = new unsigned long[docLength];
+        for (int i = 0; i < docLength; i++)
+        {
+            result[i] = 0;
+        }
+        int resultSize = sizeof(result) * docLength;
+        cl::Buffer d_result = cl::Buffer(context, CL_MEM_WRITE_ONLY, resultSize);
         // Read the program source
         std::ifstream sourceFile(KERNEL_FULL_FILE);
         std::string sourceCode(std::istreambuf_iterator < char > (sourceFile), (std::istreambuf_iterator < char > ()));
@@ -99,6 +135,8 @@ void executeFullOpenCL(const std::string *documents,
         kernel.setArg(3, d_scores);
 #ifdef BLOOM_FILTER
         kernel.setArg(4, d_bloomFilter);
+#else
+        kernel.setArg(4, d_result);
 #endif
         queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
         // Copy the input data to the input buffers using the command queue
@@ -116,6 +154,11 @@ void executeFullOpenCL(const std::string *documents,
         cl::NDRange global(positions->at(0));
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
+        queue.enqueueReadBuffer(d_result, CL_TRUE, 0, resultSize, result);
+        for (int i = 0; i < docLength; i++)
+        {
+            std::cout << decode(result[i]) << " ";
+        }
         queue.finish();
         stop_time();
         std::cout << time_elapsed << " seconds to run kernel and get scores back." << std::endl;
