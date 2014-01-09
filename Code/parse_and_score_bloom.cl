@@ -34,6 +34,11 @@ __kernel void parse_and_score_bloom(__global const char *documents,
     // Keep a record of terms that make up the ngrams, and the ngrams themselves
     ulong reg[NUM_NGRAMS];
     ulong ngrams[NUM_NGRAMS];
+    for (uint i = 0; i < NUM_NGRAMS; i++)
+    {
+        reg[i] = 0;
+        ngrams[i] = 0;
+    }
     // Document to parse
     uint document = get_global_id(0) + 1;
     ulong startParse = positions[document];
