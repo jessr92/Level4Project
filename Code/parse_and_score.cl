@@ -15,7 +15,8 @@ __kernel void parse_and_score(__global const char *documents,
                               __global const ulong4 *profile,
                               __global const ulong *positions,
                               __global ulong *scores,
-                              __global ulong *result)
+                              __global ulong *result,
+                              __global int *state)
 {
     // Keep a record of terms that make up the ngrams, and the ngrams themselves
     ulong reg[NUM_NGRAMS];
@@ -32,18 +33,15 @@ __kernel void parse_and_score(__global const char *documents,
     ulong score = 0;
     ulong termToScore = 0;
     ulong loc = 0;
+    int nextState[25];
+    for (uint i = 0; i < 25; i++)
+    {
+        nextState[i] = state[i];
+    }
     // 0 = Skipping
     // 1 = Writing
     // 2 = Flushing
     // 3 = Inside Tag
-    int nextState[25] =
-    {
-        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
-        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
-        WRITING,    SKIPPING,   SKIPPING,   INSIDE_TAG, SKIPPING,
-        INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, SKIPPING,
-        WRITING,    SKIPPING,   SKIPPING,   SKIPPING,   SKIPPING
-    };
     int currentState = SKIPPING;
     int bitn = 0;
     for (ulong pos = startParse; pos < endParse; pos++)

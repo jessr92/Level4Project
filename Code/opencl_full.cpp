@@ -84,6 +84,14 @@ void executeFullOpenCL(const std::string *documents,
     word_t *tempBloomFilter = new word_t[bloomFilter->size()];
     std::copy(bloomFilter->begin(), bloomFilter->end(), tempBloomFilter);
 #endif
+    int nextState[25] =
+    {
+        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
+        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
+        WRITING,    SKIPPING,   SKIPPING,   INSIDE_TAG, SKIPPING,
+        INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, SKIPPING,
+        WRITING,    SKIPPING,   SKIPPING,   SKIPPING,   SKIPPING
+    };
     try
     {
         // Get the available platforms.
@@ -110,6 +118,8 @@ void executeFullOpenCL(const std::string *documents,
 #endif
         int scoresSize = sizeof(scores) * positions->at(0);
         cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
+        int stateSize = sizeof(nextState) * 25;
+        cl::Buffer d_state = cl::Buffer(context, CL_MEM_READ_ONLY, stateSize);
         int docLength = positions->at(2) - positions->at(1);
         unsigned long *result = new unsigned long[docLength];
         for (int i = 0; i < docLength; i++)
@@ -138,12 +148,14 @@ void executeFullOpenCL(const std::string *documents,
 #else
         kernel.setArg(4, d_result);
 #endif
+        kernel.setArg(5, d_state);
         queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
         // Copy the input data to the input buffers using the command queue
         mark_time();
         queue.enqueueWriteBuffer(d_docs, CL_TRUE, 0, docsSize, docs);
         queue.enqueueWriteBuffer(d_positions, CL_TRUE, 0, positionsSize, tempPositions);
         queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
+        queue.enqueueWriteBuffer(d_state, CL_TRUE, 0, stateSize, nextState);
         stop_time();
         std::cout << time_elapsed << " seconds to copy data HtoD." << std::endl;
 #ifdef BLOOM_FILTER
