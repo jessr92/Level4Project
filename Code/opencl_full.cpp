@@ -84,14 +84,6 @@ void executeFullOpenCL(const std::string *documents,
     word_t *tempBloomFilter = new word_t[bloomFilter->size()];
     std::copy(bloomFilter->begin(), bloomFilter->end(), tempBloomFilter);
 #endif
-    int nextState[25] =
-    {
-        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
-        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
-        WRITING,    SKIPPING,   SKIPPING,   INSIDE_TAG, SKIPPING,
-        INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, SKIPPING,
-        WRITING,    SKIPPING,   SKIPPING,   SKIPPING,   SKIPPING
-    };
     try
     {
         // Get the available platforms.
@@ -115,11 +107,19 @@ void executeFullOpenCL(const std::string *documents,
 #ifdef BLOOM_FILTER
         int bloomFilterSize = sizeof(word_t) * bloomFilter->size();
         cl::Buffer d_bloomFilter = cl::Buffer(context, CL_MEM_READ_ONLY, bloomFilterSize);
+        int nextState[25] =
+        {
+            WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
+            WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
+            WRITING,    SKIPPING,   SKIPPING,   INSIDE_TAG, SKIPPING,
+            INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, SKIPPING,
+            WRITING,    SKIPPING,   SKIPPING,   SKIPPING,   SKIPPING
+        };
+        int stateSize = sizeof(nextState) * 25;
+        cl::Buffer d_state = cl::Buffer(context, CL_MEM_READ_ONLY, stateSize);
 #endif
         int scoresSize = sizeof(scores) * positions->at(0);
         cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
-        int stateSize = sizeof(nextState) * 25;
-        cl::Buffer d_state = cl::Buffer(context, CL_MEM_READ_ONLY, stateSize);
         // Read the program source
         std::ifstream sourceFile(KERNEL_FULL_FILE);
         std::string sourceCode(std::istreambuf_iterator < char > (sourceFile), (std::istreambuf_iterator < char > ()));
@@ -138,8 +138,6 @@ void executeFullOpenCL(const std::string *documents,
 #ifdef BLOOM_FILTER
         kernel.setArg(4, d_bloomFilter);
         kernel.setArg(5, d_state);
-#else
-        kernel.setArg(4, d_state);
 #endif
         queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
         // Copy the input data to the input buffers using the command queue
@@ -147,11 +145,11 @@ void executeFullOpenCL(const std::string *documents,
         queue.enqueueWriteBuffer(d_docs, CL_TRUE, 0, docsSize, docs);
         queue.enqueueWriteBuffer(d_positions, CL_TRUE, 0, positionsSize, tempPositions);
         queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
-        queue.enqueueWriteBuffer(d_state, CL_TRUE, 0, stateSize, nextState);
         stop_time();
         std::cout << time_elapsed << " seconds to copy data HtoD." << std::endl;
 #ifdef BLOOM_FILTER
         queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, tempBloomFilter);
+        queue.enqueueWriteBuffer(d_state, CL_TRUE, 0, stateSize, nextState);
 #endif
         // Execute the kernel
         mark_time();
@@ -161,7 +159,6 @@ void executeFullOpenCL(const std::string *documents,
         queue.finish();
         stop_time();
         std::cout << time_elapsed << " seconds to run kernel and get scores back." << std::endl;
-
     }
     catch (cl::Error error)
     {
