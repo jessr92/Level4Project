@@ -120,14 +120,6 @@ void executeFullOpenCL(const std::string *documents,
         cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
         int stateSize = sizeof(nextState) * 25;
         cl::Buffer d_state = cl::Buffer(context, CL_MEM_READ_ONLY, stateSize);
-        int docLength = positions->at(2) - positions->at(1);
-        unsigned long *result = new unsigned long[docLength];
-        for (int i = 0; i < docLength; i++)
-        {
-            result[i] = 0;
-        }
-        int resultSize = sizeof(result) * docLength;
-        cl::Buffer d_result = cl::Buffer(context, CL_MEM_WRITE_ONLY, resultSize);
         // Read the program source
         std::ifstream sourceFile(KERNEL_FULL_FILE);
         std::string sourceCode(std::istreambuf_iterator < char > (sourceFile), (std::istreambuf_iterator < char > ()));
@@ -145,10 +137,10 @@ void executeFullOpenCL(const std::string *documents,
         kernel.setArg(3, d_scores);
 #ifdef BLOOM_FILTER
         kernel.setArg(4, d_bloomFilter);
-#else
-        kernel.setArg(4, d_result);
-#endif
         kernel.setArg(5, d_state);
+#else
+        kernel.setArg(4, d_state);
+#endif
         queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
         // Copy the input data to the input buffers using the command queue
         mark_time();
@@ -166,11 +158,6 @@ void executeFullOpenCL(const std::string *documents,
         cl::NDRange global(positions->at(0));
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
-        queue.enqueueReadBuffer(d_result, CL_TRUE, 0, resultSize, result);
-        for (int i = 0; i < docLength; i++)
-        {
-            std::cout << decode(result[i]) << " ";
-        }
         queue.finish();
         stop_time();
         std::cout << time_elapsed << " seconds to run kernel and get scores back." << std::endl;
