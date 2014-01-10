@@ -21,6 +21,10 @@ __kernel void parse_and_score_bloom(__global const char *documents,
                                     __global ulong *scores,
                                     __global const ulong *bloomFilter)
 {
+    if (get_global_id(0) >= positions[0])
+    {
+        return;
+    }
     // Copy bloom filter to local storage
     __local ulong localBloomFilter[BLOOM_SIZE];
     if (get_local_id(0) == 0)
