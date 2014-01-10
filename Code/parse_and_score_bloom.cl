@@ -19,21 +19,15 @@ __kernel void parse_and_score_bloom(__global const char *documents,
                                     __global const ulong4 *profile,
                                     __global const ulong *positions,
                                     __global ulong *scores,
-                                    __global const ulong *bloomFilter,
-                                    __global int *state)
+                                    __global const ulong *bloomFilter)
 {
     // Copy bloom filter to local storage
     __local ulong localBloomFilter[BLOOM_SIZE];
-    __local int nextState[25];
     if (get_local_id(0) == 0)
     {
         for (uint i = 0; i < BLOOM_SIZE; i++)
         {
             localBloomFilter[i] = bloomFilter[i];
-        }
-        for (uint i = 0; i < 25; i++)
-        {
-            nextState[i] = state[i];
         }
     }
     barrier(CLK_LOCAL_MEM_FENCE);
@@ -51,6 +45,14 @@ __kernel void parse_and_score_bloom(__global const char *documents,
     ulong endParse = positions[document + 1];
     ulong score = 0;
     ulong termToScore = 0;
+    int nextState[25] =
+    {
+        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
+        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
+        WRITING,    SKIPPING,   SKIPPING,   INSIDE_TAG, SKIPPING,
+        INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, SKIPPING,
+        WRITING,    SKIPPING,   SKIPPING,   SKIPPING,   SKIPPING
+    };
     // 0 = Skipping
     // 1 = Writing
     // 2 = Flushing

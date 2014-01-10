@@ -107,16 +107,6 @@ void executeFullOpenCL(const std::string *documents,
 #ifdef BLOOM_FILTER
         int bloomFilterSize = sizeof(word_t) * bloomFilter->size();
         cl::Buffer d_bloomFilter = cl::Buffer(context, CL_MEM_READ_ONLY, bloomFilterSize);
-        int nextState[25] =
-        {
-            WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
-            WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
-            WRITING,    SKIPPING,   SKIPPING,   INSIDE_TAG, SKIPPING,
-            INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, SKIPPING,
-            WRITING,    SKIPPING,   SKIPPING,   SKIPPING,   SKIPPING
-        };
-        int stateSize = sizeof(nextState) * 25;
-        cl::Buffer d_state = cl::Buffer(context, CL_MEM_READ_ONLY, stateSize);
 #endif
         int scoresSize = sizeof(scores) * positions->at(0);
         cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
@@ -137,7 +127,6 @@ void executeFullOpenCL(const std::string *documents,
         kernel.setArg(3, d_scores);
 #ifdef BLOOM_FILTER
         kernel.setArg(4, d_bloomFilter);
-        kernel.setArg(5, d_state);
 #endif
         queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
         // Copy the input data to the input buffers using the command queue
@@ -149,13 +138,12 @@ void executeFullOpenCL(const std::string *documents,
         std::cout << time_elapsed << " seconds to copy data HtoD." << std::endl;
 #ifdef BLOOM_FILTER
         queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, tempBloomFilter);
-        queue.enqueueWriteBuffer(d_state, CL_TRUE, 0, stateSize, nextState);
 #endif
         // Execute the kernel
         mark_time();
         int localSize = 128;
-	int globalSize = positions->at(0);
-	if (globalSize % localSize != 0)
+        int globalSize = positions->at(0);
+        if (globalSize % localSize != 0)
         {
             globalSize += localSize - (globalSize % localSize);
         }
