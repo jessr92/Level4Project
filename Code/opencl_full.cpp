@@ -153,8 +153,15 @@ void executeFullOpenCL(const std::string *documents,
 #endif
         // Execute the kernel
         mark_time();
-        cl::NDRange global(positions->at(0));
-        queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
+        int localSize = 128;
+	int globalSize = positions->at(0);
+	if (globalSize % localSize != 0)
+        {
+            globalSize += localSize - (globalSize % localSize);
+        }
+        cl::NDRange global(globalSize);
+        cl::NDRange local(localSize);
+        queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
         queue.finish();
         stop_time();

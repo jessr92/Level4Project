@@ -16,6 +16,10 @@ __kernel void parse_and_score(__global const char *documents,
                               __global const ulong *positions,
                               __global ulong *scores)
 {
+    if (get_global_id(0) >= positions[0])
+    {
+        return;
+    }
     // Keep a record of terms that make up the ngrams, and the ngrams themselves
     ulong reg[NUM_NGRAMS];
     ulong ngrams[NUM_NGRAMS];
