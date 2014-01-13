@@ -109,8 +109,15 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
             queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, tempBloomFilter);
 #endif
             // Execute the kernel
-            cl::NDRange global((docAddresses->at(0) / DOCS_PER_THREAD) + 1);
-            queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, cl::NullRange);
+            int localSize = 128;
+            int globalSize = docAddresses->at(0);
+            if (globalSize % localSize != 0)
+            {
+                globalSize += localSize - (globalSize % localSize);
+            }
+            cl::NDRange global(globalSize);
+            cl::NDRange local(localSize);
+            queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
             queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
             queue.finish();
         }
