@@ -9,10 +9,6 @@ __kernel void scoreCollectionBloom(__global const ulong *collection,
                                    __global ulong *scores,
                                    __global const ulong *bloomFilter)
 {
-    if (get_global_id(0) >= docAddresses[0])
-    {
-        return;
-    }
     __local ulong localBloomFilter[BLOOM_SIZE];
     if (get_local_id(0) == 0)
     {

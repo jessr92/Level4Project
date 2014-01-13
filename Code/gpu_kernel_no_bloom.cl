@@ -7,10 +7,6 @@ __kernel void scoreCollectionNoBloom(__global const ulong *collection,
                                      __global const uint *docAddresses,
                                      __global ulong *scores)
 {
-    if (get_global_id(0) >= docAddresses[0])
-    {
-        return;
-    }
     ulong reg[NUM_NGRAMS];
     ulong ngrams[NUM_NGRAMS];
     uint document = (get_global_id(0) * DOCS_PER_THREAD) + 1;
