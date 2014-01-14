@@ -3,7 +3,9 @@
 
 #include <iostream>
 #include <fstream>
+#include <thread>
 #include <vector>
+#include <pthread.h>
 #include "shared_details.h"
 
 typedef uint64_t word_t;

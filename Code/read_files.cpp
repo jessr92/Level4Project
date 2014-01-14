@@ -84,23 +84,65 @@ const std::string *readFile(std::string file)
     return documents;
 }
 
-const std::vector<word_t> *getMarkerPositions(const std::string *documents)
+word_t *values;
+word_t *threadIds;
+std::vector<word_t> **docVectors;
+const std::string *doc;
+word_t threadCount = NUM_THREADS;
+
+void *calculateMarkerPositions(void *value)
 {
-    std::vector<word_t> *positions = new std::vector<word_t>;
+    word_t tid = *(word_t *)value;
+    word_t pos = (tid == 0) ? 0 : values[tid - 1];
+    word_t end = values[tid];
+    docVectors[tid] = new std::vector<word_t>();
     // Find all document endings, note their location (assuming valid file)
-    word_t pos = documents->find(DOCUMENT_MARKER, 0);
-    word_t numberOfDocuments = 0;
-    positions->push_back(numberOfDocuments); // Placeholder for actual value.
-    while (pos != std::string::npos)
+    pos = doc->find(DOCUMENT_MARKER, pos);
+    while (pos < end && pos != std::string::npos)
     {
         // Add index of first character for substring match
-        positions->push_back(pos);
-        numberOfDocuments++;
-        pos = documents->find(DOCUMENT_MARKER, pos + 1);
+        docVectors[tid]->push_back(pos);
+        pos = doc->find(DOCUMENT_MARKER, pos + 1);
     }
-    // Add string length so positions.size() so last document knows where to end
-    positions->push_back(documents->size());
-    // Update 0th element to contain document count.
-    positions->at(0) = numberOfDocuments;
-    return positions;
+    return NULL;
+}
+
+const std::vector<word_t> *getMarkerPositions(const std::string *documents)
+{
+    doc = documents;
+    word_t threadCount = std::thread::hardware_concurrency();
+    if (threadCount != 0)
+    {
+        threadCount = threadCount;
+    }
+    values = new word_t[threadCount];
+    threadIds = new word_t[threadCount];
+    docVectors = new std::vector<word_t> *[threadCount];
+    pthread_t *threads = new pthread_t[threadCount];
+    unsigned long docLength = documents->size();
+    if (docLength % threadCount != 0)
+    {
+        docLength += (threadCount - (docLength % threadCount));
+    }
+    for (word_t i = 0; i < threadCount; i++)
+    {
+        values[i] = (docLength / threadCount) * (i + 1);
+        threadIds[i] = i;
+        pthread_create(&threads[i], NULL, calculateMarkerPositions, (void *)&threadIds[i]);
+    }
+    for (word_t i = 0; i < threadCount; i++)
+    {
+        pthread_join(threads[i], NULL);
+    }
+    std::vector<word_t> *result = new std::vector<word_t>();
+    result->push_back(0);
+    unsigned long numberOfDocuments = 0;
+    for (word_t i = 0; i < threadCount; i++)
+    {
+        numberOfDocuments += docVectors[i]->size();
+        result->insert(result->end(), docVectors[i]->begin(), docVectors[i]->end());
+    }
+    result->at(0) = numberOfDocuments;
+    result->push_back(documents->size());
+    return result;
 }
