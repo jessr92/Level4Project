@@ -154,7 +154,7 @@ void executeFullOpenCL(const std::string *documents,
         queue.finish();
         stop_time();
         std::cout << time_elapsed << " seconds to run kernel and get scores back." << std::endl;
-	return;
+        return;
     }
     catch (cl::Error error)
     {
