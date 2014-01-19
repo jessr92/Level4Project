@@ -30,6 +30,7 @@ __kernel void parse_and_score(__global const char *documents,
     }
     // Document to parse
     uint document = get_global_id(0) + 1;
+while(document < positions[0]) {
     ulong startParse = positions[document];
     ulong endParse = positions[document + 1];
     ulong score = 0;
@@ -68,6 +69,7 @@ __kernel void parse_and_score(__global const char *documents,
             if ((bitn > 0) && (currentState == FLUSHING))
             {
                 termToScore += (bitn / CHARACTER_SIZE);
+		printf("%u\n", termToScore);
                 score += score_term(termToScore, profile, reg, ngrams);
                 termToScore = 0;
                 bitn = 0;
@@ -87,6 +89,8 @@ __kernel void parse_and_score(__global const char *documents,
         }
     }
     scores[document - 1] = score;
+document++;
+}
 }
 
 ulong score_term(ulong term,
