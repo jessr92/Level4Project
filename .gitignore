@@ -252,3 +252,5 @@ Code/dumpcl
 Code/cpu_reference_implementation_mt
 
 Code/opencl_full
+
+Code/decode
