@@ -95,7 +95,7 @@ void executeFullOpenCL(const std::string *documents,
         // Get a list of devices on this platform.
         cl::vector<cl::Device> devices;
         platforms[0].getDevices(CL_DEVICE_TYPE_CPU, &devices);
-        std::cout << "Device names: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
+        std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
         // Create a context for the devices
         cl::Context context(devices);
         // Create a command queue for the first device
