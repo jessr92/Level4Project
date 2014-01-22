@@ -91,7 +91,7 @@ void executeFullOpenCL(const std::string *documents,
         cl::Platform::get(&platforms);
         // Get a list of devices on this platform.
         cl::vector<cl::Device> devices;
-        platforms[0].getDevices(CL_DEVICE_TYPE_CPU, &devices);
+        platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
         std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
         // Create a context for the devices
         cl::Context context(devices);
@@ -149,12 +149,11 @@ void executeFullOpenCL(const std::string *documents,
         }
         cl::NDRange global(globalSize);
         cl::NDRange local(localSize);
-        queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(1), cl::NDRange(1));
+        queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
         queue.finish();
         stop_time();
         std::cout << time_elapsed << " seconds to run kernel and get scores back." << std::endl;
-        return;
     }
     catch (cl::Error error)
     {

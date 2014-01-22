@@ -30,68 +30,63 @@ __kernel void parse_and_score(__global const char *documents,
     }
     // Document to parse
     uint document = get_global_id(0) + 1;
-    while (document < positions[0])
+    ulong startParse = positions[document];
+    ulong endParse = positions[document + 1];
+    ulong score = 0;
+    ulong termToScore = 0;
+    int nextState[25] =
     {
-        ulong startParse = positions[document];
-        ulong endParse = positions[document + 1];
-        ulong score = 0;
-        ulong termToScore = 0;
-        int nextState[25] =
+        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
+        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
+        WRITING,    SKIPPING,   SKIPPING,   INSIDE_TAG, SKIPPING,
+        INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, SKIPPING,
+        WRITING,    SKIPPING,   SKIPPING,   SKIPPING,   SKIPPING
+    };
+    // 0 = Skipping
+    // 1 = Writing
+    // 2 = Flushing
+    // 3 = Inside Tag
+    int currentState = SKIPPING;
+    int bitn = 0;
+    for (ulong pos = startParse; pos < endParse; pos++)
+    {
+        char c = documents[pos];
+        // if isalnum(c)
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
         {
-            WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
-            WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
-            WRITING,    SKIPPING,   SKIPPING,   INSIDE_TAG, SKIPPING,
-            INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, SKIPPING,
-            WRITING,    SKIPPING,   SKIPPING,   SKIPPING,   SKIPPING
-        };
-        // 0 = Skipping
-        // 1 = Writing
-        // 2 = Flushing
-        // 3 = Inside Tag
-        int currentState = SKIPPING;
-        int bitn = 0;
-        for (ulong pos = startParse; pos < endParse; pos++)
-        {
-            char c = documents[pos];
-            // if isalnum(c)
-            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+            currentState = nextState[5 * currentState];
+            if ((bitn < TERM_LENGTH - 4) && (currentState == WRITING))
             {
-                currentState = nextState[5 * currentState];
-                if ((bitn < TERM_LENGTH - 4) && (currentState == WRITING))
-                {
-                    termToScore += to5BitEncoding(c) << (bitn + 4);
-                    bitn += CHARACTER_SIZE;
-                }
-            }
-            // else if isspace(c)
-            else if (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r')
-            {
-                currentState = nextState[(5 * currentState) + 2];
-                if ((bitn > 0) && (currentState == FLUSHING))
-                {
-                    termToScore += (bitn / CHARACTER_SIZE);
-                    printf("%lu\n", termToScore);
-                    score += score_term(termToScore, profile, reg, ngrams);
-                    termToScore = 0;
-                    bitn = 0;
-                }
-            }
-            else if (c == '<')
-            {
-                currentState = nextState[(5 * currentState) + 3];
-            }
-            else if (c == '>')
-            {
-                currentState = nextState[(5 * currentState) + 4];
-            }
-            else
-            {
-                currentState = nextState[(5 * currentState) + 1];
+                termToScore += to5BitEncoding(c) << (bitn + 4);
+                bitn += CHARACTER_SIZE;
             }
         }
-        scores[document - 1] = score;
-        document++;
+        // else if isspace(c)
+        else if (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r')
+        {
+            currentState = nextState[(5 * currentState) + 2];
+            if ((bitn > 0) && (currentState == FLUSHING))
+            {
+                termToScore += (bitn / CHARACTER_SIZE);
+                score += score_term(termToScore, profile, reg, ngrams);
+                termToScore = 0;
+                bitn = 0;
+            }
+        }
+        else if (c == '<')
+        {
+            currentState = nextState[(5 * currentState) + 3];
+        }
+        else if (c == '>')
+        {
+            currentState = nextState[(5 * currentState) + 4];
+        }
+        else
+        {
+            currentState = nextState[(5 * currentState) + 1];
+        }
     }
+    scores[document - 1] = score;
 }
 
 ulong score_term(ulong term,

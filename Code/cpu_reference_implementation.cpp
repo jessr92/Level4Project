@@ -26,33 +26,6 @@ inline void stop_time()
     time_elapsed = endt - startt;
 }
 
-std::string decode(unsigned long term)
-{
-    std::ostringstream outs;
-    char letters[12];
-    unsigned termSize = term & 0xFU;
-    for (unsigned i = 0; i < termSize; ++i)
-    {
-        letters[i] = (term >> (i * 5 + 4) & 0x1FUL);
-        // is letter?
-        if ((letters[i] > 9) && (letters[i] < 10 + 22 + 1 ))  // WV: this is wrong! it's 22 I think
-        {
-            letters[i] += (letters[i] > 17) ? ((letters[i] > 21) ? ((letters[i] > 27) ? 4 : 3) : 2) : 0;
-            letters[i] += 65 - 10;
-            // is digit?
-        }
-        else
-        {
-            letters[i] = letters[i] + 48;
-        }
-        outs << letters[i];
-    }
-    //  std::cout << std::endl;
-    //std::cout << "size: " << termSize << std::endl;
-    std::string os = outs.str();
-    return os;
-}
-
 struct ulong4
 {
     unsigned long s0, s1, s2, s3;
@@ -321,14 +294,6 @@ int main(int argc, char *argv[])
     std::vector<unsigned int> *docAddresses = getDocumentAddresses(collection);
     std::cout << "docAddresses: " << docAddresses->at(0) << std::endl;
     executeReferenceImplementation(collection, profile, docAddresses, bloomFilter);
-    for (unsigned int i = 0; i < collection->size(); i++)
-    {
-        std::cout << decode(collection->at(i)) << " ";
-        if (std::find(docAddresses->begin(), docAddresses->end(), i) != docAddresses->end())
-        {
-            std::cout << std::endl;
-        }
-    }
     delete bloomFilter;
     delete collection;
     delete profile;
