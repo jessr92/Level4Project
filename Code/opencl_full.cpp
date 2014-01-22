@@ -35,33 +35,6 @@ inline void stop_time()
     totalt += time_elapsed;
 }
 
-std::string decode(unsigned long term)
-{
-    std::ostringstream outs;
-    char letters[12];
-    unsigned termSize = term & 0xFU;
-    for (unsigned i = 0; i < termSize; ++i)
-    {
-        letters[i] = (term >> (i * 5 + 4) & 0x1FUL);
-        // is letter?
-        if ((letters[i] > 9) && (letters[i] < 10 + 22 + 1 ))  // WV: this is wrong! it's 22 I think
-        {
-            letters[i] += (letters[i] > 17) ? ((letters[i] > 21) ? ((letters[i] > 27) ? 4 : 3) : 2) : 0;
-            letters[i] += 65 - 10;
-            // is digit?
-        }
-        else
-        {
-            letters[i] = letters[i] + 48;
-        }
-        outs << letters[i];
-    }
-    //  std::cout << std::endl;
-    //std::cout << "size: " << termSize << std::endl;
-    std::string os = outs.str();
-    return os;
-}
-
 void executeFullOpenCL(const std::string *documents,
                        const std::vector<word_t> *profile,
                        const std::vector<word_t> *bloomFilter,
@@ -70,6 +43,11 @@ void executeFullOpenCL(const std::string *documents,
     unsigned long hamCount = 0;
     unsigned long spamCount = 0;
     const char *docs = documents->c_str();
+#ifdef DEVCPU
+    char *tempDocs = new char[documents->size() + 1];
+    tempDocs[documents->size()] = '\0';
+    memcpy(tempDocs, docs, documents->size());
+#endif
     unsigned long *scores = new unsigned long[positions->at(0)];
     for (word_t i = 0; i < positions->at(0); i++)
     {
@@ -91,7 +69,11 @@ void executeFullOpenCL(const std::string *documents,
         cl::Platform::get(&platforms);
         // Get a list of devices on this platform.
         cl::vector<cl::Device> devices;
+#ifdef DEVCPU
+        platforms[0].getDevices(CL_DEVICE_TYPE_CPU, &devices);
+#else
         platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
+#endif
         std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
         // Create a context for the devices
         cl::Context context(devices);
@@ -99,17 +81,28 @@ void executeFullOpenCL(const std::string *documents,
         cl::CommandQueue queue = cl::CommandQueue(context, devices[0]);
         // Create the memory buffers
         int docsSize = sizeof(char) * documents->size();
-        cl::Buffer d_docs = cl::Buffer(context, CL_MEM_READ_ONLY, docsSize);
         int profileSize = sizeof(word_t) * profile->size();
-        cl::Buffer d_profile = cl::Buffer(context, CL_MEM_READ_ONLY, profileSize);
         int positionsSize = sizeof(word_t) * positions->size();
+        int scoresSize = sizeof(scores) * positions->at(0);
+#ifdef DEVCPU
+        cl::Buffer d_docs = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, docsSize, tempDocs);
+        cl::Buffer d_profile = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, profileSize, tempProfile);
+        cl::Buffer d_positions = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, positionsSize, tempPositions);
+        cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, scoresSize, scores);
+#else
+        cl::Buffer d_docs = cl::Buffer(context, CL_MEM_READ_ONLY, docsSize);
+        cl::Buffer d_profile = cl::Buffer(context, CL_MEM_READ_ONLY, profileSize);
         cl::Buffer d_positions = cl::Buffer(context, CL_MEM_READ_ONLY, positionsSize);
+        cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
+#endif
 #ifdef BLOOM_FILTER
         int bloomFilterSize = sizeof(word_t) * bloomFilter->size();
+#ifdef DEVCPU
+        cl::Buffer d_bloomFilter = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, bloomFilterSize, tempBloomFilter);
+#else
         cl::Buffer d_bloomFilter = cl::Buffer(context, CL_MEM_READ_ONLY, bloomFilterSize);
 #endif
-        int scoresSize = sizeof(scores) * positions->at(0);
-        cl::Buffer d_scores = cl::Buffer(context, CL_MEM_WRITE_ONLY, scoresSize);
+#endif
         // Read the program source
         std::ifstream sourceFile(KERNEL_FULL_FILE);
         std::string sourceCode(std::istreambuf_iterator < char > (sourceFile), (std::istreambuf_iterator < char > ()));
@@ -128,6 +121,12 @@ void executeFullOpenCL(const std::string *documents,
 #ifdef BLOOM_FILTER
         kernel.setArg(4, d_bloomFilter);
 #endif
+#ifdef DEVCPU
+        queue.enqueueMapBuffer(d_profile, CL_FALSE, CL_MAP_READ, 0, profileSize);
+        queue.enqueueMapBuffer(d_docs, CL_FALSE, CL_MAP_READ, 0, docsSize);
+        queue.enqueueMapBuffer(d_positions, CL_FALSE, CL_MAP_READ, 0, positionsSize);
+        queue.enqueueMapBuffer(d_scores, CL_FALSE, CL_MAP_WRITE, 0, scoresSize);
+#else
         queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
         // Copy the input data to the input buffers using the command queue
         mark_time();
@@ -136,12 +135,21 @@ void executeFullOpenCL(const std::string *documents,
         queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
         stop_time();
         std::cout << time_elapsed << " seconds to copy data HtoD." << std::endl;
+#endif
 #ifdef BLOOM_FILTER
+#ifdef DEVCPU
+        queue.enqueueMapBuffer(d_bloomFilter, CL_FALSE, CL_MAP_READ, 0, bloomFilterSize);
+#else
         queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, tempBloomFilter);
+#endif
 #endif
         // Execute the kernel
         mark_time();
+#ifdef DEVCPU
+        int localSize = 1;
+#else
         int localSize = 128;
+#endif
         int globalSize = positions->at(0);
         if (globalSize % localSize != 0)
         {
@@ -150,7 +158,9 @@ void executeFullOpenCL(const std::string *documents,
         cl::NDRange global(globalSize);
         cl::NDRange local(localSize);
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
+#ifndef DEVCPU
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
+#endif
         queue.finish();
         stop_time();
         std::cout << time_elapsed << " seconds to run kernel and get scores back." << std::endl;
