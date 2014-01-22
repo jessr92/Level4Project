@@ -120,7 +120,7 @@ void executeFullOpenCL(const std::string *documents,
         // Make program from the source code
         cl::Program program = cl::Program(context, source);
         // Build the program for the devices
-        program.build(devices);
+        program.build(devices, "-cl-mad-enable -cl-no-signed-zeros -cl-finite-math-only -cl-fast-relaxed-math");
         // Make kernel
         cl::Kernel kernel(program, KERNEL_FULL_NAME);
         // Set the kernel arguments
