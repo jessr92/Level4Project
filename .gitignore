@@ -254,3 +254,5 @@ Code/cpu_reference_implementation_mt
 Code/opencl_full
 
 Code/decode
+
+Code/opencl_full_cpu
