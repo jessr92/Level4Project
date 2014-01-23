@@ -21,11 +21,12 @@ OPENCL_FULL_OBJS=opencl_full.o $(STANDARD_OBJS)
 OBJS = $(CPU_OBJS) $(GPU_NO_WRAPPER_OBJS) $(CPU_NO_WRAPPER_OBJS) $(CPU_MT_OBJS)
 OBJS+= $(DUMP_CL_OBJS) $(OPENCL_FULL_OBJS)
 
+CPU_OBJS_LIB=$(CPU_OBJS) -lpthread
 CPU_MT_OBJS_LIB=$(CPU_MT_OBJS) -lpthread
-CPU_NO_WRAPPER_OBJS_LIB=$(CPU_NO_WRAPPER_OBJS) -lOpenCL
-GPU_NO_WRAPPER_OBJS_LIB=$(GPU_NO_WRAPPER_OBJS) -lOpenCL
-DUMP_CL_OBJS_LIB=$(DUMP_CL_OBJS) -lOpenCL
-OPENCL_FULL_OBJS_LIB=$(OPENCL_FULL_OBJS) -lOpenCL
+CPU_NO_WRAPPER_OBJS_LIB=$(CPU_NO_WRAPPER_OBJS) -lOpenCL -lpthread
+CPU_NO_WRAPPER_OBJS_LIB=$(GPU_NO_WRAPPER_OBJS) -lOpenCL -lpthread
+DUMP_CL_OBJS_LIB=$(DUMP_CL_OBJS) -lOpenCL -lpthread
+OPENCL_FULL_OBJS_LIB=$(OPENCL_FULL_OBJS) -lOpenCL -lpthread
 
 ifeq "$(shell uname)" "Darwin"
 	CFLAGS+=-framework OpenCL
@@ -44,7 +45,7 @@ endif
 all: $(PROGS)
 
 cpu_reference_implementation: $(CPU_OBJS)
-	$(CXX) $(CXXFLAGS) -o cpu_reference_implementation $(CPU_OBJS)
+	$(CXX) $(CXXFLAGS) -o cpu_reference_implementation $(CPU_OBJS_LIB)
 
 gpu_implementation_no_wrapper: $(GPU_NO_WRAPPER_OBJS)
 	$(CXX) $(CXXFLAGS) -o gpu_implementation_no_wrapper $(GPU_NO_WRAPPER_OBJS_LIB)
