@@ -136,7 +136,14 @@ ulong score_term(ulong term,
             ulong4 profileEntry = profile[profileAddress];
             // Only one of these will add something non-zero to the score.
             // The left hand side of the * operator will either be 0 or 1.
-            score += (((profileEntry.s0 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s0 & PROF_WEIGHT);
+
+            // The following line is misbehaving* for certain profiles on certain devices (not the Tesla)
+            // Leaving it commented out and only scoring based on the other three entries provides sensible
+            // albeit incorrect results. Results are incorrect due to the missing scoring values of the s0th
+            // term.
+            // I... I have no words.
+            // * By misbehaving I mean having this line in results in non-zero scores for all documents for 5/12 profiles.
+            // score += (((profileEntry.s0 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s0 & PROF_WEIGHT);
             score += (((profileEntry.s1 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s1 & PROF_WEIGHT);
             score += (((profileEntry.s2 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s2 & PROF_WEIGHT);
             score += (((profileEntry.s3 >> 26) & PROF_REST_LENGTH) == rest) * (profileEntry.s3 & PROF_WEIGHT);
