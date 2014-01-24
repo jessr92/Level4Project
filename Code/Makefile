@@ -7,7 +7,6 @@ PROGS=cpu_reference_implementation
 PROGS+=gpu_implementation_no_wrapper
 PROGS+=cpu_implementation_no_wrapper
 PROGS+=cpu_reference_implementation_mt
-PROGS+=dumpcl
 PROGS+=opencl_full
 PROGS+=clean
 
@@ -24,7 +23,7 @@ OBJS+= $(DUMP_CL_OBJS) $(OPENCL_FULL_OBJS)
 CPU_OBJS_LIB=$(CPU_OBJS) -lpthread
 CPU_MT_OBJS_LIB=$(CPU_MT_OBJS) -lpthread
 CPU_NO_WRAPPER_OBJS_LIB=$(CPU_NO_WRAPPER_OBJS) -lOpenCL -lpthread
-CPU_NO_WRAPPER_OBJS_LIB=$(GPU_NO_WRAPPER_OBJS) -lOpenCL -lpthread
+GPU_NO_WRAPPER_OBJS_LIB=$(GPU_NO_WRAPPER_OBJS) -lOpenCL -lpthread
 DUMP_CL_OBJS_LIB=$(DUMP_CL_OBJS) -lOpenCL -lpthread
 OPENCL_FULL_OBJS_LIB=$(OPENCL_FULL_OBJS) -lOpenCL -lpthread
 

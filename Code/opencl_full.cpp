@@ -6,11 +6,11 @@
 #include "shared_details.h"
 #define __NO_STD_VECTOR // Use cl::vector instead of STL version
 #define __CL_ENABLE_EXCEPTIONS
-#ifdef __APPLE__
+//#ifdef __APPLE__
 #include "cl.hpp"
-#else
-#include <CL/cl.hpp>
-#endif
+//#else
+//#include <CL/cl.hpp>
+//#endif
 #include <sys/time.h>
 #include "OpenCLUtils.h"
 #include <sstream>
