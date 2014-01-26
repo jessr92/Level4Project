@@ -1,5 +1,77 @@
 \section{OpenCL}
 
+\subsection{Language Overview}
+
+Open Computing Language (OpenCL) is a framework for writing applications
+designed to be executed across heterogeneous platforms such as central
+processing units (CPUs), graphics processing units (GPUs), and accelerator
+devices such as the Intel Phi and Field Programmable Gate Arrays (FPGAs). The
+language is an open standard maintained by Khronos Group
+\footnote{\url{http://www.khronos.org/opencl}}. OpenCL is based on the C99
+standard and can be loosely thought of as a subset of the C99 language with some
+additional keywords.
+
+OpenCL splits the program code into two sections called `host' and `device'.
+Host code runs on the CPU and is written in a traditional language such as C or
+C++. The host code executes as normal and makes use of APIs exposed by OpenCL to
+define how, and where, OpenCL code is executed.
+
+OpenCL applications are called kernels. A kernel is a function that executes on
+an OpenCL capable device. Given the focus of OpenCL is on parallelism, a kernel
+is written from the perspective of a single thread instead of requiring explicit
+threading code from more familiar models such as POSIX Threads. An OpenCL work
+item is similar to a POSIX Thread with a notable exception that OpenCL has no
+stack. OpenCL kernels are also compiled at runtime thus the host code, and the
+compiler itself, can make device-specific optimisations for optimal performance.
+
+\subsection{Models}
+
+To accommodate the variety of devices OpenCL is designed to work with, a more
+abstract Memory Model, and Concurrency and Execution model was designed to allow
+the programmer full access to the target devices' capabilities.
+
+\subsubsection{Memory Model}
+
+For a traditional C/C++ application, the application programmer can make use of
+the primary memory space of the computer, typically DDR2 or DDR3 RAM. There are
+caches on the CPU die however no direct control over their contents is offered.
+For CPUs this is not an issue, all modern CPUs support automatic caching.
+Problems occur when considering other devices, such as a GPU. GPUs do not
+typically have automatic caching thus a programmer must make use of OpenCLs
+abstract Memory Model, and hardware vendors must map this model to the physical
+hardware.
+
+The OpenCL memory model defines four different types of memory, each of which
+will be outlined below:
+
+Global memory: This memory is accessible by all compute units and is similar to
+main memory on a traditional CPU system. For a GPU this is memory is mapped to
+the primary memory of the GPU and is typically 1-4GB in size. When transferring
+data between the host and device, this is where the data has to reside. Global
+memory is denoted as `\_\_global' in an OpenCL kernel.
+
+Constant memory: Constant memory resides in the same space as global memory and
+is used for data which is accessed simultaneously by all work items, or for
+variables whose values never change. Constant memory is denoted as `\_\_local'
+in an OpenCL kernel.
+
+Local memory: This is scratch pad memory which is only visible to a single
+compute unit on the device (think core of a CPU). Local memory is generally on-
+chip memory and thus has faster access time than global memory. Local memory is
+typically on the order of tens of kilobytes in size. Use of local memory is
+either statically declared in the kernel (e.g `\_\_local float[64] localArray')
+or dynamically allocated at runtime by the host since OpenCL kernels do not
+offer dynamic memory allocation. Variables in local memory are not what would be
+called `local' in a traditional application, local variables are in private
+memory.
+
+Private memory: This is memory that is unique to an individual work item. Any
+local variables and non-pointer kernel arguments are private by default. These
+are typically mapped to registers although can be slipped over to longer-latency
+memories if required.
+
+\subsubsection{Concurrency and Execution Model}
+
 \section{CPU and GPU Differences}
 
 \section{Document Classification}
@@ -7,4 +79,5 @@
 \subsection{Bloom Filters}
 
 \subsection{Hashed Profile}
+
 % linear probing, hence 4 terms looked at.
