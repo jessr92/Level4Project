@@ -110,10 +110,10 @@ void *calculateMarkerPositions(void *value)
 const std::vector<word_t> *getMarkerPositions(const std::string *documents)
 {
     doc = documents;
-    word_t threadCount = std::thread::hardware_concurrency();
-    if (threadCount != 0)
+    threadCount = std::thread::hardware_concurrency();
+    if (threadCount == 0)
     {
-        threadCount = threadCount;
+        threadCount = NUM_THREADS;
     }
     values = new word_t[threadCount];
     threadIds = new word_t[threadCount];
