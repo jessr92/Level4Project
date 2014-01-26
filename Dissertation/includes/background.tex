@@ -39,23 +39,23 @@ For CPUs this is not an issue, all modern CPUs support automatic caching.
 Problems occur when considering other devices, such as a GPU. GPUs do not
 typically have automatic caching thus a programmer must make use of OpenCLs
 abstract Memory Model, and hardware vendors must map this model to the physical
-hardware.
+hardware. The OpenCL memory model defines four different types of memory, each
+of which will be outlined below.
 
-The OpenCL memory model defines four different types of memory, each of which
-will be outlined below:
+\begin{description}
 
-Global memory: This memory is accessible by all compute units and is similar to
-main memory on a traditional CPU system. For a GPU this is memory is mapped to
-the primary memory of the GPU and is typically 1-4GB in size. When transferring
-data between the host and device, this is where the data has to reside. Global
-memory is denoted as `\_\_global' in an OpenCL kernel.
+\item[Global memory] This memory is accessible by all compute units and is
+similar to main memory on a traditional CPU system. For a GPU this is memory is
+mapped to the primary memory of the GPU and is typically 1-4GB in size. When
+transferring data between the host and device, this is where the data has to
+reside. Global memory is denoted as `\_\_global' in an OpenCL kernel.
 
-Constant memory: Constant memory resides in the same space as global memory and
-is used for data which is accessed simultaneously by all work items, or for
-variables whose values never change. Constant memory is denoted as `\_\_local'
-in an OpenCL kernel.
+\item[Constant memory] Constant memory resides in the same space as global
+memory and is used for data which is accessed simultaneously by all work items,
+or for variables whose values never change. Constant memory is denoted as
+`\_\_constant' in an OpenCL kernel.
 
-Local memory: This is scratch pad memory which is only visible to a single
+\item[Local memory] This is scratch pad memory which is only visible to a single
 compute unit on the device (think core of a CPU). Local memory is generally on-
 chip memory and thus has faster access time than global memory. Local memory is
 typically on the order of tens of kilobytes in size. Use of local memory is
@@ -65,10 +65,12 @@ offer dynamic memory allocation. Variables in local memory are not what would be
 called `local' in a traditional application, local variables are in private
 memory.
 
-Private memory: This is memory that is unique to an individual work item. Any
-local variables and non-pointer kernel arguments are private by default. These
-are typically mapped to registers although can be slipped over to longer-latency
-memories if required.
+\item[Private memory] This is memory that is unique to an individual work item.
+Any local variables and non-pointer kernel arguments are private by default.
+These are typically mapped to registers although can be spilled over to higher
+latency memories if required.
+
+\end{description}
 
 \subsubsection{Concurrency and Execution Model}
 
