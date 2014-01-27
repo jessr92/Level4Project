@@ -71,6 +71,8 @@ void executeFullOpenCL(const std::string *documents,
         cl::vector<cl::Device> devices;
 #ifdef DEVCPU
         platforms[0].getDevices(CL_DEVICE_TYPE_CPU, &devices);
+#elif defined(DEVACC)
+        platforms[0].getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices);
 #else
         platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
 #endif
@@ -146,6 +148,8 @@ void executeFullOpenCL(const std::string *documents,
         // Execute the kernel
         mark_time();
 #ifdef DEVCPU
+        int localSize = 1;
+#elif defined(DEVACC)
         int localSize = 1;
 #else
         int localSize = 128;
