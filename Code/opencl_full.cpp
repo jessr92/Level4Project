@@ -15,6 +15,8 @@
 #include "OpenCLUtils.h"
 #include <sstream>
 
+#define DEVACC
+
 double time_elapsed;
 double startt, endt;
 double totalt = 0;
@@ -150,7 +152,7 @@ void executeFullOpenCL(const std::string *documents,
 #ifdef DEVCPU
         int localSize = 1;
 #elif defined(DEVACC)
-        int localSize = 1;
+        int localSize = 4;
 #else
         int localSize = 128;
 #endif
