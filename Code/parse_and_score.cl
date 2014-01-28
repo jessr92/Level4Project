@@ -40,7 +40,7 @@ __kernel void parse_and_score(__global const char *documents,
     // 1 = Writing
     // 2 = Flushing
     // 3 = Inside Tag
-    int currentState = SKIPPING;
+    int currentState = 0;
     int bitn = 0;
     for (ulong pos = startParse; pos < endParse; pos++)
     {
@@ -49,7 +49,7 @@ __kernel void parse_and_score(__global const char *documents,
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
         {
             currentState = nextState(currentState, 0);
-            if ((bitn < TERM_LENGTH - 4) && (currentState == WRITING))
+            if ((bitn < TERM_LENGTH - 4) && (currentState == 1))
             {
                 termToScore += to5BitEncoding(c) << (bitn + 4);
                 bitn += CHARACTER_SIZE;
@@ -59,7 +59,7 @@ __kernel void parse_and_score(__global const char *documents,
         else if (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r')
         {
             currentState = nextState(currentState, 2);
-            if ((bitn > 0) && (currentState == FLUSHING))
+            if ((bitn > 0) && (currentState == 2))
             {
                 termToScore += (bitn / CHARACTER_SIZE);
                 score += score_term(termToScore, profile, reg, ngrams);
@@ -91,74 +91,74 @@ int nextState(int cs, int ns)
         switch (ns)
         {
         case 0:
-            return WRITING;
+            return 1;
         case 1:
-            return SKIPPING;
+            return 0;
         case 2:
-            return FLUSHING;
+            return 2;
         case 3:
-            return INSIDE_TAG;
+            return 3;
         case 4:
-            return SKIPPING;
+            return 0;
         }
     case 1:
         switch (ns)
         {
         case 0:
-            return WRITING;
+            return 1;
         case 1:
-            return SKIPPING;
+            return 0;
         case 2:
-            return FLUSHING;
+            return 2;
         case 3:
-            return INSIDE_TAG;
+            return 3;
         case 4:
-            return SKIPPING;
+            return 0;
         }
     case 2:
         switch (ns)
         {
         case 0:
-            return WRITING;
+            return 1;
         case 1:
-            return SKIPPING;
+            return 0;
         case 2:
-            return SKIPPING;
+            return 0;
         case 3:
-            return INSIDE_TAG;
+            return 3;
         case 4:
-            return SKIPPING;
+            return 0;
         }
     case 3:
         switch (ns)
         {
         case 0:
-            //return INSIDE_TAG;
+            //return 3;
         case 1:
-            //return INSIDE_TAG;
+            //return 3;
         case 2:
-            //return INSIDE_TAG;
+            //return 3;
         case 3:
-            //return INSIDE_TAG;
+            //return 3;
         case 4:
-            return SKIPPING;
+            return 0;
         }
     case 4:
         switch (ns)
         {
         case 0:
-            return WRITING;
+            return 1;
         case 1:
-            return SKIPPING;
+            return 0;
         case 2:
-            return SKIPPING;
+            return 0;
         case 3:
-            return SKIPPING;
+            return 0;
         case 4:
-            return SKIPPING;
+            return 0;
         }
     }
-    return SKIPPING; // Should never get here.
+    return 0; // Should never get here.
 }
 
 ulong score_term(ulong term,
