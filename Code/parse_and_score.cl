@@ -11,6 +11,8 @@ ulong score_term(ulong term,
 
 ulong to5BitEncoding(char c);
 
+int nextState(int cs, int ns);
+
 __kernel void parse_and_score(__global const char *documents,
                               __global const ulong4 *profile,
                               __global const ulong *positions,
@@ -34,14 +36,6 @@ __kernel void parse_and_score(__global const char *documents,
     ulong endParse = positions[document + 1];
     ulong score = 0;
     ulong termToScore = 0;
-    int nextState[25] =
-    {
-        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
-        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
-        WRITING,    SKIPPING,   SKIPPING,   INSIDE_TAG, SKIPPING,
-        INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, SKIPPING,
-        WRITING,    SKIPPING,   SKIPPING,   SKIPPING,   SKIPPING
-    };
     // 0 = Skipping
     // 1 = Writing
     // 2 = Flushing
@@ -54,7 +48,7 @@ __kernel void parse_and_score(__global const char *documents,
         // if isalnum(c)
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
         {
-            currentState = nextState[5 * currentState];
+            currentState = nextState(currentState, 0);
             if ((bitn < TERM_LENGTH - 4) && (currentState == WRITING))
             {
                 termToScore += to5BitEncoding(c) << (bitn + 4);
@@ -64,7 +58,7 @@ __kernel void parse_and_score(__global const char *documents,
         // else if isspace(c)
         else if (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r')
         {
-            currentState = nextState[(5 * currentState) + 2];
+            currentState = nextState(currentState, 2);
             if ((bitn > 0) && (currentState == FLUSHING))
             {
                 termToScore += (bitn / CHARACTER_SIZE);
@@ -75,18 +69,96 @@ __kernel void parse_and_score(__global const char *documents,
         }
         else if (c == '<')
         {
-            currentState = nextState[(5 * currentState) + 3];
+            currentState = nextState(currentState, 3);
         }
         else if (c == '>')
         {
-            currentState = nextState[(5 * currentState) + 4];
+            currentState = nextState(currentState, 4);
         }
         else
         {
-            currentState = nextState[(5 * currentState) + 1];
+            currentState = nextState(currentState, 1);
         }
     }
     scores[document - 1] = score;
+}
+
+int nextState(int cs, int ns)
+{
+    switch (cs)
+    {
+    case 0:
+        switch (ns)
+        {
+        case 0:
+            return WRITING;
+        case 1:
+            return SKIPPING;
+        case 2:
+            return FLUSHING;
+        case 3:
+            return INSIDE_TAG;
+        case 4:
+            return SKIPPING;
+        }
+    case 1:
+        switch (ns)
+        {
+        case 0:
+            return WRITING;
+        case 1:
+            return SKIPPING;
+        case 2:
+            return FLUSHING;
+        case 3:
+            return INSIDE_TAG;
+        case 4:
+            return SKIPPING;
+        }
+    case 2:
+        switch (ns)
+        {
+        case 0:
+            return WRITING;
+        case 1:
+            return SKIPPING;
+        case 2:
+            return SKIPPING;
+        case 3:
+            return INSIDE_TAG;
+        case 4:
+            return SKIPPING;
+        }
+    case 3:
+        switch (ns)
+        {
+        case 0:
+            //return INSIDE_TAG;
+        case 1:
+            //return INSIDE_TAG;
+        case 2:
+            //return INSIDE_TAG;
+        case 3:
+            //return INSIDE_TAG;
+        case 4:
+            return SKIPPING;
+        }
+    case 4:
+        switch (ns)
+        {
+        case 0:
+            return WRITING;
+        case 1:
+            return SKIPPING;
+        case 2:
+            return SKIPPING;
+        case 3:
+            return SKIPPING;
+        case 4:
+            return SKIPPING;
+        }
+    }
+    return SKIPPING; // Should never get here.
 }
 
 ulong score_term(ulong term,

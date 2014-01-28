@@ -15,7 +15,7 @@
 #include "OpenCLUtils.h"
 #include <sstream>
 
-#define DEVACC
+#define DEVCPU
 
 double time_elapsed;
 double startt, endt;
