@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "shared_details.h"
 
 std::string decode(unsigned long term)
 {
@@ -49,6 +50,25 @@ std::vector<unsigned long> *readEncodedFile(std::string file)
     return encoding;
 }
 
+std::vector<unsigned long> *loadCollection(std::string collection_file)
+{
+    std::vector<unsigned long> *collection = new std::vector<unsigned long>;
+    std::ifstream fh(collection_file.c_str());
+    if (fh.bad())
+    {
+        std::cerr << "Error: Could not open " << collection_file << std::endl;
+        return NULL;
+    }
+    fh >> std::hex;
+    unsigned long word;
+    while (fh >> word)
+    {
+        collection->push_back(word);
+    }
+    fh.close();
+    return collection;
+}
+
 int main(int argc, char *argv[])
 {
     std::vector<unsigned long> *encoding;
@@ -58,8 +78,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        std::cout << "need file to decode" << std::endl;
-        return 0;
+        encoding = loadCollection(COLLECTION_FILE);
     }
     for (int i = 0; i < encoding->size(); i++)
     {

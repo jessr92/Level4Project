@@ -161,8 +161,8 @@ void executeFullOpenCL(const std::string *documents,
         {
             globalSize += localSize - (globalSize % localSize);
         }
-        cl::NDRange global(globalSize);
-        cl::NDRange local(localSize);
+        cl::NDRange global(1);
+        cl::NDRange local(1);
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
 #ifndef DEVCPU
         queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
@@ -176,6 +176,7 @@ void executeFullOpenCL(const std::string *documents,
         std::cout << error.what() << "(" << clErrorString(error.err()) << ")" << std::endl;
         return;
     }
+    return;
     for (word_t i = 0; i < positions->at(0); ++i)
     {
         scores[i] > THRESHOLD ? ++spamCount : ++hamCount;
