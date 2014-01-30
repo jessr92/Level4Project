@@ -82,6 +82,10 @@ int main(int argc, char *argv[])
     }
     for (int i = 0; i < encoding->size(); i++)
     {
+        if ((encoding->at(i) & 0xF) == 0)
+        {
+            continue;
+        }
         std::string decoded = decode(encoding->at(i));
         if (decoded.find("APW") != std::string::npos)
         {
