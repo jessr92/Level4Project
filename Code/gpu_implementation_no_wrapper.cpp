@@ -60,7 +60,11 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         cl::Platform::get(&platforms);
         // Get a list of devices on this platform.
         cl::vector<cl::Device> devices;
+#ifdef DEVACC
+        platforms[0].getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices);
+#else
         platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
+#endif
         std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
         // Create a context for the devices
         cl::Context context(devices);
