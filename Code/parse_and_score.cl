@@ -31,59 +31,56 @@ __kernel void parse_and_score(__global const char *documents,
         ngrams[i] = 0;
     }
     // Document to parse
-    for (uint document = 1; document <= positions[0]; document++)
+    uint document = get_global_id(0) + 1;
+    ulong startParse = positions[document];
+    ulong endParse = positions[document + 1];
+    ulong score = 0;
+    ulong termToScore = 0;
+    // 0 = Skipping
+    // 1 = Writing
+    // 2 = Flushing
+    // 3 = Inside Tag
+    int currentState = 0;
+    int bitn = 0;
+    for (ulong pos = startParse; pos < endParse; pos++)
     {
-        ulong startParse = positions[document];
-        ulong endParse = positions[document + 1];
-        ulong score = 0;
-        ulong termToScore = 0;
-        // 0 = Skipping
-        // 1 = Writing
-        // 2 = Flushing
-        // 3 = Inside Tag
-        int currentState = 0;
-        int bitn = 0;
-        for (ulong pos = startParse; pos < endParse; pos++)
+        char c = documents[pos];
+        // if isalnum(c)
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
         {
-            char c = documents[pos];
-            // if isalnum(c)
-            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+            currentState = nextState(currentState, 0);
+            if ((bitn < TERM_LENGTH - 4) && (currentState == 1))
             {
-                currentState = nextState(currentState, 0);
-                if ((bitn < TERM_LENGTH - 4) && (currentState == 1))
-                {
-                    termToScore += to5BitEncoding(c) << (bitn + 4);
-                    bitn += CHARACTER_SIZE;
-                }
-            }
-            // else if isspace(c)
-            else if (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r')
-            {
-                currentState = nextState(currentState, 2);
-                if ((bitn > 0) && (currentState == 2))
-                {
-                    termToScore += (bitn / CHARACTER_SIZE);
-                    printf("%lu\n", termToScore);
-                    score += score_term(termToScore, profile, reg, ngrams);
-                    termToScore = 0;
-                    bitn = 0;
-                }
-            }
-            else if (c == '<')
-            {
-                currentState = nextState(currentState, 3);
-            }
-            else if (c == '>')
-            {
-                currentState = nextState(currentState, 4);
-            }
-            else
-            {
-                currentState = nextState(currentState, 1);
+                termToScore += to5BitEncoding(c) << (bitn + 4);
+                bitn += CHARACTER_SIZE;
             }
         }
-        scores[document - 1] = score;
+        // else if isspace(c)
+        else if (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r')
+        {
+            currentState = nextState(currentState, 2);
+            if ((bitn > 0) && (currentState == 2))
+            {
+                termToScore += (bitn / CHARACTER_SIZE);
+                score += score_term(termToScore, profile, reg, ngrams);
+                termToScore = 0;
+                bitn = 0;
+            }
+        }
+        else if (c == '<')
+        {
+            currentState = nextState(currentState, 3);
+        }
+        else if (c == '>')
+        {
+            currentState = nextState(currentState, 4);
+        }
+        else
+        {
+            currentState = nextState(currentState, 1);
+        }
     }
+    scores[document - 1] = score;
 }
 
 int nextState(int cs, int ns)
@@ -136,13 +133,13 @@ int nextState(int cs, int ns)
         switch (ns)
         {
         case 0:
-            //return 3;
+            return 3;
         case 1:
-            //return 3;
+            return 3;
         case 2:
-            //return 3;
+            return 3;
         case 3:
-            //return 3;
+            return 3;
         case 4:
             return 0;
         }
