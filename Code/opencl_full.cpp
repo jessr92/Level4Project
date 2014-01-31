@@ -123,50 +123,53 @@ void executeFullOpenCL(const std::string *documents,
 #ifdef BLOOM_FILTER
         kernel.setArg(4, d_bloomFilter);
 #endif
+        for (int i = 0; i < REPETITIONS; i++)
+        {
 #ifdef DEVCPU
-        queue.enqueueMapBuffer(d_profile, CL_FALSE, CL_MAP_READ, 0, profileSize);
-        queue.enqueueMapBuffer(d_docs, CL_FALSE, CL_MAP_READ, 0, docsSize);
-        queue.enqueueMapBuffer(d_positions, CL_FALSE, CL_MAP_READ, 0, positionsSize);
-        queue.enqueueMapBuffer(d_scores, CL_FALSE, CL_MAP_WRITE, 0, scoresSize);
+            queue.enqueueMapBuffer(d_profile, CL_FALSE, CL_MAP_READ, 0, profileSize);
+            queue.enqueueMapBuffer(d_docs, CL_FALSE, CL_MAP_READ, 0, docsSize);
+            queue.enqueueMapBuffer(d_positions, CL_FALSE, CL_MAP_READ, 0, positionsSize);
+            queue.enqueueMapBuffer(d_scores, CL_FALSE, CL_MAP_WRITE, 0, scoresSize);
 #else
-        queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
-        // Copy the input data to the input buffers using the command queue
-        mark_time();
-        queue.enqueueWriteBuffer(d_docs, CL_TRUE, 0, docsSize, docs);
-        queue.enqueueWriteBuffer(d_positions, CL_TRUE, 0, positionsSize, tempPositions);
-        queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
-        stop_time();
-        std::cout << time_elapsed << " seconds to copy data HtoD." << std::endl;
+            queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
+            // Copy the input data to the input buffers using the command queue
+            mark_time();
+            queue.enqueueWriteBuffer(d_docs, CL_TRUE, 0, docsSize, docs);
+            queue.enqueueWriteBuffer(d_positions, CL_TRUE, 0, positionsSize, tempPositions);
+            queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
+            stop_time();
+            std::cout << time_elapsed << " seconds to copy data HtoD." << std::endl;
 #endif
 #ifdef BLOOM_FILTER
 #ifdef DEVCPU
-        queue.enqueueMapBuffer(d_bloomFilter, CL_FALSE, CL_MAP_READ, 0, bloomFilterSize);
+            queue.enqueueMapBuffer(d_bloomFilter, CL_FALSE, CL_MAP_READ, 0, bloomFilterSize);
 #else
-        queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, tempBloomFilter);
+            queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, tempBloomFilter);
 #endif
 #endif
-        // Execute the kernel
-        mark_time();
+            // Execute the kernel
+            mark_time();
 #ifdef DEVCPU
-        int localSize = 1;
+            int localSize = 1;
 #elif defined(DEVACC)
-        int localSize = 4;
+            int localSize = 4;
 #else
-        int localSize = 128;
+            int localSize = 128;
 #endif
-        int globalSize = positions->at(0);
-        if (globalSize % localSize != 0)
-        {
-            globalSize += localSize - (globalSize % localSize);
-        }
-        cl::NDRange global(globalSize);
-        cl::NDRange local(localSize);
-        queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
+            int globalSize = positions->at(0);
+            if (globalSize % localSize != 0)
+            {
+                globalSize += localSize - (globalSize % localSize);
+            }
+            cl::NDRange global(globalSize);
+            cl::NDRange local(localSize);
+            queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
 #ifndef DEVCPU
-        queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
+            queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
 #endif
-        queue.finish();
-        stop_time();
+            queue.finish();
+            stop_time();
+        }
         std::cout << time_elapsed << " seconds to run kernel and get scores back." << std::endl;
     }
     catch (cl::Error error)
