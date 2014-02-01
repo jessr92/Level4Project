@@ -85,6 +85,69 @@ latency memories if required.
 
 \subsubsection{Concurrency and Execution Model}
 
+As was alluded to in Figure \ref{fig:openCLMemoryModel}, OpenCL uses a number of
+different terms to describe it's execution model. There is no explicit `thread',
+instead OpenCL has work items which are the closest relative to traditional
+threads. The OpenCL Concurrency and Execution Model is split into two parts,
+host and device, and both will be outlined below.
+
+\paragraph{Host}
+
+\begin{description}
+
+\item[Host program] As discussed previously, a host program is a traditional
+program (written in C/C++ for instance) and is executed on a CPU. The host
+program is responsible for managing the execution of kernels by creating and
+setting up command queues for memory commands, kernel execution commands, and
+synchronisation of commands.
+
+\item[Context] The host program defines a context for the kernels. The context
+will include the kernels to be executed, the available OpenCL devices, the
+program kernels, and the memory objects used by kernels.
+
+\item[NDRange] This stands for N-Dimensional Range and defines how work items
+are organised. Work items can be arranged into 1, 2, or 3 dimensions.
+
+\end{description}
+
+\paragraph{Device}
+
+\begin{description}
+
+\item[Compute Unit] This is a generic term used to describe a multiprocessor on
+a GPU, or a core of a CPU. For some devices (such as a GPU) a compute unit will
+have dedicated local memory, visible only to itself. A single compute unit can
+be assigned multiple work groups.
+
+\item[Kernel] As discussed previously, OpenCL code which runs on an OpenCL
+device is known as a kernel. These are written from the perspective of a single
+work item (thread).
+
+\item[Work group] This is a collection of work items. An entire work group is
+assigned to one compute unit. These work items can share local memory and can
+synchronise with one another.
+
+\item[Work item] This closely resembles a single thread. Each work item is
+assigned a work group. Every work item can access local memory of its work
+group and can access all global and constant memory. A work item will also
+have private variables which may or may not fit inside private memory.
+
+\item[Global size] This represents the total number of work items in each
+dimension. The multiplication of the global size in each dimension is the total
+number of work items being executed for the corresponding kernel.
+
+\item[Local size] This represents the total number of work items in each
+dimension for a single work group. The global size for a dimension has to be an
+integer multiple of the local size for that dimension for the work group size
+to be valid. This is to ensure work groups can fit inside the global dimension
+size evenly.
+
+\end{description}
+
+Just as with the Memory Model, different devices will realise the Concurrency
+and Execution model differently. These differences will be discussed in the next
+section.
+
 \section{CPU and GPU Differences}
 
 \section{Document Classification}
