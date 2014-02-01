@@ -221,6 +221,7 @@ pip-log.txt
 *.aux
 *.bbl
 *.blg
+*.out
 *.synctex.gz
 *.toc
 *.raw
