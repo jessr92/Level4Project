@@ -14,15 +14,16 @@ additional keywords.
 OpenCL splits the program code into two sections called `host' and `device'.
 Host code runs on the CPU and is written in a traditional language such as C or
 C++. The host code executes as normal and makes use of APIs exposed by OpenCL to
-define how, and where, OpenCL code is executed.
+define how, and where, OpenCL device code is executed.
 
 OpenCL applications are called kernels. A kernel is a function that executes on
 an OpenCL capable device. Given the focus of OpenCL is on parallelism, a kernel
 is written from the perspective of a single thread instead of requiring explicit
 threading code from more familiar models such as POSIX Threads. An OpenCL work
 item is similar to a POSIX Thread with a notable exception that OpenCL has no
-stack. OpenCL kernels are also compiled at runtime thus the host code, and the
-compiler itself, can make device-specific optimisations for optimal performance.
+traditional stack, any `function' calls are actually in-lined by the compiler.
+OpenCL kernels are also compiled at runtime thus the host code, and the compiler
+itself, can make device-specific optimisations for optimal performance.
 
 \subsection{Models}
 
@@ -40,12 +41,14 @@ Problems occur when considering other devices, such as a GPU. GPUs do not
 typically have automatic caching thus a programmer must make use of OpenCLs
 abstract Memory Model, and hardware vendors must map this model to the physical
 hardware. The OpenCL memory model defines four different types of memory, each
-of which will be outlined below.
+of which will be outlined below. A simplified diagrammatic representation of the
+memory model is shown in Figure \ref{fig:openCLMemoryModel}.
 
 \begin{description}
 
 \item[Global memory] This memory is accessible by all compute units and is
-similar to main memory on a traditional CPU system. For a GPU this is memory is
+similar to main memory on a traditional CPU system. All work items are able to
+access and update everything stored in this memory. For a GPU this is memory is
 mapped to the primary memory of the GPU and is typically 1-4GB in size. When
 transferring data between the host and device, this is where the data has to
 reside. Global memory is denoted as `\_\_global' in an OpenCL kernel.
@@ -56,14 +59,16 @@ or for variables whose values never change. Constant memory is denoted as
 `\_\_constant' in an OpenCL kernel.
 
 \item[Local memory] This is scratch pad memory which is only visible to a single
-compute unit on the device (think core of a CPU). Local memory is generally on-
-chip memory and thus has faster access time than global memory. Local memory is
-typically on the order of tens of kilobytes in size. Use of local memory is
-either statically declared in the kernel (e.g `\_\_local float[64] localArray')
-or dynamically allocated at runtime by the host since OpenCL kernels do not
-offer dynamic memory allocation. Variables in local memory are not what would be
-called `local' in a traditional application, local variables are in private
-memory.
+compute unit on the device (think core of a CPU). Local memory can be split up
+into distinct sections if a single compute unit is executing multiple work-
+groups simultaneously. Local memory is generally on- chip memory and thus has
+faster access time than global memory. Local memory is typically on the order of
+tens of kilobytes in size. Use of local memory is either statically declared in
+the kernel (e.g `\_\_local float[64] localArray') or dynamically allocated at
+runtime by the host since OpenCL kernels do not offer dynamic memory allocation.
+Variables in local memory are not what would be called `local' in a traditional
+application, local variables are in private memory. Variables in local memory
+are shared across a single work group, which can contain multiple work items.
 
 \item[Private memory] This is memory that is unique to an individual work item.
 Any local variables and non-pointer kernel arguments are private by default.
@@ -71,6 +76,12 @@ These are typically mapped to registers although can be spilled over to higher
 latency memories if required.
 
 \end{description}
+
+\begin{figure}[h]
+\includegraphics[width=\linewidth]{images/openCLMemoryModel.png}
+\caption{Simplified visualisation of OpenCL Memory Model}
+\label{fig:openCLMemoryModel}
+\end{figure}
 
 \subsubsection{Concurrency and Execution Model}
 
