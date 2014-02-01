@@ -9,7 +9,12 @@ devices such as the Intel Phi and Field Programmable Gate Arrays (FPGAs). The
 language is an open standard maintained by Khronos Group
 \footnote{\url{http://www.khronos.org/opencl}}. OpenCL is based on the C99
 standard and can be loosely thought of as a subset of the C99 language with some
-additional keywords.
+additional keywords. The first release of the OpenCL standard (OpenCL 1.0) was
+on the 8th of December 2008. There have been two subsequent stable releases of
+the standard, OpenCL 1.1 and 1.2, on the 14th of June 2010 and 15th of November
+2011 respectively. The version with most hardware support is OpenCL 1.1
+\footnote{\url{http://www.khronos.org/registry/cl/specs/opencl-1.1.pdf}} and
+this standard forms the basis of all discussion on OpenCL in this report.
 
 OpenCL splits the program code into two sections called `host' and `device'.
 Host code runs on the CPU and is written in a traditional language such as C or
@@ -85,7 +90,7 @@ latency memories if required.
 
 \subsubsection{Concurrency and Execution Model}
 
-As was alluded to in Figure \ref{fig:openCLMemoryModel}, OpenCL uses a number of
+As shown in Figure \ref{fig:openCLMemoryModel}, OpenCL uses a number of
 different terms to describe it's execution model. There is no explicit `thread',
 instead OpenCL has work items which are the closest relative to traditional
 threads. The OpenCL Concurrency and Execution Model is split into two parts,
@@ -107,6 +112,11 @@ program kernels, and the memory objects used by kernels.
 
 \item[NDRange] This stands for N-Dimensional Range and defines how work items
 are organised. Work items can be arranged into 1, 2, or 3 dimensions.
+
+\item[Device Type] OpenCL places devices into three different classifications.
+CPUs, GPUs, and Accelerators. An example accelerator device would be the Intel
+Phi \footnote{\url{http://www.intel.com/content/www/us/en/processors/xeon/xeon-
+phi-detail.html}}.
 
 \end{description}
 
@@ -148,7 +158,14 @@ Just as with the Memory Model, different devices will realise the Concurrency
 and Execution model differently. These differences will be discussed in the next
 section.
 
-\section{CPU and GPU Differences}
+\section{Device comparisons}
+
+There are numerous important architecture differences between different classes
+of device,
+
+\subsection{CPU and GPU}
+
+\subsection{Intel Phi}
 
 \section{Document Classification}
 
