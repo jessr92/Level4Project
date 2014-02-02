@@ -294,7 +294,35 @@ For the purposes of this report, APU discussion ends here. At present consumer
 devices are relatively immature and for a majority of applications, a distinct
 GPU or accelerator card is more likely to achieve the best overall performance.
 
-\subsection{Intel Phi}
+\subsection{Intel Xeon Phi}
+
+The Intel Xeon Phi is similar in many respects to a CPU, with around 60
+x86-compatible CPU cores. The device additionally has 8GB of on-board GDDR5
+memory, similar to a GPU. The device sits in a PCI-E slot like a GPU and thus
+has the same performance considerations for the PCI-E bus as a GPU. A detailed
+look at the inner workings of the Intel Xeon Phi architecture can be found on
+Intel's website \footnote{\url{http://software.intel.com/en-us/articles/intel-
+xeon-phi-coprocessor-codename-knights-corner}}.
+
+Each CPU core is on a bi-directional ring bus to memory and each core is capable
+of 4-way hyper threading resulting in 240 hardware threads per device. Clock
+speeds are typically lower than a CPU at around 1GHz. The Intel Xeon Phi is
+designed to allow CPU-like programming versatility with the high performance and
+efficient power use of an accelerator chips.
+
+In addition to being an OpenCL capable device, the Xeon Phi is capable of
+running applications written in traditional source code such as C, C++, or
+FORTRAN. The device itself contains a Linux operating system which is
+automatically started up and loads a file system, allows secure shell logins,
+and enables a TCP/IP stack to facilitate communication as if the device was a
+separate internal network device.
+
+\subsubsection{Performance Considerations}
+
+In addition to the PCI-E bus consideration, the ring bus to memory needs to be
+taken into consideration. This is most notable with communication between cores.
+Communication between neighbouring cores will be fast, however communication
+between cores on the `opposite side' of the ring will be significantly slower.
 
 \section{Document Classification}
 
