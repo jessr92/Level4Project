@@ -44,7 +44,7 @@ caches on the CPU die however no direct control over their contents is offered.
 For CPUs this is not an issue, all modern CPUs support automatic caching.
 Problems occur when considering other devices, such as a GPU. GPUs do not
 typically have automatic caching thus a programmer must make use of OpenCLs
-abstract Memory Model, and hardware vendors must map this model to the physical
+abstract memory model, and hardware vendors must map this model to the physical
 hardware. The OpenCL memory model defines four different types of memory, each
 of which will be outlined below. A simplified diagrammatic representation of the
 memory model is shown in Figure \ref{fig:openCLMemoryModel}.
@@ -64,21 +64,21 @@ or for variables whose values never change. Constant memory is denoted as
 `\_\_constant' in an OpenCL kernel.
 
 \item[Local memory] This is scratch pad memory which is only visible to a single
-compute unit on the device (think core of a CPU). Local memory can be split up
-into distinct sections if a single compute unit is executing multiple work-
-groups simultaneously. Local memory is generally on- chip memory and thus has
-faster access time than global memory. Local memory is typically on the order of
-tens of kilobytes in size. Use of local memory is either statically declared in
-the kernel (e.g `\_\_local float[64] localArray') or dynamically allocated at
-runtime by the host since OpenCL kernels do not offer dynamic memory allocation.
-Variables in local memory are not what would be called `local' in a traditional
-application, local variables are in private memory. Variables in local memory
-are shared across a single work group, which can contain multiple work items.
+compute unit on the device. Local memory can be split up into distinct sections
+if a single compute unit is executing multiple work- groups simultaneously.
+Local memory is generally on- chip memory and thus has faster access time than
+global memory. Local memory is typically on the order of tens of kilobytes in
+size. Use of local memory is either statically declared in the kernel (e.g
+`\_\_local float[64] localArray') or dynamically allocated at runtime by the
+host since OpenCL kernels do not offer dynamic memory allocation. Variables in
+local memory are not what would be called `local' in a traditional application,
+local variables are in private memory. Variables in local memory are shared
+across a single work group, which can contain multiple work items.
 
 \item[Private memory] This is memory that is unique to an individual work item.
 Any local variables and non-pointer kernel arguments are private by default.
-These are typically mapped to registers although can be spilled over to higher
-latency memories if required.
+These are typically mapped to registers although thy can be spilled over to
+higher latency memories if there is insufficient space available.
 
 \end{description}
 
@@ -111,7 +111,10 @@ will include the kernels to be executed, the available OpenCL devices, the
 program kernels, and the memory objects used by kernels.
 
 \item[NDRange] This stands for N-Dimensional Range and defines how work items
-are organised. Work items can be arranged into 1, 2, or 3 dimensions.
+are organised. Work items can be arranged into 1, 2, or 3 dimensions. This can
+be done to increase performance and improve clarity of kernel code. For
+instance, modifying an image would warrant having a two dimensional range as an
+image is represented as a two dimensional array of pixels.
 
 \item[Device Type] OpenCL places devices into three different classifications.
 CPUs, GPUs, and Accelerators. An example accelerator device would be the Intel
@@ -161,9 +164,102 @@ section.
 \section{Device comparisons}
 
 There are numerous important architecture differences between different classes
-of device,
+of device. At the high level, CPUs are aimed at being good all-rounders,
+suitable for a multitude of tasks whereas GPUs have focused on the problem of
+pixel value generation in a highly parallel fashion. This had led to the
+evolution of different devices taking distinct paths. The important differences
+will be outlined in this section.
 
 \subsection{CPU and GPU}
+
+The CPU is typically referred informally as the `brain' of the computer, not
+only does it run the user's wide variety of software, it also acts as the
+overall controller for the entire system. This necessitated a one-size-fits-all
+style of approach when designing the CPU chip and the corresponding instruction
+set architecture. A CPU typically has a high clock speed, in the range of 3-4GHz
+for a modern desktop. Each die can contain a small number, typically four, of
+cores that execute instructions independently.
+
+A GPU is the highly parallel oriented chip, with hundreds of cores running at a
+slower clock speed (about one fifth of a CPU core) and have a more restricted
+instruction set, primarily designed for simple, repetitive tasks needed for
+video output.
+
+\subsubsection{Threading and Cache}
+
+A CPU has a few hardware threads, 1 or 2 per CPU core, and multi-level cache to
+reduce off-chip memory access latency.
+
+GPUs have many threads to keep compute units busy, if some threads are waiting
+on memory accesses, other threads are available to run. Latency is thus hidden
+rather than reduced. This has led to the context switch cost for GPU threads to
+be insignificant.
+
+\subsubsection{Arithmetic Throughput}
+
+GPUs use more of the transistor budget on arithmetic units than memory cache
+compared to CPUs. This lends GPUs to high density arithmetic and repetitive
+computations more than a CPU.
+
+\subsubsection{Execution Model Implementation}
+
+CPUs have a very free implementation of the OpenCL execution model. Threads are
+free to take their own execution path, and aren't directly affected by other
+thread's progress except from at explicit synchronisation stages.
+
+GPUs, on the other hand, have a Single Instruction Multiple Threads (SIMT)
+execution model. This means that GPUs have one instruction unit for multiple
+arithmetic units. Threads are partitioned into groups which execute the same
+instruction simultaneously. For nVidia GPUs these are referred to in the CUDA
+model as `warps' and typically contain 32 threads. This can increase performance
+as this reduces the number of fetch and decode operations on instructions
+required. A performance consequence of this is in code with conditional
+branches.
+
+\begin{verbatim}
+if (someCondition)
+{
+    nonTrivialCode();
+}
+else
+{
+    someMoreNonTrivialCode();
+}
+\end{verbatim}
+
+For a simple example, consider the situation when someCondition is true for half
+of the threads, and false for the other half threads. For a CPU then each thread
+executes the instructions by itself and some threads can be executing
+`nonTrivialCode()' at the same time some threads are executing
+`someMoreNonTrivalCode()'. However, on a GPU the threads in the true branch
+execute their instructions while the other threads remain idle, after the true
+branch has been completed, the false branch threads then execute, this is known
+as a divergent warp. Divergent warps can considerably reduce performance as it
+reduces the number of threads executing in parallel.
+
+In addition to instruction execution, memory accesses are done on a per warp
+basis. For ideal performance addressing should be such that threads in a warp
+access coalesced memory locations to reduce memory transaction cost. For
+instance, an array where access is based on a hash function can result in poor
+performance as threads in a warp are likely to be accessing significantly
+different parts of memory.
+
+\subsubsection{Extra performance consideration}
+
+In addition to the architecture differences between CPUs and GPUs, there is a
+separate consideration that must be made for GPUs and other discrete devices,
+the PCI-E bus. GPUs are unable to directly access main memory like a CPU, thus
+before any code is run on a GPU, data must be transferred between RAM and the
+GPUs on-board memory. This can take a significant period of time in comparison
+to the code runtime. This is due to the relatively slow speed of the PCI-E bus
+in comparison to on-board memory access. A GPU is able to access it's global
+memory at a rate of around 200GB/s on modern chips. Contrast this to the PCI-E
+link speed which can be as low as 250MB/s per lane. The most common systems have
+PCI-E 2.0 slots which run at 500MB/s per PCI-E lane with 16 lanes available for
+the GPU giving a maximum theoretical transfer speed of 8GB/s, 25 times slower
+than access from on-board memory.
+
+\subsection{Bridging the gap - APUs}
 
 \subsection{Intel Phi}
 
