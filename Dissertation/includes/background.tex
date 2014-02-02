@@ -228,7 +228,7 @@ else
 \end{verbatim}
 
 For a simple example, consider the situation when someCondition is true for half
-of the threads, and false for the other half threads. For a CPU then each thread
+of the threads, and false for the other half threads. For a CPU each thread
 executes the instructions by itself and some threads can be executing
 `nonTrivialCode()' at the same time some threads are executing
 `someMoreNonTrivalCode()'. However, on a GPU the threads in the true branch
@@ -260,6 +260,27 @@ the GPU giving a maximum theoretical transfer speed of 8GB/s, 25 times slower
 than access from on-board memory.
 
 \subsection{Bridging the gap - APUs}
+
+Both CPUs and GPUs are strong in their respective application areas. Ideally, a
+system should be able to make best use of both types of device with as little
+overhead as possible. One of the obvious potential bottlenecks is the PCI-E bus
+to devices discrete from the CPU. This led to the design of an Accelerated
+Processing Unit (APU), these have a traditional CPU in addition to a GPU (or
+FPGA) on the same die and are a good example of a Heterogeneous System
+Architecture (HSA). This design isn't new, CPUs have typically contained a small
+GPU, especially in the small laptop market. With the growth of Heterogeneous
+Systems, there has been a trend to increasing the GPU performance on die with
+the CPU. This reduces the gap between CPU and GPU and removes the PCI-E bus
+overhead. The primary consumer implementation of this is AMDs HSA
+\footnote{\url{http://developer.amd.com/resources/heterogeneous-computing/}}.
+The joint die allows power to be managed so that different applications can make
+most effective use of the CPU and GPU cycles available. In addition, there is
+also work going on to completely unify address space, to make the heterogeneous
+architecture more seamless to work with.
+
+For the purposes of this report, APU discussion ends here. At present consumer
+devices are relatively immature and for a majority of applications, a distinct
+GPU or accelerator card is more likely to achieve the best overall performance.
 
 \subsection{Intel Phi}
 
