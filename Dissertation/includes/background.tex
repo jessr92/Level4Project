@@ -157,6 +157,18 @@ size evenly.
 
 \end{description}
 
+\begin{figure}
+\includegraphics[width=\linewidth]{images/openCLExecutionModel.png}
+\caption{Simplified visualisation of OpenCL Execution Model}
+\label{fig:openCLExecutionModel}
+\end{figure}
+
+Figure \ref{fig:openCLExecutionModel} shows diagrammatically the relationship
+between global and local size, and work items and work groups. Shown is a two
+dimensional range, with global size of 15 for dimension 0, and 10 for dimension
+1. Local size is 5 in both directions creating 6 work groups with 25 work items
+each.
+
 Just as with the Memory Model, different devices will realise the Concurrency
 and Execution model differently. These differences will be discussed in the next
 section.
