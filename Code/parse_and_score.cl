@@ -82,6 +82,7 @@ __kernel void parse_and_score(__global const char *documents,
     int bitn = 0;
     for (ulong pos = startParse; pos < endParse; pos++)
     {
+        int fiveState = currentState * 5;
         char c = documents[pos];
         // if isalnum(c)
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
@@ -96,7 +97,7 @@ __kernel void parse_and_score(__global const char *documents,
         // else if isspace(c)
         else if (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r')
         {
-            currentState = nextState(currentState, 2);
+            currentState = nextStateArray[fiveState + 2];
             if ((bitn > 0) && (currentState == 2))
             {
                 termToScore += (bitn / CHARACTER_SIZE);
@@ -115,11 +116,11 @@ __kernel void parse_and_score(__global const char *documents,
         }
         else if (c == '>')
         {
-            currentState = nextState(currentState, 4);
+            currentState = nextStateArray[fiveState + 4];
         }
         else
         {
-            currentState = nextState(currentState, 1);
+            currentState = nextStateArray[fiveState + 1];
         }
     }
     scores[document - 1] = score;
