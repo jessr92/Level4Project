@@ -209,6 +209,6 @@ int main(int argc, char *argv[])
     stop_time();
     std::cout << time_elapsed << " seconds to get marker positions." << std::endl;
     executeFullOpenCL(docs, profile, bloomFilter, positions);
-    std::cout << totalt << " seconds to score documents." << std::endl;
+    std::cout << totalt << " seconds to score documents (reptition time doesn't currently include document marker time!)." << std::endl;
     return 0;
 }
