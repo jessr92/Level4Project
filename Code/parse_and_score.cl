@@ -66,14 +66,6 @@ __kernel void parse_and_score(__global const char *documents,
     ulong endParse = positions[document + 1];
     ulong score = 0;
     ulong termToScore = 0;
-    int nextStateArray[25] =
-    {
-        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
-        WRITING,    SKIPPING,   FLUSHING,   INSIDE_TAG, SKIPPING,
-        WRITING,    SKIPPING,   SKIPPING,   INSIDE_TAG, SKIPPING,
-        INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, INSIDE_TAG, SKIPPING,
-        WRITING,    SKIPPING,   SKIPPING,   SKIPPING,   SKIPPING
-    };
     // 0 = Skipping
     // 1 = Writing
     // 2 = Flushing
