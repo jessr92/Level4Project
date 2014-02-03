@@ -97,7 +97,7 @@ __kernel void parse_and_score(__global const char *documents,
         // else if isspace(c)
         else if (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r')
         {
-            currentState = nextStateArray[fiveState + 2];
+            currentState = nextState(currentState, 2);
             if ((bitn > 0) && (currentState == 2))
             {
                 termToScore += (bitn / CHARACTER_SIZE);
@@ -116,11 +116,11 @@ __kernel void parse_and_score(__global const char *documents,
         }
         else if (c == '>')
         {
-            currentState = nextStateArray[fiveState + 4];
+            currentState = nextState(currentState, 4);
         }
         else
         {
-            currentState = nextStateArray[fiveState + 1];
+            currentState = nextState(currentState, 1);
         }
     }
     scores[document - 1] = score;
