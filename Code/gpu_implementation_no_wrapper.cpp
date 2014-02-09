@@ -62,14 +62,21 @@ void executeGPUImplementation(const std::vector<word_t> *collection,
         cl::vector<cl::Device> devices;
 #ifdef DEVACC
         platforms[0].getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices);
+        // Wim's Intel Xeon Phi is the second one.
+        std::cout << "Device name: " << devices[1].getInfo<CL_DEVICE_NAME>() << std::endl;
 #else
         platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
-#endif
         std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
+
+#endif
         // Create a context for the devices
         cl::Context context(devices);
         // Create a command queue for the first device
+#ifdef DEVACC
+        cl::CommandQueue queue = cl::CommandQueue(context, devices[1]);
+#else
         cl::CommandQueue queue = cl::CommandQueue(context, devices[0]);
+#endif
         // Create the memory buffers
         int collectionSize = sizeof(word_t) * collection->size();
         cl::Buffer d_collection = cl::Buffer(context, CL_MEM_READ_ONLY, collectionSize);

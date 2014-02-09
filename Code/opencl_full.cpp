@@ -76,11 +76,20 @@ void executeFullOpenCL(const std::string *documents,
 #else
         platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
 #endif
+#ifdef DEVACC
+        // Wim's Intel Xeon Phi is the second one.
+        std::cout << "Device name: " << devices[1].getInfo<CL_DEVICE_NAME>() << std::endl;
+#else
         std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
+#endif
         // Create a context for the devices
         cl::Context context(devices);
         // Create a command queue for the first device
+#ifdef DEVACC
+        cl::CommandQueue queue = cl::CommandQueue(context, devices[1]);
+#else
         cl::CommandQueue queue = cl::CommandQueue(context, devices[0]);
+#endif
         // Create the memory buffers
         int docsSize = sizeof(char) * documents->size();
         int profileSize = sizeof(word_t) * profile->size();
