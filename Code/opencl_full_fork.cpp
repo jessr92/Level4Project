@@ -138,61 +138,62 @@ void executeFullOpenCL(const std::string *documents,
 #ifdef BLOOM_FILTER
         kernel.setArg(4, d_bloomFilter);
 #endif
-        for (int i = 0; i < REPETITIONS; i++) {
-        if (pid != 0)
+        for (int i = 0; i < REPETITIONS; i++)
         {
-            queue.enqueueMapBuffer(d_profile, CL_FALSE, CL_MAP_READ, 0, profileSize);
-            queue.enqueueMapBuffer(d_docs, CL_FALSE, CL_MAP_READ, 0, docsSize);
-            queue.enqueueMapBuffer(d_positions, CL_FALSE, CL_MAP_READ, 0, positionsSize);
-            queue.enqueueMapBuffer(d_scores, CL_FALSE, CL_MAP_WRITE, 0, scoresSize);
-        }
-        else
-        {
-            queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
-            // Copy the input data to the input buffers using the command queue
-            mark_time();
-            queue.enqueueWriteBuffer(d_docs, CL_TRUE, 0, docsSize, docs);
-            queue.enqueueWriteBuffer(d_positions, CL_TRUE, 0, positionsSize, tempPositions);
-            queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
-            stop_time();
-            std::cout << time_elapsed << " seconds to copy data HtoD." << std::endl;
-        }
+            if (pid != 0)
+            {
+                queue.enqueueMapBuffer(d_profile, CL_FALSE, CL_MAP_READ, 0, profileSize);
+                queue.enqueueMapBuffer(d_docs, CL_FALSE, CL_MAP_READ, 0, docsSize);
+                queue.enqueueMapBuffer(d_positions, CL_FALSE, CL_MAP_READ, 0, positionsSize);
+                queue.enqueueMapBuffer(d_scores, CL_FALSE, CL_MAP_WRITE, 0, scoresSize);
+            }
+            else
+            {
+                queue.enqueueWriteBuffer(d_profile, CL_TRUE, 0, profileSize, tempProfile);
+                // Copy the input data to the input buffers using the command queue
+                mark_time();
+                queue.enqueueWriteBuffer(d_docs, CL_TRUE, 0, docsSize, docs);
+                queue.enqueueWriteBuffer(d_positions, CL_TRUE, 0, positionsSize, tempPositions);
+                queue.enqueueWriteBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
+                stop_time();
+                std::cout << time_elapsed << " seconds to copy data HtoD." << std::endl;
+            }
 #ifdef BLOOM_FILTER
-        if (pid != 0)
-        {
-            queue.enqueueMapBuffer(d_bloomFilter, CL_FALSE, CL_MAP_READ, 0, bloomFilterSize);
-        }
-        else
-        {
-            queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, tempBloomFilter);
-        }
+            if (pid != 0)
+            {
+                queue.enqueueMapBuffer(d_bloomFilter, CL_FALSE, CL_MAP_READ, 0, bloomFilterSize);
+            }
+            else
+            {
+                queue.enqueueWriteBuffer(d_bloomFilter, CL_TRUE, 0, bloomFilterSize, tempBloomFilter);
+            }
 #endif
-        // Execute the kernel
-        mark_time();
-        int localSize;
-        if (pid != 0)
-        {
-            localSize = 1;
+            // Execute the kernel
+            mark_time();
+            int localSize;
+            if (pid != 0)
+            {
+                localSize = 1;
+            }
+            else
+            {
+                localSize = 128;
+            }
+            int globalSize = positions->at(0);
+            if (globalSize % localSize != 0)
+            {
+                globalSize += localSize - (globalSize % localSize);
+            }
+            cl::NDRange global(globalSize);
+            cl::NDRange local(localSize);
+            queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
+            if (pid == 0)
+            {
+                queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
+            }
+            queue.finish();
+            stop_time();
         }
-        else
-        {
-            localSize = 128;
-        }
-        int globalSize = positions->at(0);
-        if (globalSize % localSize != 0)
-        {
-            globalSize += localSize - (globalSize % localSize);
-        }
-        cl::NDRange global(globalSize);
-        cl::NDRange local(localSize);
-        queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
-        if (pid == 0)
-        {
-            queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
-        }
-        queue.finish();
-        stop_time();
-}
         if (pid != 0)
         {
             std::cout << time_elapsed << " seconds to run kernel and get scores back CPU." << std::endl;
@@ -237,7 +238,8 @@ int main(int argc, char *argv[])
     pid = fork();
     const std::vector<word_t> *positions;
     mark_time();
-    for (int i = 0; i < REPETITIONS; i++) {
+    for (int i = 0; i < REPETITIONS; i++)
+    {
         positions = getMarkerPositions(docs);
     }
     stop_time();
