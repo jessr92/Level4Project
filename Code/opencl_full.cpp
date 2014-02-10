@@ -78,7 +78,7 @@ void executeFullOpenCL(const std::string *documents,
 #endif
 #ifdef DEVACC
         // Wim's Intel Xeon Phi is the second one.
-        std::cout << "Device name: " << devices[1].getInfo<CL_DEVICE_NAME>() << std::endl;
+        std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
 #else
         std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
 #endif
