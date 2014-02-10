@@ -74,7 +74,6 @@ __kernel void parse_and_score(__global const char *documents,
     int bitn = 0;
     for (ulong pos = startParse; pos < endParse; pos++)
     {
-        int fiveState = currentState * 5;
         char c = documents[pos];
         // if isalnum(c)
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
