@@ -18,6 +18,7 @@
 double time_elapsed;
 double startt, endt;
 double totalt = 0;
+int pid = 0;
 
 inline void mark_time()
 {
@@ -43,9 +44,8 @@ void executeFullOpenCL(const std::string *documents,
     unsigned long hamCount = 0;
     unsigned long spamCount = 0;
     const char *docs = documents->c_str();
-    int pid = fork();
     char *tempDocs = NULL;
-    if (pid == 0)
+    if (pid != 0)
     {
         tempDocs = new char[documents->size() + 1];
         tempDocs[documents->size()] = '\0';
@@ -72,7 +72,7 @@ void executeFullOpenCL(const std::string *documents,
         cl::Platform::get(&platforms);
         // Get a list of devices on this platform.
         cl::vector<cl::Device> devices;
-        if (pid == 0)
+        if (pid != 0)
         {
             platforms[0].getDevices(CL_DEVICE_TYPE_CPU, &devices);
         }
@@ -94,7 +94,7 @@ void executeFullOpenCL(const std::string *documents,
         cl::Buffer d_profile;
         cl::Buffer d_positions;
         cl::Buffer d_scores;
-        if (pid == 0)
+        if (pid != 0)
         {
             d_docs = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, docsSize, tempDocs);
             d_profile = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, profileSize, tempProfile);
@@ -111,7 +111,7 @@ void executeFullOpenCL(const std::string *documents,
 #ifdef BLOOM_FILTER
         int bloomFilterSize = sizeof(word_t) * bloomFilter->size();
         cl::Buffer d_bloomFilter;
-        if (pid == 0)
+        if (pid != 0)
         {
             d_bloomFilter = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, bloomFilterSize, tempBloomFilter);
         }
@@ -138,7 +138,8 @@ void executeFullOpenCL(const std::string *documents,
 #ifdef BLOOM_FILTER
         kernel.setArg(4, d_bloomFilter);
 #endif
-        if (pid == 0)
+        for (int i = 0; i < REPETITIONS; i++) {
+        if (pid != 0)
         {
             queue.enqueueMapBuffer(d_profile, CL_FALSE, CL_MAP_READ, 0, profileSize);
             queue.enqueueMapBuffer(d_docs, CL_FALSE, CL_MAP_READ, 0, docsSize);
@@ -157,7 +158,7 @@ void executeFullOpenCL(const std::string *documents,
             std::cout << time_elapsed << " seconds to copy data HtoD." << std::endl;
         }
 #ifdef BLOOM_FILTER
-        if (pid == 0)
+        if (pid != 0)
         {
             queue.enqueueMapBuffer(d_bloomFilter, CL_FALSE, CL_MAP_READ, 0, bloomFilterSize);
         }
@@ -169,7 +170,7 @@ void executeFullOpenCL(const std::string *documents,
         // Execute the kernel
         mark_time();
         int localSize;
-        if (pid == 0)
+        if (pid != 0)
         {
             localSize = 1;
         }
@@ -185,13 +186,21 @@ void executeFullOpenCL(const std::string *documents,
         cl::NDRange global(globalSize);
         cl::NDRange local(localSize);
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
-        if (pid != 0)
+        if (pid == 0)
         {
             queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
         }
         queue.finish();
         stop_time();
-        std::cout << time_elapsed << " seconds to run kernel and get scores back." << std::endl;
+}
+        if (pid != 0)
+        {
+            std::cout << time_elapsed << " seconds to run kernel and get scores back CPU." << std::endl;
+        }
+        else
+        {
+            std::cout << time_elapsed << " seconds to run kernel and get scores back GPU." << std::endl;
+        }
     }
     catch (cl::Error error)
     {
@@ -225,11 +234,15 @@ int main(int argc, char *argv[])
     }
     // Read in document file and find out where the documents start.
     const std::string *docs = readFile(DOCUMENT_FILE);
+    pid = fork();
+    const std::vector<word_t> *positions;
     mark_time();
-    const std::vector<word_t> *positions = getMarkerPositions(docs);
+    for (int i = 0; i < REPETITIONS; i++) {
+        positions = getMarkerPositions(docs);
+    }
     stop_time();
     std::cout << time_elapsed << " seconds to get marker positions." << std::endl;
     executeFullOpenCL(docs, profile, bloomFilter, positions);
-    std::cout << totalt << " seconds to score documents (reptition time doesn't currently include document marker time!)." << std::endl;
+    std::cout << totalt << " seconds to score documents." << std::endl;
     return 0;
 }
