@@ -213,11 +213,15 @@ int main(int argc, char *argv[])
     }
     // Read in document file and find out where the documents start.
     const std::string *docs = readFile(DOCUMENT_FILE);
+    const std::vector<word_t> *positions;
     mark_time();
-    const std::vector<word_t> *positions = getMarkerPositions(docs);
+    for (int i = 0; i < REPETITIONS; i++)
+    {
+        positions = getMarkerPositions(docs);
+    }
     stop_time();
     std::cout << time_elapsed << " seconds to get marker positions." << std::endl;
     executeFullOpenCL(docs, profile, bloomFilter, positions);
-    std::cout << totalt << " seconds to score documents (reptition time doesn't currently include document marker time!)." << std::endl;
+    std::cout << totalt << " seconds to score documents." << std::endl;
     return 0;
 }
