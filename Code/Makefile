@@ -28,7 +28,7 @@ CPU_NO_WRAPPER_OBJS_LIB=$(CPU_NO_WRAPPER_OBJS) -lOpenCL -lpthread
 GPU_NO_WRAPPER_OBJS_LIB=$(GPU_NO_WRAPPER_OBJS) -lOpenCL -lpthread
 DUMP_CL_OBJS_LIB=$(DUMP_CL_OBJS) -lOpenCL -lpthread
 OPENCL_FULL_OBJS_LIB=$(OPENCL_FULL_OBJS) -lOpenCL -lpthread
-OPENCL_FULL_FORK_OBJS_LIB=$(OPENCL_FULL_FORK_OBJS) -lOpencl -lpthread
+OPENCL_FULL_FORK_OBJS_LIB=$(OPENCL_FULL_FORK_OBJS) -lOpenCL -lpthread
 
 ifeq "$(shell uname)" "Darwin"
 	CFLAGS+=-framework OpenCL

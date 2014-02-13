@@ -14,6 +14,7 @@
 #include <sys/time.h>
 #include "OpenCLUtils.h"
 #include <sstream>
+#include <unistd.h>
 
 double time_elapsed;
 double startt, endt;
