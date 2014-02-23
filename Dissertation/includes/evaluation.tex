@@ -1,0 +1,84 @@
+More on devices but just shoving it here atm.
+
+CPU = 2 x Xeon E5462. 2 * Quad Core @ 2.8GHz
+
+GPU = Tesla C2075
+
+Intel Xeon Phi = Intel Xeon Phi 51100P
+
+\section{Scoring-only}
+
+Scoring only results. Results averaged over the 12 profiles after 10 repetitions
+each.
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Device & Test & Time (ms) & Throughput (MB/s)\\
+\hline
+\multirow{4}{*}{CPU C++ Single Threaded}
+& No Bloom Filter & a & b \\
+& Bloom Filter & c & d \\
+& Bloom Filter All Hits & e & f \\
+& Bloom Filter No Hits & g & h \\
+\hline
+\multirow{4}{*}{CPU C++ Multi-threaded}
+& No Bloom Filter & a & b \\
+& Bloom Filter & c & d \\
+& Bloom Filter All Hits & e & f \\
+& Bloom Filter No Hits & g & h \\
+\hline
+\multirow{4}{*}{CPU OpenCL}
+& No Bloom Filter & a & b \\
+& Bloom Filter & c & d \\
+& Bloom Filter All Hits & e & f \\
+& Bloom Filter No Hits & g & h \\
+\hline
+\multirow{4}{*}{GPU}
+& No Bloom Filter & a & b \\
+& Bloom Filter & c & d \\
+& Bloom Filter All Hits & e & f \\
+& Bloom Filter No Hits & g & h \\
+\hline
+\multirow{4}{*}{Intel Xeon Phi}
+& No Bloom Filter & a & b \\
+& Bloom Filter & c & d \\
+& Bloom Filter All Hits & e & f \\
+& Bloom Filter No Hits & g & h \\
+\hline
+\end{tabular}
+
+\section{Parsing and Scoring}
+
+Parsing and scoring results. Results averaged over the 12 profiles after 10
+repetitions each. Exceptions to this are the CPU+GPU where No Bloom Filter is
+20, Bloom Filter and Bloom Filter No Hits is 23, and Bloom Filter No Hits is 22.
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Device & Test & Time (ms) & Throughput (MB/s)\\
+\hline
+\multirow{4}{*}{CPU}
+& No Bloom Filter & a & b \\
+& Bloom Filter & c & d \\
+& Bloom Filter All Hits & e & f \\
+& Bloom Filter No Hits & g & h \\
+\hline
+\multirow{4}{*}{GPU}
+& No Bloom Filter & a & b \\
+& Bloom Filter & c & d \\
+& Bloom Filter All Hits & e & f \\
+& Bloom Filter No Hits & g & h \\
+\hline
+\multirow{4}{*}{CPU and GPU}
+& No Bloom Filter & a & b \\
+& Bloom Filter & c & d \\
+& Bloom Filter All Hits & e & f \\
+& Bloom Filter No Hits & g & h \\
+\hline
+\multirow{4}{*}{Intel Xeon Phi}
+& No Bloom Filter & a & b \\
+& Bloom Filter & c & d \\
+& Bloom Filter All Hits & e & f \\
+& Bloom Filter No Hits & g & h \\
+\hline
+\end{tabular}
