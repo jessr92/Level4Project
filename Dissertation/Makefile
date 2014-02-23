@@ -1,7 +1,7 @@
 all: 1002536r-Document-Filtering.pdf
 
 1002536r-Document-Filtering.pdf:
-	latexmk -pdf 1002536r-Document-Filtering
+	latexmk -pdf -pvc 1002536r-Document-Filtering
 	rm -f *.log *.aux *.toc *.out *.bbl *.blg *.fdb_latexmk *.fls
 
 clean:

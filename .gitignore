@@ -259,3 +259,7 @@ Code/decode
 Code/opencl_full_cpu
 
 Code/opencl_full_fork
+
+*.fdb_latexmk
+
+*.fls
