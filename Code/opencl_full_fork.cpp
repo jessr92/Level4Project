@@ -20,6 +20,7 @@ double time_elapsed;
 double startt, endt;
 double totalt = 0;
 int pid = 0;
+int repetitions = REPETITIONS;
 
 inline void mark_time()
 {
@@ -139,7 +140,7 @@ void executeFullOpenCL(const std::string *documents,
 #ifdef BLOOM_FILTER
         kernel.setArg(4, d_bloomFilter);
 #endif
-        for (int i = 0; i < REPETITIONS; i++)
+        for (int i = 0; i < repetitions; i++)
         {
             if (pid != 0)
             {
@@ -237,9 +238,15 @@ int main(int argc, char *argv[])
     // Read in document file and find out where the documents start.
     const std::string *docs = readFile(DOCUMENT_FILE);
     pid = fork();
+#ifdef BLOOM_FILTER
+    if (pid != 0)
+    {
+        repetitions *= 1.3;
+    }
+#endif
     const std::vector<word_t> *positions;
     mark_time();
-    for (int i = 0; i < REPETITIONS; i++)
+    for (int i = 0; i < repetitions; i++)
     {
         positions = getMarkerPositions(docs);
     }
