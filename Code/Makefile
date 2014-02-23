@@ -12,6 +12,8 @@ PROGS+=opencl_full
 PROGS+=opencl_full_fork
 PROGS+=clean
 
+OPENCL_LIB=-lOpenCL -L/opt/AMDAPP/lib/x86_64
+
 STANDARD_OBJS=read_files.o OpenCLUtils.o
 CPU_OBJS=cpu_reference_implementation.o $(STANDARD_OBJS)
 CPU_NO_WRAPPER_OBJS=cpu_implementation_no_wrapper.o $(STANDARD_OBJS)
@@ -25,11 +27,11 @@ OBJS+= $(DUMP_CL_OBJS) $(OPENCL_FULL_OBJS) $(OPENCL_FULL_FORK_OBJS)
 
 CPU_OBJS_LIB=$(CPU_OBJS) -lpthread
 CPU_MT_OBJS_LIB=$(CPU_MT_OBJS) -lpthread
-CPU_NO_WRAPPER_OBJS_LIB=$(CPU_NO_WRAPPER_OBJS) -lOpenCL -lpthread -L/opt/AMDAPP/lib/x86_64
-GPU_NO_WRAPPER_OBJS_LIB=$(GPU_NO_WRAPPER_OBJS) -lOpenCL -lpthread -L/opt/AMDAPP/lib/x86_64
-DUMP_CL_OBJS_LIB=$(DUMP_CL_OBJS) -lOpenCL -lpthread -L/opt/AMDAPP/lib/x86_64
-OPENCL_FULL_OBJS_LIB=$(OPENCL_FULL_OBJS) -lOpenCL -lpthread -L/opt/AMDAPP/lib/x86_64
-OPENCL_FULL_FORK_OBJS_LIB=$(OPENCL_FULL_FORK_OBJS) -lOpenCL -lpthread -L/opt/AMDAPP/lib/x86_64
+CPU_NO_WRAPPER_OBJS_LIB=$(CPU_NO_WRAPPER_OBJS) -lpthread $(OPENCL_LIB)
+GPU_NO_WRAPPER_OBJS_LIB=$(GPU_NO_WRAPPER_OBJS) -lpthread $(OPENCL_LIB)
+DUMP_CL_OBJS_LIB=$(DUMP_CL_OBJS) -lpthread $(OPENCL_LIB)
+OPENCL_FULL_OBJS_LIB=$(OPENCL_FULL_OBJS) -lpthread $(OPENCL_LIB)
+OPENCL_FULL_FORK_OBJS_LIB=$(OPENCL_FULL_FORK_OBJS) -lpthread $(OPENCL_LIB)
 
 ifeq "$(shell uname)" "Darwin"
 	CFLAGS+=-framework OpenCL
