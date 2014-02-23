@@ -30,7 +30,7 @@ if [ "$HOSTNAME" = "fara.dcs.gla.ac.uk" ]; then
     ./opencl_full_fork > parserResults/CPUGPU/opencl_full_forkUF.txt profileUSAFinancial.bin
     ./opencl_full_fork > parserResults/CPUGPU/opencl_full_forkUI.txt profileUSAInternational.bin
     ./opencl_full_fork > parserResults/CPUGPU/opencl_full_forkUW.txt profileUSAWashington.bin
-    mean clean
+    make clean
     make CPPFLAGS+=-DDEVCPU
     mkdir -p parserResults/CPU
     echo "Testing parser/scorer on CPU"
