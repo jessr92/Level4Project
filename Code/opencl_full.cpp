@@ -212,7 +212,11 @@ int main(int argc, char *argv[])
         std::cout << PROFILE_FILE << ": " << profile->size() << std::endl;
     }
     // Read in document file and find out where the documents start.
+#ifdef HTML_PARSE
+    const std::string *docs = readFile(HTML_FILE);
+#else
     const std::string *docs = readFile(DOCUMENT_FILE);
+#endif
     const std::vector<word_t> *positions;
     mark_time();
     for (int i = 0; i < REPETITIONS; i++)

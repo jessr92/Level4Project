@@ -263,3 +263,5 @@ Code/opencl_full_fork
 *.fdb_latexmk
 
 *.fls
+
+*.warc

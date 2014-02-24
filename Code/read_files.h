@@ -1,8 +1,10 @@
 #ifndef __READ_FILES__
 #define __READ_FILES__
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <thread>
 #include <vector>
 #include <pthread.h>

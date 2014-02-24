@@ -31,6 +31,10 @@
 #define DOCUMENT_FILE "TREC_all.txt"
 #define DOCUMENT_MARKER "<DOC>"
 
+#define HTML_FILE "02.warc"
+#define HTML_START "<html"
+#define HTML_END "</html>"
+
 #define SKIPPING 0
 #define WRITING 1
 #define FLUSHING 2

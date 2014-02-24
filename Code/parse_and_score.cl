@@ -62,8 +62,13 @@ __kernel void parse_and_score(__global const char *documents,
     }
     // Document to parse
     uint document = get_global_id(0) + 1;
+#ifdef HTML_PARSE
+    ulong startParse = positions[(get_global_id(0) * 2) + 1];
+    ulong endParse = positions[(get_global_id(0) * 2) + 2];
+#else
     ulong startParse = positions[document];
     ulong endParse = positions[document + 1];
+#endif
     ulong score = 0;
     ulong termToScore = 0;
     // 0 = Skipping

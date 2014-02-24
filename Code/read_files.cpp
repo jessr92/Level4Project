@@ -107,8 +107,68 @@ void *calculateMarkerPositions(void *value)
     return NULL;
 }
 
+void *calculateMarkerPositionsHTML(void *value)
+{
+    word_t tid = *(word_t *)value;
+    word_t pos = (tid == 0) ? 0 : values[tid - 1];
+    word_t end = values[tid];
+    docVectors[tid] = new std::vector<word_t>();
+    // Find all document starts, note their location (assuming valid file)
+    std::vector<word_t> *startPositions = new std::vector<word_t>();
+    pos = doc->find(HTML_START, pos);
+    while (pos < end && pos != std::string::npos)
+    {
+        // Add index of first character for substring match
+        docVectors[tid]->push_back(pos);
+        pos = doc->find(HTML_START, pos + 1);
+    }
+    // Find all document ends, note their location (assuming valid file)
+    pos = (tid == 0) ? 0 : values[tid - 1];
+    std::vector<word_t> *endPositions = new std::vector<word_t>();
+    pos = doc->find(HTML_END, pos);
+    while (pos < end && pos != std::string::npos)
+    {
+        // Add index of first character for substring match
+        docVectors[tid]->push_back(pos);
+        pos = doc->find(HTML_END, pos + 1);
+    }
+    // Merge start/end into one vector
+    word_t i = (startPositions->size() < endPositions->size())
+               ? startPositions->size() : endPositions->size();
+    word_t startLoc = 0;
+    word_t endLoc = 0;
+    for (; startLoc < i && endLoc < i;)
+    {
+        if (startPositions->at(startLoc) < endPositions->at(endLoc))
+        {
+            docVectors[tid]->push_back(startPositions->at(startLoc++));
+        }
+        else
+        {
+            docVectors[tid]->push_back(endPositions->at(endLoc++));
+        }
+    }
+    // Only one of these while loops should execute. The one that does execute
+    // should only execute once (otherwise invalid file)
+    while (startLoc != i)
+    {
+        docVectors[tid]->push_back(startPositions->at(startLoc++));
+    }
+    while (endLoc != i)
+    {
+        docVectors[tid]->push_back(endPositions->at(endLoc++));
+    }
+    return NULL;
+}
+
 const std::vector<word_t> *getMarkerPositions(const std::string *documents)
 {
+    // For HTML convert to lower case.
+    // Parse does this anyway so won't affect scoring.
+    // Makes it easier to find <html and </html> in document.
+    // doc = new std::string();
+    // doc->resize(documents->size());
+    // std::transform(documents->begin(), documents->end(), doc->begin(), ::tolower);
     doc = documents;
     threadCount = std::thread::hardware_concurrency();
     if (threadCount == 0)
@@ -128,7 +188,11 @@ const std::vector<word_t> *getMarkerPositions(const std::string *documents)
     {
         values[i] = (docLength / threadCount) * (i + 1);
         threadIds[i] = i;
+#ifdef HTML_PARSE
+        pthread_create(&threads[i], NULL, calculateMarkerPositionsHTML, (void *)&threadIds[i]);
+#else
         pthread_create(&threads[i], NULL, calculateMarkerPositions, (void *)&threadIds[i]);
+#endif
     }
     for (word_t i = 0; i < threadCount; i++)
     {
