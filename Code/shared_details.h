@@ -32,8 +32,7 @@
 #define DOCUMENT_MARKER "<DOC>"
 
 #define HTML_FILE "02.warc"
-#define HTML_START "<html"
-#define HTML_END "</html>"
+#define WARC_MARKER "Content-Type: text/html"
 
 #define SKIPPING 0
 #define WRITING 1
