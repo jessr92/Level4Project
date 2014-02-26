@@ -15,17 +15,20 @@ nVidia and Intel OpenCL SDKs were installed and up to date at time of writing.
 \begin{itemize}
 
 \item[CPU] The motherboard has two CPU sockets, both with an Intel Xeon E5462
-processor. This is a quad core processor with a 2.8GHz clock speed and 12MB of
-Level 2 cache per processor.
+\footnote{\url{http://ark.intel.com/products/33084/Intel-Xeon-Processor-E5462
+-12M-Cache-2_80-GHz-1600-MHz-FSB}} processor. This is a quad core processor with
+a 2.8GHz clock speed and 12MB of Level 2 cache per processor.
 
 \item[RAM] There is 14GB of PC2-6400 (800MHz) DDR2 RAM installed, with error
 correcting code (ECC) enabled.
 
-\item[GPU] The GPU is an nVidia Tesla C2075. The device has 6GB of dedicated
-GDDR5 memory running at 1.5GHz giving an internal memory bandwidth of 144GB/s.
-There are 448 ``CUDA Cores'' with a clock frequency of 1.15GHz. It has been
-fitted into a PCIe 1.0 slot with 16x lane bandwidth giving a total theoretical
-bandwidth between it's VRAM and main memory of 4GB/s (250MB/s per lane).
+\item[GPU] The GPU is an nVidia Tesla C2075
+\footnote{\url{http://www.nvidia.co.uk/docs/IO/43395/NV-DS-Tesla-C2075.pdf}}.
+The device has 6GB of dedicated GDDR5 memory running at 1.5GHz giving an
+internal memory bandwidth of 144GB/s. There are 448 ``CUDA Cores'' with a clock
+frequency of 1.15GHz. It has been installed in a PCIe 1.0 slot with 16x lane
+bandwidth giving a total theoretical bandwidth between its on-board memory and
+main memory of 4GB/s (250MB/s per lane).
 
 \end{itemize}
 
@@ -33,18 +36,37 @@ bandwidth between it's VRAM and main memory of 4GB/s (250MB/s per lane).
 
 \begin{itemize}
 
-\item[CPU] There is a single Intel Xeon E5-2620 fitted. This is a six core
-processor with hyper-threading to give twelve hardware threads. The standard
-clock frequency is 2GHz with a maximum turbo frequency of 2.5Ghz. There is a
-total of 15MB ``Intel Smart Cache'' available.
+\item[CPU] There is a single Intel Xeon E5-2620
+\footnote{\url{http://ark.intel.com/products/64594/intel-xeon-processor-e5-2620
+-15m-cache-2_00-ghz-7_20-gts-intel-qpi}} fitted. This is a six core processor
+with hyper-threading to give twelve hardware threads. The standard clock
+frequency is 2GHz with a maximum turbo frequency of 2.5Ghz. There is a total of
+15MB ``Intel Smart Cache'' available which acts as Level 3 cache.
 
-\item[RAM] 16GB RAM
+\item[RAM] 16GB DDR3 RAM
 
-\item[Intel Xeon Phi] Intel Xeon Phi 51100P
+\item[Intel Xeon Phi] The Intel Xeon Phi is the 51100P
+\footnote{\url{http://ark.intel.com/products/71992/intel-xeon-phi-coprocessor-
+5110p-8gb-1_053-ghz-60-core}} variant. There are sixty physical CPU cores
+running at 1.053GHz, the cores are 4-way hyper-threaded resulting in 240
+hardware threads. There is 8GB of on board memory running at 5GT/s for a
+theoretical maximum memory bandwidth of 320GB/s. It has been installed in a PCIe
+2.0 slot with 16x lane bandwidth giving a total theoretical bandwidth between
+its on-board memory and main memory of 8GB/s (500MB/ per lane).
 
 \end{itemize}
 
-\section{Scoring-only}
+\section{Experiment Setup and Input Files}
+
+12 profiles
+
+TREC\_ALL.txt - 236MB
+
+collection.raw - pre-parsed TREC\_ALL.txt
+
+bloomfilter.raw (normal, all hits, no hits): 4KB
+
+\section{Scoring Only Results}
 
 Scoring only results. Results averaged over the 12 profiles after 10 repetitions
 each.
@@ -53,31 +75,37 @@ each.
 \hline
 Device & Test & Time (ms) & Throughput (MB/s)\\
 \hline
-\multirow{4}{*}{Intel Xeon E5462 C++ Single Threaded}
-& No Bloom Filter & a & b \\
-& Bloom Filter & c & d \\
-& Bloom Filter All Hits & e & f \\
-& Bloom Filter No Hits & g & h \\
+\multirow{4}{*}{2x Intel Xeon E5462 C++ Single Threaded}
+& No Bloom Filter & 2537 & 93 \\
+& Bloom Filter & 2617 & 90.2 \\
+& Bloom Filter All Hits & 4023 & 58.7 \\
+& Bloom Filter No Hits & 2006 & 117.4 \\
 \hline
-\multirow{4}{*}{Intel Xeon E5462 C++ Multi-threaded}
-& No Bloom Filter & a & b \\
-& Bloom Filter & c & d \\
-& Bloom Filter All Hits & e & f \\
-& Bloom Filter No Hits & g & h \\
+\multirow{4}{*}{2x Intel Xeon E5462 C++ Multi-threaded}
+& No Bloom Filter & 390 & 605.1 \\
+& Bloom Filter & 336 & 702.4 \\
+& Bloom Filter All Hits & 550 & 429.1 \\
+& Bloom Filter No Hits & 257 & 918.3 \\
 \hline
-\multirow{4}{*}{Intel Xeon E5462 OpenCL}
-& No Bloom Filter & a & b \\
-& Bloom Filter & c & d \\
-& Bloom Filter All Hits & e & f \\
-& Bloom Filter No Hits & g & h \\
+\multirow{4}{*}{2x Intel Xeon E5462 OpenCL}
+& No Bloom Filter & 222 & 1063.1 \\
+& Bloom Filter & 156 & 1512.8 \\
+& Bloom Filter All Hits & 298 & 791.9 \\
+& Bloom Filter No Hits & 104 & 2269.2 \\
 \hline
 \multirow{4}{*}{nVidia Tesla C2075}
-& No Bloom Filter & a & b \\
-& Bloom Filter & c & d \\
-& Bloom Filter All Hits & e & f \\
-& Bloom Filter No Hits & g & h \\
+& No Bloom Filter & 258 & 914.7 \\
+& Bloom Filter & 232 & 1017.2 \\
+& Bloom Filter All Hits & 294 & 802.7 \\
+& Bloom Filter No Hits & 216 & 1092.6 \\
 \hline
 \multirow{4}{*}{Intel Xeon Phi}
+& No Bloom Filter & 381 & 619.4 \\
+& Bloom Filter & 409 & 577 \\
+& Bloom Filter All Hits & 456 & 517.5 \\
+& Bloom Filter No Hits & 402 & 587.1 \\
+\hline
+\multirow{4}{*}{AMD System...}
 & No Bloom Filter & a & b \\
 & Bloom Filter & c & d \\
 & Bloom Filter All Hits & e & f \\
@@ -85,11 +113,12 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 \hline
 \end{tabular}
 
-\section{Parsing and Scoring}
+\section{Parsing and Scoring Results}
 
 Parsing and scoring results. Results averaged over the 12 profiles after 10
-repetitions each. Exceptions to this are the CPU+GPU where No Bloom Filter is
-20, Bloom Filter and Bloom Filter No Hits is 23, and Bloom Filter No Hits is 22.
+repetitions each. Exceptions to this are the CPU+GPU where No Bloom Filter
+conducts 20 repetitions, Bloom Filter and Bloom Filter No Hits 23 repetitions,
+and Bloom Filter No Hits 22 repetitions.
 
 \begin{tabular}{|l|l|l|l|}
 \hline
@@ -119,4 +148,16 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 & Bloom Filter All Hits & e & f \\
 & Bloom Filter No Hits & g & h \\
 \hline
+\multirow{4}{*}{AMD System...}
+& No Bloom Filter & a & b \\
+& Bloom Filter & c & d \\
+& Bloom Filter All Hits & e & f \\
+& Bloom Filter No Hits & g & h \\
+\hline
 \end{tabular}
+
+\section{Other Metrics}
+
+\subsection{Performance per Watt}
+
+\subsection{Performance per Dollar}
