@@ -1,10 +1,48 @@
-More on devices but just shoving it here atm.
+\section{Devices Used}
 
-CPU = 2 x Xeon E5462. 2 * Quad Core @ 2.8GHz
+For the purposes of evaluating the performance of both the scorer and the scorer
+and parser, a Mac Pro (Early 2008 - MacPro3,1) was used. This was fitted with
+two Intel Xeon E5462 processors, and a nVidia Tesla C2075 GPU. In addition,
+there was a separate machine fitted with an Intel Xeon Phi 51100P. A brief
+overview of the hardware will be given to provide some perspective to the
+results which follow.
 
-GPU = Tesla C2075
+\subsection{Mac Pro System}
 
-Intel Xeon Phi = Intel Xeon Phi 51100P
+The Mac Pro was running Mac OS X version 10.8.5 (Build Version 12F45). Both the
+nVidia and Intel OpenCL SDKs were installed and up to date at time of writing.
+
+\begin{itemize}
+
+\item[CPU] The motherboard has two CPU sockets, both with an Intel Xeon E5462
+processor. This is a quad core processor with a 2.8GHz clock speed and 12MB of
+Level 2 cache per processor.
+
+\item[RAM] There is 14GB of PC2-6400 (800MHz) DDR2 RAM installed, with error
+correcting code (ECC) enabled.
+
+\item[GPU] The GPU is an nVidia Tesla C2075. The device has 6GB of dedicated
+GDDR5 memory running at 1.5GHz giving an internal memory bandwidth of 144GB/s.
+There are 448 ``CUDA Cores'' with a clock frequency of 1.15GHz. It has been
+fitted into a PCIe 1.0 slot with 16x lane bandwidth giving a total theoretical
+bandwidth between it's VRAM and main memory of 4GB/s (250MB/s per lane).
+
+\end{itemize}
+
+\subsection{Intel Xeon Phi System}
+
+\begin{itemize}
+
+\item[CPU] There is a single Intel Xeon E5-2620 fitted. This is a six core
+processor with hyper-threading to give twelve hardware threads. The standard
+clock frequency is 2GHz with a maximum turbo frequency of 2.5Ghz. There is a
+total of 15MB ``Intel Smart Cache'' available.
+
+\item[RAM] 16GB RAM
+
+\item[Intel Xeon Phi] Intel Xeon Phi 51100P
+
+\end{itemize}
 
 \section{Scoring-only}
 
@@ -15,25 +53,25 @@ each.
 \hline
 Device & Test & Time (ms) & Throughput (MB/s)\\
 \hline
-\multirow{4}{*}{CPU C++ Single Threaded}
+\multirow{4}{*}{Intel Xeon E5462 C++ Single Threaded}
 & No Bloom Filter & a & b \\
 & Bloom Filter & c & d \\
 & Bloom Filter All Hits & e & f \\
 & Bloom Filter No Hits & g & h \\
 \hline
-\multirow{4}{*}{CPU C++ Multi-threaded}
+\multirow{4}{*}{Intel Xeon E5462 C++ Multi-threaded}
 & No Bloom Filter & a & b \\
 & Bloom Filter & c & d \\
 & Bloom Filter All Hits & e & f \\
 & Bloom Filter No Hits & g & h \\
 \hline
-\multirow{4}{*}{CPU OpenCL}
+\multirow{4}{*}{Intel Xeon E5462 OpenCL}
 & No Bloom Filter & a & b \\
 & Bloom Filter & c & d \\
 & Bloom Filter All Hits & e & f \\
 & Bloom Filter No Hits & g & h \\
 \hline
-\multirow{4}{*}{GPU}
+\multirow{4}{*}{nVidia Tesla C2075}
 & No Bloom Filter & a & b \\
 & Bloom Filter & c & d \\
 & Bloom Filter All Hits & e & f \\
