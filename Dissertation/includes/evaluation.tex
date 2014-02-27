@@ -84,16 +84,27 @@ Cache available per processor.
 
 12 profiles
 
+Each profile 128MB each
+
 TREC\_ALL.txt - 236MB
 
 collection.raw - pre-parsed TREC\_ALL.txt
 
 bloomfilter.raw (normal, all hits, no hits): 4KB
 
+normal = generated from profile
+
+all hits = 4KB of all 1 bits
+
+no hits = 4KB of all 0 bits
+
+Multiple repetitions
+
 \section{Scoring Only Results}
 
 Scoring only results. Results averaged over the 12 profiles after 10 repetitions
-each.
+each. The only exception to this was the AMD CPU system where the higher
+throughput made 100 repetitions necessary to achieve reliable results.
 
 \begin{tabular}{|l|l|l|l|}
 \hline
@@ -130,10 +141,10 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 & Bloom Filter No Hits & 402 & 587.1 \\
 \hline
 \multirow{4}{*}{4x AMD Opteron 6366 HE}
-& No Bloom Filter & a & b \\
-& Bloom Filter & c & d \\
-& Bloom Filter All Hits & e & f \\
-& Bloom Filter No Hits & g & h \\
+& No Bloom Filter & 87 & 2712.6 \\
+& Bloom Filter & 50 & 4720 \\
+& Bloom Filter All Hits & 96 & 2458.3 \\
+& Bloom Filter No Hits & 39 & 6051.3 \\
 \hline
 \end{tabular}
 
