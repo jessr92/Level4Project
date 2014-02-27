@@ -3,8 +3,9 @@
 For the purposes of evaluating the performance of both the scorer and the scorer
 and parser, a Mac Pro (Early 2008 - MacPro3,1) was used. This was fitted with
 two Intel Xeon E5462 processors, and a nVidia Tesla C2075 GPU. In addition,
-there was a separate machine fitted with an Intel Xeon Phi 51100P. A brief
-overview of the hardware will be given to provide some perspective to the
+there was a separate machine fitted with an Intel Xeon Phi 51100P. An AMD system
+with a traditional CPU setup with 4x AMD Operon 6366 HE CPUs was also used. A
+brief overview of the hardware will be given to provide some perspective to the
 results which follow.
 
 \subsection{Mac Pro System}
@@ -34,6 +35,10 @@ main memory of 4GB/s (250MB/s per lane).
 
 \subsection{Intel Xeon Phi System}
 
+The system is running the SUSE Enterprise Server 11 Linux distribution. This
+system was used solely for running the software system on the Intel Xeon Phi and
+did not have a graphics card fitted.
+
 \begin{itemize}
 
 \item[CPU] There is a single Intel Xeon E5-2620
@@ -53,6 +58,25 @@ hardware threads. There is 8GB of on board memory running at 5GT/s for a
 theoretical maximum memory bandwidth of 320GB/s. It has been installed in a PCIe
 2.0 slot with 16x lane bandwidth giving a total theoretical bandwidth between
 its on-board memory and main memory of 8GB/s (500MB/ per lane).
+
+\end{itemize}
+
+\subsection{AMD System}
+
+The system is running the Fedora 18 Linux distribution. This system was used
+solely for running the software system on the AMD CPUs and did not have a
+graphics card fitted.
+
+\begin{itemize}
+
+\item[CPU] There are four AMD Opteron 6366 HE
+\footnote{\url{http://products.amd.com/en-us/OpteronCPUDetail.aspx?id=813&f1=&f2
+=&f3=Yes&f4=&f5=&f6=&f7=&f8=&f9=&f10=&f11=&}} (high efficiency) processors
+fitted. Each processor has 16 cores running at a base clock speed of 1.8GHz with
+a maximum turbo frequency os 3.1GHz. There is 1MB of Level 2 and 16MB of Level 3
+Cache available per processor.
+
+\item[RAM] 512GB DDR3 RAM
 
 \end{itemize}
 
@@ -105,7 +129,7 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 & Bloom Filter All Hits & 456 & 517.5 \\
 & Bloom Filter No Hits & 402 & 587.1 \\
 \hline
-\multirow{4}{*}{AMD System...}
+\multirow{4}{*}{4x AMD Opteron 6366 HE}
 & No Bloom Filter & a & b \\
 & Bloom Filter & c & d \\
 & Bloom Filter All Hits & e & f \\
@@ -124,35 +148,35 @@ and Bloom Filter No Hits 22 repetitions.
 \hline
 Device & Test & Time (ms) & Throughput (MB/s)\\
 \hline
-\multirow{4}{*}{CPU}
-& No Bloom Filter & a & b \\
-& Bloom Filter & c & d \\
-& Bloom Filter All Hits & e & f \\
-& Bloom Filter No Hits & g & h \\
+\multirow{4}{*}{2x Intel Xeon E5462}
+& No Bloom Filter & 699 & 337.6 \\
+& Bloom Filter & 648 & 364.2 \\
+& Bloom Filter All Hits & 782 & 301.8 \\
+& Bloom Filter No Hits & 590 & 400 \\
 \hline
-\multirow{4}{*}{GPU}
-& No Bloom Filter & a & b \\
-& Bloom Filter & c & d \\
-& Bloom Filter All Hits & e & f \\
-& Bloom Filter No Hits & g & h \\
+\multirow{4}{*}{nVidia Tesla C2075}
+& No Bloom Filter & 649 & 363.6 \\
+& Bloom Filter & 800 & 295 \\
+& Bloom Filter All Hits & 876 & 269.4 \\
+& Bloom Filter No Hits & 756 & 312.2 \\
 \hline
-\multirow{4}{*}{CPU and GPU}
-& No Bloom Filter & a & b \\
-& Bloom Filter & c & d \\
-& Bloom Filter All Hits & e & f \\
-& Bloom Filter No Hits & g & h \\
+\multirow{4}{*}{2x Intel Xeon E5462 \& nVidia Tesla C2075}
+& No Bloom Filter & 386 & 611.4 \\
+& Bloom Filter & 401 & 588.5 \\
+& Bloom Filter All Hits & 455 & 518.7 \\
+& Bloom Filter No Hits & 379 & 622.7 \\
 \hline
 \multirow{4}{*}{Intel Xeon Phi}
-& No Bloom Filter & a & b \\
-& Bloom Filter & c & d \\
-& Bloom Filter All Hits & e & f \\
-& Bloom Filter No Hits & g & h \\
+& No Bloom Filter & 499 & 472.9 \\
+& Bloom Filter & 514 & 459.1 \\
+& Bloom Filter All Hits & 568 & 415.5 \\
+& Bloom Filter No Hits & 524 & 450.4 \\
 \hline
-\multirow{4}{*}{AMD System...}
-& No Bloom Filter & a & b \\
-& Bloom Filter & c & d \\
-& Bloom Filter All Hits & e & f \\
-& Bloom Filter No Hits & g & h \\
+\multirow{4}{*}{4x AMD Opteron 6366 HE}
+& No Bloom Filter & 239 & 987.4 \\
+& Bloom Filter & 450 & 524.4 \\
+& Bloom Filter All Hits & 474 & 497.9 \\
+& Bloom Filter No Hits & 426 & 554 \\
 \hline
 \end{tabular}
 
