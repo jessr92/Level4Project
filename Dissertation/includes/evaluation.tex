@@ -83,6 +83,22 @@ Cache available per processor.
 
 \section{Experiment Set up and Input Files}
 
+\subsection{Data Transfer}
+
+The first experiment conducted was to investigate the effect of the PCI Express
+bus transfer rate on overall system performance. The classification system
+involves the transfer of very small (4KB) OpenCL buffers, up to very large (100s
+of MB and above) OpenCL buffers. Both present potential performance concerns.
+Small transfers can result in low throughput as the waking up of the PCI Express
+bus and setting up of data transfer can overshadow the actual transfer time.
+Large transfers, even though being they may be being transferred at the maximum
+possible transfer rate, will, due to their size, take up significant amount of
+time to transfer. If the transfer time is significant in regards to the actual
+time to score the transferred documents, use of an accelerator device could be
+inefficient, irrespective of the processing power of the accelerator.
+
+\subsection{Document Classification}
+
 For each device, the system (scoring only or scoring and parsing) was run over a
 number of different profiles. There are twelve profiles in total, each 128MB in
 size. The twelve profiles each had a different combination of terms relating to
@@ -114,6 +130,28 @@ are prevented. This results in a completely zero score classification for all
 documents however, alongside the ``all hits'' bloom filter, results in a range
 of performance values possible when using a bloom filter.
 
+\section{Data Transfer}
+
+Table \ref{table:dataTransfer}
+
+\begin{table}[H]
+\begin{tabular}{|l|l|l|}
+\hline
+Transfer Size & Transfer Time & Throughput\\
+\hline
+\end{tabular}
+\caption{PCI Express bus transfer rates}
+\label{table:dataTransfer}
+\end{table}
+
+Figure \ref{fig:dataTransfer}
+
+\begin{figure}[H]
+\centering
+\caption{PCI Express bus transfer rates}
+\label{fig:dataTransfer}
+\end{figure}
+
 \section{Scoring Only Results}
 
 Table \ref{table:scoringOnly} contains the results from the scoring only
@@ -128,7 +166,7 @@ per profile to achieve reliable results.
 The C++ Single Threaded and C++ Multi-threaded results are there for reference
 and to indicate how effective parallelism is for document filtering.
 
-\begin{table}[h!]
+\begin{table}[H]
 \begin{tabular}{|l|l|l|l|}
 \hline
 Device & Test & Time (ms) & Throughput (MB/s)\\
@@ -180,7 +218,7 @@ times the performance of the second fastest system. It's important to note
 however that these figures are only used for reference. There would need to
 be some part of the system conducting the parsing section.
 
-\begin{figure}
+\begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{images/scoringOnlyBest.png}
 \caption{Scoring Only Device Comparison}
@@ -202,7 +240,7 @@ repetitions in total (ten for each device), ``Bloom Filter'' and ``Bloom Filter
 No Hits'' required twenty three repetitions (CPU had three extra), and ``Bloom
 Filter All Hits'' required twenty two repetitions (CPU had two extra).
 
-\begin{table}[h!]
+\begin{table}[H]
 \begin{tabular}{|l|l|l|l|}
 \hline
 Device & Test & Time (ms) & Throughput (MB/s)\\
@@ -252,7 +290,7 @@ Figure \ref{fig:parseScoringBest} takes each device's best result and compares
 them in a bar graph. From a single device perspective, the AMD System takes the
 lead easily. For the dual device perspective, ...
 
-\begin{figure}
+\begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{images/parsingScoringBest.png}
 \caption{Parsing and Scoring Device Comparison}
