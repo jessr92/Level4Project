@@ -49,7 +49,7 @@ if [ "$HOSTNAME" = "fara.dcs.gla.ac.uk" ]; then
 fi
 # Manipa has the Intel Phi we're testing with
 if [ "$HOSTNAME" = "manipa" ]; then
-    mean clean
+    make clean
     make CPPFLAGS+=-DDEVACC
     mkdir -p parserResults/Phi
     echo "Testing parser/scorer on Phi"
