@@ -36,8 +36,9 @@ main memory of 4GB/s (250MB/s per lane).
 \subsection{Intel Xeon Phi System}
 
 The system is running the SUSE Enterprise Server 11 Linux distribution. This
-system was used solely for running the software system on the Intel Xeon Phi and
-did not have a graphics card fitted.
+system was used for running the software system on the Intel Xeon Phi both with
+and without the CPU as an OpenCL device. The system did not have a graphics card
+fitted.
 
 \begin{itemize}
 
@@ -80,32 +81,54 @@ Cache available per processor.
 
 \end{itemize}
 
-\section{Experiment Setup and Input Files}
+\section{Experiment Set up and Input Files}
 
-12 profiles
+For each device, the system (scoring only or scoring and parsing) was run over a
+number of different profiles. There are twelve profiles in total, each 128MB in
+size. The twelve profiles each had a different combination of terms relating to
+the two classes a document could come under. Given that the profile is the same
+size, the profiles themselves do not affect performance, only the classification
+of documents. Each profile run would be repeated several times.
 
-Each profile 128MB each
+For the scoring only system, a pre-parsed collection of terms for the TREC
+collection is given. The parser and scoring only system receives the original
+TREC collection text file.
 
-TREC\_ALL.txt - 236MB
+Each device is given three different bloom filter inputs. The first is the
+``normal'' bloom filter. This bloom filter is actually generated from the
+profiles and will result in the same classification as the non bloom filter
+runs.
 
-collection.raw - pre-parsed TREC\_ALL.txt
+The second is the ``all hits'' bloom filter. This bloom filter is created to be
+completely full and thus always result in a hit, irrespective of whether or not
+the term is in the profile. This is seen as a worst-case scenario performance-
+wise when running with a bloom filter, the case where no reads from main memory
+are prevented. This will result in the same classification as the non bloom
+filter runs.
 
-bloomfilter.raw (normal, all hits, no hits): 4KB
-
-normal = generated from profile
-
-all hits = 4KB of all 1 bits
-
-no hits = 4KB of all 0 bits
-
-Multiple repetitions
+The third is the ``no hits'' bloom filter. This bloom filter is created to be
+completely empty and thus never results in a hit, irrespective of whether or not
+the term is in the profile. This is seen as a best-case scenario performance-
+wise when running with a bloom filter, the case where all reads from main memory
+are prevented. This results in a completely zero score classification for all
+documents however, alongside the ``all hits'' bloom filter, results in a range
+of performance values possible when using a bloom filter.
 
 \section{Scoring Only Results}
 
-Scoring only results. Results averaged over the 12 profiles after 10 repetitions
-each. The only exception to this was the AMD CPU system where the higher
-throughput made 100 repetitions necessary to achieve reliable results.
+Table \ref{table:scoringOnly} contains the results from the scoring only
+experiments. The results are the average time and throughput of the system over
+the twelve profiles.
 
+Each profile run is repeated ten times to improve the accuracy and reliability
+of the timing mechanism. The exception to this rule is the AMD system which,
+due to its significantly higher throughput, required one hundred repetitions
+per profile to achieve reliable results.
+
+The C++ Single Threaded and C++ Multi-threaded results are there for reference
+and to indicate how effective parallelism is for document filtering.
+
+\begin{table}[h!]
 \begin{tabular}{|l|l|l|l|}
 \hline
 Device & Test & Time (ms) & Throughput (MB/s)\\
@@ -147,14 +170,39 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 & Bloom Filter No Hits & 39 & 6051.3 \\
 \hline
 \end{tabular}
+\caption{Scoring Only Results}
+\label{table:scoringOnly}
+\end{table}
+
+Figure \ref{fig:scoringOnlyBest} takes each device's best result and compares
+them in a bar graph. The AMD system has the clear lead, having nearly three
+times the performance of the second fastest system. It's important to note
+however that these figures are only used for reference. There would need to
+be some part of the system conducting the parsing section.
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{images/scoringOnlyBest.png}
+\caption{Scoring Only Device Comparison}
+\label{fig:scoringOnlyBest}
+\end{figure}
 
 \section{Parsing and Scoring Results}
 
-Parsing and scoring results. Results averaged over the 12 profiles after 10
-repetitions each. Exceptions to this are the CPU+GPU where No Bloom Filter
-conducts 20 repetitions, Bloom Filter and Bloom Filter No Hits 23 repetitions,
-and Bloom Filter No Hits 22 repetitions.
+Table \ref{table:parsingScoring} contains the results from the parsing and
+scoring experiments. The results are the average time and throughput of the
+system over the twelve profiles.
 
+Each profile run is repeated ten times to improve the accuracy and reliability
+of the timing mechanism. The exception to this rule is the Intel CPU and nVidia
+GPU system which, due to the fact that both devices were running in parallel and
+run at slightly different rates, required different numbers of repetitions to
+finish at the same time. The ``No Bloom Filter'' experiment required twenty
+repetitions in total (ten for each device), ``Bloom Filter'' and ``Bloom Filter
+No Hits'' required twenty three repetitions (CPU had three extra), and ``Bloom
+Filter All Hits'' required twenty two repetitions (CPU had two extra).
+
+\begin{table}[h!]
 \begin{tabular}{|l|l|l|l|}
 \hline
 Device & Test & Time (ms) & Throughput (MB/s)\\
@@ -183,6 +231,12 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 & Bloom Filter All Hits & 568 & 415.5 \\
 & Bloom Filter No Hits & 524 & 450.4 \\
 \hline
+\multirow{4}{*}{Intel Xeon E5-2620 \& Intel Xeon Phi}
+& No Bloom Filter & a & b \\
+& Bloom Filter & c & d \\
+& Bloom Filter All Hits & e & f \\
+& Bloom Filter No Hits & g & h \\
+\hline
 \multirow{4}{*}{4x AMD Opteron 6366 HE}
 & No Bloom Filter & 239 & 987.4 \\
 & Bloom Filter & 450 & 524.4 \\
@@ -190,9 +244,47 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 & Bloom Filter No Hits & 426 & 554 \\
 \hline
 \end{tabular}
+\caption{Parsing and Scoring Results}
+\label{table:parsingScoring}
+\end{table}
+
+Figure \ref{fig:parseScoringBest} takes each device's best result and compares
+them in a bar graph. From a single device perspective, the AMD System takes the
+lead easily. For the dual device perspective, ...
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{images/parsingScoringBest.png}
+\caption{Parsing and Scoring Device Comparison}
+\label{fig:parseScoringBest}
+\end{figure}
 
 \section{Other Metrics}
 
+In addition to raw performance, two other metrics are commonly used when
+comparing systems. These are performance per watt and performance per dollar.
+
+Systems which are cheap to purchase and run but still give reasonably high
+performance are likely to be preferred by organisations than the top-of-the-
+range high performance systems as they are typically very expensive and power
+hungry. These are primarily important in a data centre.
+
 \subsection{Performance per Watt}
 
+fara: idle 210W;
+
+CPU 310W;
+
+GPU 310W;
+
+CPU+GPU 410W
+
 \subsection{Performance per Dollar}
+
+fara: £3000 (£1749 + Tesla...)
+
+manipa: £8400
+
+togian:
+
+\section{Discussion of Results}
