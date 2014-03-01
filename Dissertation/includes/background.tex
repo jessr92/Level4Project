@@ -326,8 +326,173 @@ between cores on the `opposite side' of the ring will be significantly slower.
 
 \section{Document Classification}
 
-\subsection{Bloom Filters}
+As discussed in Section~\ref{sec:relatedResearch} on related research, the work
+in this report directly related to and builds on work by Wim Vanderbauwhede et
+al. The purpose of their work is to classify a stream of text documents based on
+significant terms in the documents. A classic example would be emails, where
+spam emails tend to have specific terms to indicate their class. An assumption
+is that most of the documents will not be of interest (mostly not spam in our
+example) so the profiles of significant terms discriminates highly. This is
+achieved by a Naive Bayes classifier with n-grams, similar to the work by the
+University of Waterloo \cite{peng2003combining} for text classification and
+Greek \cite{metsis2006spam} and German \cite{Schneider:2003:CEM:1067807.1067848}
+academics for Spam Filtering itself.
 
-\subsection{Hashed Profile}
+The most recent papers by Wim Vanderbauwhede et al. discuss the use of FPGAs for
+high throughput document filtering. The inherent parallelism in document
+classification (as is also true with many data-centric algorithms) and the
+parallelism focus of FPGAs, was found to be a suitable pairing to create a power
+efficient, high throughput scoring system for parsed documents
+\cite{vanderbauwhede2013high} \cite{HybridCPUFPGA}. The results of the latest
+paper show that, while an FPGA can score at a median performance of 749MB/s
+\cite{vanderbauwhede2013high}, the CPU can only parse at 426.2MB/s making the
+parsing on the CPU the bottleneck to higher performance. This report will take
+the same initial steps, implementing the scoring for a GPU, and then, due to the
+parser being the bottleneck to performance, look into having parsing and scoring
+on the GPU and other devices. This is similar to the work by Altera Toronto
+Technology Center which focuses on performance per watt ratios
+\cite{chen2012invited} but use manufacturer quoted board figures for power
+usage, rather than measuring energy used from the power socket.
 
-% linear probing, hence 4 terms looked at.
+\subsection{Parser}
+
+\subsubsection{Structure}
+
+The parser is a Finite State Machine originally implemented in C++ but designed
+to also be suitable for FPGA implementation. The parser is able to make full use
+of all hardware threads available to it from the CPUs. \cite{HybridCPUFPGA}. The
+output from the parser is a series of terms (English language words) in a sixty
+four bit number. Each term can contain up to twelve characters, with each
+character being represented by five bits. The last four bits of the term are
+used to identify the number of characters in the term. If a term is larger than
+twelve characters, the remainder of the word is truncated. Given the average
+English word length of 8.23 characters \footnote{\url{http://www.ravi.io
+/language-word-lengths}} this is an acceptable encoding.
+
+\subsubsection{Baudot Encoding}
+
+The encoding used to convert an eight bit ASCII character into five bits is a
+variant of Baudot encoding
+\footnote{\url{http://rabbit.eng.miami.edu/info/baudot.html}}. Most text
+compression algorithms are lossless, the original text can always be returned
+during a decompression stage. Baudot code is different, it is lossy. The
+compressed text can still be read as English, just with some unusual character
+substitutions. The algorithm is outlined in Figure~\ref{baudotCode}:
+
+\begin{figure}[H]
+\begin{verbatim}
+to5BitEncoding(char c)
+{
+    if (c == 'i' || c == 'j' || c == 'I' || c == 'J')
+    {
+        return 1;
+    }
+    if (c == 'o' || c == 'O')
+    {
+        return 0;
+    }
+    if (isLowercase(c))
+    {
+        tcode = c - ((v > 106) ? ((v > 111) ? ((v > 117) ? 4 : 3) : 2) : 0);
+        return tcode - 87;
+    }
+    if (isUpperCase(c))
+    {
+        tcode = c - ((v > 74) ? ((v > 79) ? ((v > 86) ? 4 : 3) : 2) : 0);
+        return tcode - 55;
+    }
+    if (isNumeric(c))
+    {
+        return c - 48;
+    }
+}
+\end{verbatim}
+\caption{ASCII to 5 bit encoding pseudo code}
+\label{baudotCode}
+\end{figure}
+
+In short, characters which look like a 1 (`i', `j', `I', and `J') are converted
+to 1. Characters which look like a 0 (`o', `O') are converted to 0. `u' and `v',
+and `U' and `V' are treated to be identical. All other characters have their
+ASCII value reduced so that they fit into numbers lower than 32. All lower case
+characters are now upper case meaning now, in total, there are 10 (numeric) + 26
+(letters) - 4 (`I', `J', `O', and `U' = `V') = 32 characters.
+
+\subsection{Scorer}
+
+The array of terms is passed onto the scorer, prior this report this could be
+another CPU routine, or an FPGA. The beginning of documents is marked by a term
+representing the document ID. The last four bits (term length field) are left
+at 0 to indicate that this is a document start.
+
+\subsubsection{Terms and N-Grams}
+
+Each term is taken in turn. N-grams (up to tri-grams) are created with the new
+term. An n-gram is essentially a concatenation of the newest term onto the end
+of the last n-1 terms, up to a n-gram length of twelve as with the original
+terms. The reason behind this is that an English word on its own right isn't
+always significant but with the previous words to place it in context, it may
+be. A simple example from the area of spam filtering is the word `Rolex'. On its
+own it's not necessarily important whereas with the tri-gram `Cheap Real Rolex',
+it becomes more significant and indicates that the document in question is
+likely spam.
+
+\subsubsection{Profile}
+
+After the n-grams have been generated, each one is taken in turn and looked up
+in the profile of terms. The profile is a hashed data structure of (term,
+weight) pairs. If the term exists in the profile, the weight of the term is
+added to the document's score. It is this score which is ultimately used to
+determine a document's classification. If the score is above a certain threshold
+value, the document is significant to us, otherwise it isn't.
+
+A profile is typically quite large, 128MB in this case. As such, the profile is
+organised in such a way that it is a hashed array allowing for O(1) (constant
+time) lookup rather than a linear, or binary search which would be O(n) (linear)
+and O(log n) time respectively (where n is the number of elements in the
+profile). To work out where a term is in the profile, a simple bit shift and
+masking operation is executed to obtain an offset into the profile array. This
+allows for the possibility of collisions with other terms thus probing is used
+(up to four addresses) to reduce the likelihood of missing a term in the
+profile.
+
+\subsubsection{Bloom Filters}
+
+With the profile being large, it will always be mostly resident in main memory.
+For the CPU system this is off chip, and for accelerator devices this is on the
+same board, but both have significantly higher latency than caches which reside
+closer to the CPU cores and GPU compute units. With the profile only containing
+a subset of possible terms, and the requirement to look up four terms due to
+hashing collisions, this latency to go to main memory can be quite expensive. To
+reduce the need to go to main memory, a small data structure (4KB or so) is
+employed called a bloom filter. Burton Bloom first defined this data structure
+in a famous paper: ``Space/Time Trade-offs in Hash Coding with Allowable
+Errors'' \cite{bloom1970space}.
+
+A Bloom filter is used to store the possibility that a term exists in the
+profile. With the size of the Bloom filter being small, it's likely it will
+migrate into a cache of both the CPU and GPU allowing for efficient lookup and
+minimised trips to memory for non-existent terms.
+
+A Bloom filter works as follows. It is an array of bit values where 0 indicates
+absent and 1 indicates present. When constructing the profile, each entry is
+run through a number of hash functions (for example, four) to get a number of
+numerical values. These numerical values are indexes for bit positions in the
+bloom filter. These bit positions are set to 1.
+
+To use the bloom filter, the term to be looked up is run through the same hash
+functions. If all locations returned by the hash functions have their bit set to
+1, then it's likely the term is in the profile. Even if n-1 out of n positions
+are set to 1, with the nth set to 0, the profile is known not to contain the
+term. However, it is possible that a term can have all n bit positions set to 1
+but still be absent from the profile. Think of the case where term 1 set
+position a b, term 2 set position c, d. An absent term 3 could hash to positions
+b and c which, although they are set to 1, aren't contained in the profile. In
+other words, a bloom filter cannot have a false negative result (all terms in
+profile can be looked up) but can have false positive results like term 3.
+
+This is the space/time tradeoff that Bloom discusses. A Bloom filter can be
+very small compared to the data structure it's supporting but lookups can take
+more time due to the false positive results. If the false positive rate is low
+enough, the time saved from the reads from memory avoided by true negatives
+outweighs the time wasted looking up false positive results.

@@ -2,9 +2,10 @@
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {2.1}{\ignorespaces Simplified visualisation of OpenCL Memory Model}}{5}{figure.2.1}
 \contentsline {figure}{\numberline {2.2}{\ignorespaces Simplified visualisation of OpenCL Execution Model}}{6}{figure.2.2}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces ASCII to 5 bit encoding pseudo code}}{10}{figure.2.3}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces PCI Express bus transfer rates}}{13}{figure.4.1}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Scoring Only Device Comparison}}{15}{figure.4.2}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Parsing and Scoring Device Comparison}}{17}{figure.4.3}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces PCI Express bus transfer rates}}{16}{figure.4.1}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Scoring Only Device Comparison}}{18}{figure.4.2}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Parsing and Scoring Device Comparison}}{20}{figure.4.3}
 \addvspace {10\p@ }
