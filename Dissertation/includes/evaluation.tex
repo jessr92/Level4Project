@@ -83,7 +83,7 @@ Cache available per processor.
 
 \section{Experiment Set up and Input Files}
 
-\subsection{Data Transfer Results}
+\subsection{Data Transfer}
 
 The first experiment conducted was to investigate the effect of the PCI Express
 bus transfer rate on overall system performance. The classification system
@@ -96,6 +96,46 @@ possible transfer rate, will, due to their size, take up significant amount of
 time to transfer. If the transfer time is significant in regards to the actual
 time to score the transferred documents, use of an accelerator device could be
 inefficient, irrespective of the processing power of the accelerator.
+
+There are currently four PCI Express bus standards in place, the first two are
+in use in the systems discussed above. Each standard doubles (or nearly doubles)
+the theoretical maximum bandwidth of a single PCI-E lane in each direction.
+Table~\ref{table:pciE} shows this alongside the sampling rate in gigatransfers
+per second (GT/s) and encoding of data.
+
+\begin{table}[H]
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+PCI-E Standard & Sampling rate per lane & Data encoding & Single lane speed &
+Sixteen lane speed\\
+\hline
+PCI-E 1.0 & 2.5 GT/s & 8b/10b & 250MB/s & 4GB/s\\
+\hline
+PCI-E 2.0 & 5 GT/s & 8b/10b & 500MB/s & 8GB/s\\
+\hline
+PCI-E 3.0 & 8GT/s & 128b/130b & 985MB/s & 15.75GB/s\\
+\hline
+PCI-E 4.0 & 16GT/s & 128b/130b & 1969MB/s & 31.51GB/s\\
+\hline
+\end{tabular}
+\caption{PCI-E Bus Speeds (each direction)}
+\label{table:pciE}
+\end{table}
+
+As Table~\ref{table:pciE} shows, theoretical bandwidth nearly doubles on each
+iteration. The change from 8b/10b encoding, with 20\% transfer overhead, to
+128b/130b encoding, with around 1.56\% transfer overhead, allowed this doubling
+of bandwidth to nearly double, even though the sampling rate only increased by
+60\%.
+
+The Mac Pro system connects the Tesla C2075 to a sixteen lane PCI-E 1.0 slot and
+the Intel Phi system connects the Intel Xeon Phi to an eight lane PCI-E 2.0 slot
+which theoretically has the same bandwidth as the sixteen lane PCI-E 1.0 slot.
+
+nVidia's CUDA SDK supplies a bandwidth test which was used to determined the
+bandwidth of the Mac Pro system. The tool, called ``bandwidthTest'' has a mode
+which is referred to as ``shmoo'' that runs a series of tests of increasing
+size, from 1KB up to 64MB to give the full range of possible values.
 
 \subsection{Document Classification}
 
@@ -130,24 +170,20 @@ are prevented. This results in a completely zero score classification for all
 documents however, alongside the ``all hits'' bloom filter, results in a range
 of performance values possible when using a bloom filter.
 
-\section{Data Transfer}
+\section{Data Transfer Results}
 
-Table \ref{table:dataTransfer}
+Figure \ref{fig:dataTransfer} shows the data transfer speeds between host and
+device on the Mac Pro system. The theoretical maximum bandwidth of the system is
+4GB/s and, with large enough transfers, around 3.2GB/s (80\% of theoretical)
+is achieved.
 
-\begin{table}[H]
-\begin{tabular}{|l|l|l|}
-\hline
-Transfer Size & Transfer Time & Throughput\\
-\hline
-\end{tabular}
-\caption{PCI Express bus transfer rates}
-\label{table:dataTransfer}
-\end{table}
-
-Figure \ref{fig:dataTransfer}
+Transfers that are less than 100 kilobytes, for instance the 4KB bloom filter,
+suffer very low transfer speeds, with the bloom filter being transferred at
+around 850MB/s.
 
 \begin{figure}[H]
 \centering
+\includegraphics[width=\linewidth]{images/faraBandwidth.png}
 \caption{PCI Express bus transfer rates}
 \label{fig:dataTransfer}
 \end{figure}
