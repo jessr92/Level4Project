@@ -362,3 +362,37 @@ manipa: £8400
 togian:
 
 \section{Discussion of Results}
+
+\subsection{Data Transfer}
+
+Data transfer rates between host and device are often a source of performance
+issues when using accelerator chips. In the document classification system,
+around 300MB is required to be transferred for each kernel invocation. Transfer
+times, as measured during actual kernel executions, are around 110 milliseconds.
+
+For the scoring only results, this is up to half of the total time spent to
+score some documents. For instance the nVidia Tesla C2075 bloom filter
+experiment has a scoring time is 232ms. This is a significant overhead. Given
+that the PCI express bus speed was the original 1.0 specification with 4GB/s
+maximum throughput, moving to a graphics card with similar compute performance,
+but with PCI-E 3.0 capabilities would reduce the data transfer overhead to
+around 30ms, improving overall time to 152ms, a reduction of around one third.
+
+For the parsing and scoring results, the transfer time only represents at most
+one fifth of the total time on the Intel Xeon Phi (The no bloom filter
+experiment runs in 499ms). This is still a substantial overhead however, the
+move to PCI-E 3.0 would only reduce this time to around 429ms, a throughput
+improvement of around 16\%.
+
+The simple reason behind the differences in effect of transfer rates on
+performance between the scoring, and parsing and scoring code is that in the
+latter, the OpenCL kernel spends more computational time on each byte of data
+transferred. Both scoring, and parsing and scoring require a similar amount of
+data to be transferred yet the latter does more work thus parsing and scoring on
+the one device is the better option based on data transfer overhead alone. It is
+also worth noting again that due to the speed of parsing on the C++ system being
+low compared to the scoring speed, the improved data transfer rates will only
+reduce latency in getting classification results back, but not improve
+throughput overall given that the parser is the bottleneck.
+
+\subsection{Document Classification}
