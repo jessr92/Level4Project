@@ -396,3 +396,30 @@ reduce latency in getting classification results back, but not improve
 throughput overall given that the parser is the bottleneck.
 
 \subsection{Document Classification}
+
+\subsubsection{C++ versus OpenCL throughput}
+
+Although the scoring only experiments on the CPU was initially purely for
+reference, they also highlight a potential benefit of running a highly data
+parallel algorithm on the CPU using OpenCL. The C++ version uses POSIX threads
+to become multi-threaded and, with eight hardware threads, experience up to
+7.82x better throughput compared to the single threaded version. This is as
+expected, the maximum improvement is 8x however threading will inevitably result
+in a bit of overhead. The surprise arrives when looking at the OpenCL version of
+the scorer, it has around twice as high throughput compared to the multi-
+threaded C++ version, thus making it nearly 20x quicker than the single threaded
+version.
+
+Looking at the results alone, this initially seems unusual however can be
+explained. With POSIX threads, the document set is split evenly into eight sets,
+one for each hardware thread. In terms of scheduling and memory access, this is
+as granular as things go, each thread goes through its documents one by one. For
+OpenCL, it has the same number of work items as there are documents. For the
+TREC data set, this is around 77876 documents. OpenCL is free to schedule work
+items on compute units allowing for more granular scheduling. This can enable
+the runtime system to better hid memory access latency, resulting in the higher
+throughput. Also, given that documents can be of different lengths, if a POSIX
+thread has significantly longer documents than its counterparts, it will still
+be working away while the others have finished. This can still happen on the
+OpenCL system but with the granularity being significantly finer, it can be
+mitigated.
