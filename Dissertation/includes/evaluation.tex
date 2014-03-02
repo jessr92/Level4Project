@@ -124,8 +124,8 @@ PCI-E 4.0 & 16GT/s & 128b/130b & 1969MB/s & 31.51GB/s\\
 
 As Table~\ref{table:pciE} shows, theoretical bandwidth nearly doubles on each
 iteration. The change from 8b/10b encoding, with 20\% transfer overhead, to
-128b/130b encoding, with around 1.56\% transfer overhead, allowed this doubling
-of bandwidth to nearly double, even though the sampling rate only increased by
+128b/130b encoding, with around 1.56\% transfer overhead, allowed an increase in
+of bandwidth of nearly 100\% even though the sampling rate only increased by
 60\%.
 
 The Mac Pro system connects the Tesla C2075 to a sixteen lane PCI-E 1.0 slot and
@@ -148,7 +148,10 @@ of documents. Each profile run would be repeated several times.
 
 For the scoring only system, a pre-parsed collection of terms for the TREC
 collection is given. The parser and scoring only system receives the original
-TREC collection text file.
+TREC collection text file. The TREC collection is a 236MB text file containing
+77876 documents in plain text. Each document is enclosed by DOC tags and
+contain a document number, a date and time, a category, headline, and a series
+of paragraphs for the document itself.
 
 Each device is given three different bloom filter inputs. The first is the
 ``normal'' bloom filter. This bloom filter is actually generated from the
@@ -179,7 +182,9 @@ is achieved.
 
 Transfers that are less than 100 kilobytes, for instance the 4KB bloom filter,
 suffer very low transfer speeds, with the bloom filter being transferred at
-around 850MB/s.
+around 850MB/s. With the next smallest buffer to be transferred being on the
+order of hundreds of kilobytes (scoring results), the slow transfer rate is
+not going to cause significant impact on overall performance.
 
 \begin{figure}[H]
 \centering
