@@ -206,4 +206,29 @@ for (char in documents[startIndex..endIndex]) {
 
 \subsection{Local Size}
 
+Summary: Algorithm and device dependent changes to local size (number of work
+items in each dimension in a work group) affect performance. Large (128) =
+better latency hiding on GPU. Phi likes local size of 4 (4-way ht likely
+reason). If local size too big, compute unit used inefficiently (say compute
+unit can take 511 work items simultaneously (based on private memory usage), and
+local size is 256. Only 1 work group (256 work items) can be enqueued. If local
+size is 4, 127 work groups (508) work items can be enqueued). global size mod
+local size has to be 0.
+
 \subsection{Mapped Buffers}
+
+When using an accelerator device such as a graphics card, the data used by the
+kernel has to be transferred over the PCI-E bus by en-queueing a write buffer
+command. This incurs an unavoidable time cost as the PCI-E bus has limited
+bandwidth. When running OpenCL code on the CPU this is not the case as the
+OpenCL buffers can stay in primary memory. Unfortunately, the write buffer
+command does not realise that this is the case, and when executing a write
+buffer command for the CPU, copies the host array from primary memory to another
+location in primary memory. As well as duplicating memory usage this incurs an
+avoidable time cost.
+
+The solution to the issue is to map the OpenCL buffer to the host array. This is
+done by executing an en-queue map buffer command. The OpenCL buffer can then
+read from the host address space and removes the requirement for the unnecessary
+duplication of memory. The benefits of mapping a buffer is essentially a free
+lunch as the call takes an insignificant amount of time to execute.
