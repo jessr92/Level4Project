@@ -1,5 +1,207 @@
 \section{Implementation}
 
+The project implementation is split into two primary sections. The first is the
+scoring only implementation, the second is the parsing and scoring
+implementation. The scoring only implementation comprised the entire initial
+project plan and involved porting the existing scoring code from C++ to OpenCL.
+After the implementation of the scoring code, and the initial analysis of
+results was conducted, it was determined that the parsing code (also written in
+C++) was the bottleneck to the system and the project then began to investigate
+also porting the parsing code to OpenCL.
+
+A note on terminology: When a contiguous block of memory is allocated on the
+host device it is normally referred to as an array. When the array is
+transferred to an OpenCL device it is referred to as a buffer. These are
+functionally the same with the primary distinction being where they are
+allocated.
+
+\subsection{All implementations}
+
+Most OpenCL applications are implemented in much the same way from the host
+code's perspective. There is a significant amount of boiler plate code to detect
+OpenCL platforms and devices available on the target system. Each device that is
+going to be used needs it's own command queue. An OpenCL command queue is as the
+same suggests, any data transfers or kernel executions are placed on the
+device's command queue and executed in order of arrival to the queue (although
+out of order execution is possible). Command queues, memory, program, and kernel
+objects are all managed by an OpenCL context. The kernel itself also has to be
+compiled, it is read in from disk as a string and built for the required
+devices. This is what allows a single kernel to run on any available device
+selected, it's compiled at run time. After compilation is completed, the
+kernel's arguments are set to the appropriate device buffers. The host's arrays
+that contain data the kernel needs are then transferred to the device's buffers
+and the kernel is executed. After the kernel has finished executing, any buffers
+relating to results, in this case the document scores, are written back by en-
+queuing a read buffer command.
+
+As discussed in the background, the Naive-Bayes classifier makes use of a
+profile. This is a 128MB file containing the terms and associated term weights.
+This is read in from disk by the C++ host device code, and passed in as a buffer
+of unsigned long values to the OpenCL kernel. It does not change between
+invocations of the kernel, as all sets of documents are scored using the same
+profile.
+
+The use of a bloom filter was also discussed in the background. This is a 4KB
+array of bit values used by the OpenCL kernel to see if there is a chance that
+the document term being scored exists in the profile. As with the profile, this
+is read in from disk and passed in as a buffer to the OpenCL kernel. It also
+does not change between invocations of the kernel because the profile does not
+change.
+
+OpenCL host code is summarised in the pseudo-code in
+Figure~\ref{fig:openCLPseudocode}.
+
+\begin{figure}
+\begin{verbatim}
+// One time set up
+platforms = getPlatforms
+devices = getDevices(platforms[0])
+context = createContext(devices)
+queue = createCommandQueue(context, devices[0])
+program = buildProgram(context, sourceCode)
+kernel = createKernel(program, kernelMethodName)
+
+// repeat for each buffer
+buffer1 = createBuffer(context, options, size)
+setArg(kernel, 1, buffer1)
+writeBuffer(buffer1)
+
+// Execute kernel and get results back
+enqueueKernel(queue, kernel)
+readBuffer(resultsBuffer)
+\end{verbatim}
+\caption{OpenCL Host Pseudo-code}
+\label{fig:openCLPseudocode}
+\end{figure}
+
+\subsection{Scoring Only}
+
+In addition to the profile and bloom filter, the scoring only implementation
+reads in the parsed document terms from disk. These are passed to the OpenCL
+kernel and are used to calculate a document's score.
+
+The array of terms is a one dimensional array thus the C++ code has to iterate
+over the array and find the beginnings of documents to know how many work items
+to create (one per document) and over what range of terms represent each
+document. This simply involves the creation of indexes containing the location
+of terms with length 0 as this was used to delimit document beginnings. The
+array of document marker addresses is prefixed by the number of documents and
+has the total number of terms added to the end of the array. The total term
+number is required by the work item scoring the last document as there is no
+next document to determine where to stop scoring terms at. This buffer is also
+transferred to the device.
+
+All buffers are read only with the exception of the scores buffer. This is a
+write-only buffer with length equal to the number of documents being scored. It
+is this buffer that the kernel writes the results to and is the only buffer that
+needs to be written back to the host memory after kernel execution.
+
+After the kernel has the arguments set to the appropriate buffer, and the data
+has been transferred to the device the kernel can execute. During kernel
+execution, each work item iterates of the terms for their associated document. A
+work item knows which document to score because the location of the document
+starting term is the work item's ID + 1, up to the work item's ID + 2. Each term
+in this range is scored and the total score for the document is stored in a
+scores buffer at location equal to the work item's ID.
+
+The OpenCL kernel code is summarised in the pseudo-code in
+Figure~\ref{fig:scoringPseudocode}.
+
+\begin{figure}
+\begin{verbatim}
+documentNumber = get_global_id(0) + 1 // work item ID
+startIndex = docAddresses[documentNumber]
+endIndex = docAddresses[documentNumber + 1]
+score = 0
+for (term in terms[startIndex..endIndex]) {
+    generateNGrams(term)
+    for (ngram in ngrams) {
+        address = getTermAddress(ngram)
+        profileEntryVector = profile[address]
+        for (i = 0; i < 4; i++) {
+            profileEntry = profileEntryVector[i]
+            if (profileEntry contains ngram) {
+                score += getWeight(profileEntry)
+            }
+        }
+    }
+}
+scores[documentNumber -1] = score
+\end{verbatim}
+\caption{Scoring Pseudo-code}
+\label{fig:scoringPseudocode}
+\end{figure}
+
+After the kernel has finished executing, and the scores buffer has been written
+to a host device array, the actual classifications of each document is
+recovered. A document is classed as significant (spam in the spam or not spam
+example) if the score is above a certain threshold.
+
+\subsection{Parsing and Scoring}
+
+For the parsing and scoring version, the host code is very similar. The only
+differences relate to the documents themselves. For scoring only, the documents
+were already parsed and represented by terms. For parsing and scoring, the plain
+text is instead read in. The TREC data collection is read in as a single text
+file and passed to the OpenCL kernel as-is. For the document marker array,
+instead of detecting zero length terms, the C++ code searches through the plain
+text and stores the character locations where the sub-string ``$<$DOC$>$''
+begins. This sub-string acts as a direct replacement to the zero length term
+locations, and is transferred to the OpenCL kernel in the same way.
+
+Again, each work item is responsible for a single document. During the kernel
+invocation, each work items parses the documents character by character and, as
+soon as a full term has been parsed, scores the term. A term is ready to score
+when a white space character has been reached, and the term is of non-zero
+length. Any characters inside tags, for instance the start and end doc tags, are
+ignored. After all characters have been parsed, the scores are stored in the
+same way as the scoring code.
+
+After the kernel has finished, the scores are written back to the host and the
+classifications are calculated as before.
+
+The OpenCL kernel code is summarised in the pseudo-code in
+Figure~\ref{fig:parsingScoringPseudocode} where to5BitEncoding(char) is the
+Baudot encoding discussed and shown in Figure~\ref{baudotCode}, scoreTerm(term)
+contains the profile lookup and scoring addition code from
+Figure~\ref{fig:scoringPseudocode}, and updateState(state) works out the parser
+state machine transition based on the current state, and what character has just
+been found. States tell the parser to either skip characters, write characters
+to the term, `flush' the term (aka score the term), or that a tag has been
+encountered.
+
+\begin{figure}
+\begin{verbatim}
+documentNumber = get_global_id(0) + 1 // work item ID
+startIndex = docAddresses[documentNumber]
+endIndex = docAddresses[documentNumber + 1]
+state = SKIPPING
+score = 0
+for (char in documents[startIndex..endIndex]) {
+    if (char is alphanumeric) {
+        updateState(state, 0)
+        if (state is WRITING) {
+            term += to5BitEncoding(char)
+        }
+    } else if (char is whitespace) {
+        updateState(state, 2)
+        if (length(term) > 0 and state is FLUSHING) {
+            score += scoreTerm(term)
+            term = 0 // Parse a new term now
+        }
+    } else if (char is '<') {
+        updateState(state, 3)
+    } else if (char is '>') {
+        updateState(state, 4)
+    } else {
+        updateState(state, 1)
+    }
+}
+\end{verbatim}
+\caption{Parsing and Scoring Pseudo-code}
+\label{fig:parsingScoringPseudocode}
+\end{figure}
+
 \section{Optimisations}
 
 \subsection{Local Size}
