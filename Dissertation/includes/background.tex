@@ -261,15 +261,15 @@ different parts of memory.
 In addition to the architecture differences between CPUs and GPUs, there is a
 separate consideration that must be made for GPUs and other discrete devices,
 the PCI-E bus. GPUs are unable to directly access main memory like a CPU, thus
-before any code is run on a GPU, data must be transferred between RAM and the
-GPUs on-board memory. This can take a significant period of time in comparison
-to the code runtime. This is due to the relatively slow speed of the PCI-E bus
-in comparison to on-board memory access. A GPU is able to access it's global
-memory at a rate of around 200GB/s on modern chips. Contrast this to the PCI-E
-link speed which can be as low as 250MB/s per lane. The most common systems have
-PCI-E 2.0 slots which run at 500MB/s per PCI-E lane with 16 lanes available for
-the GPU giving a maximum theoretical transfer speed of 8GB/s, 25 times slower
-than access from on-board memory.
+before any code is run on a GPU, data must be transferred between primary memory
+and the GPUs on-board memory. This can take a significant period of time in
+comparison to the code runtime. This is due to the relatively slow speed of the
+PCI-E bus in comparison to on-board memory access. A GPU is able to access it's
+global memory at a rate of around 200GB/s on modern chips. Contrast this to the
+PCI-E link speed which can be as low as 250MB/s per lane. The most common
+systems have PCI-E 2.0 slots which run at 500MB/s per PCI-E lane with 16 lanes
+available for the GPU giving a maximum theoretical transfer speed of 8GB/s, 25
+times slower than access from on-board memory.
 
 \subsection{Bridging the gap - APUs}
 
