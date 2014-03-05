@@ -1,6 +1,6 @@
 \section{Introduction}
 
-With traditional CPUs experiencing slowdowns in improvements regarding to
+With traditional CPUs experiencing slowdowns in improvements relating to
 performance, the computing industry is looking for an alternative hardware and
 software paradigm to take us into the next era of computing performance. This
 has led to the increase in the number of cores on a single CPU die, with most
@@ -33,13 +33,13 @@ high enough score, it is classed as spam, otherwise it is not spam.
 
 Document filtering is problem of growing importance. The advent of the Internet
 has resulted in a massive surge in the transfer and storage of data and
-information. A prime example is email where hundreds of billions are sent every
-day. Emails, and other kinds of documents, require to be filtered. This problem
-is highly data parallel in nature as the classification of one document does not
-affect the classification of another. With GPU manufacturers concentrating on
-parallelism in their chip designs for pixel colour value generation, these
-devices are thought of as being a suitable device for other highly parallel
-tasks.
+information. A prime example is email where hundreds of billions of emails are
+sent every day. Emails, and other kinds of documents, sometimes need to be
+filtered. This problem is highly data parallel in nature as the classification
+of one document does not affect the classification of another. With GPU
+manufacturers concentrating on parallelism in their chip designs for pixel
+colour value generation, these devices are thought of as being a suitable device
+for other highly parallel tasks.
 
 In addition to the large amounts of data which needs to be filtered, there is a
 growing need for large enterprise data centres to be more cost effective, and to
@@ -63,7 +63,7 @@ There has also been work looking into the efficiency of different architectures
 in the area of information filtering \cite{chen2012invited}
 \cite{he2013massively} in general.
 
-This problem more specifically relates to, and builds upon work by Wim
+This report more specifically relates to, and builds upon, work by Wim
 Vanderbauwhede et al. which has primarily focused on the use of Field-
 Programmable Gate Arrays (FPGAs) to accelerate a document parser and scoring
 system \cite{vanderbauwhede2013high} \cite{HybridCPUFPGA}
@@ -80,8 +80,8 @@ Chapter 2 will contain details on the background of OpenCL, the architecture
 differences between devices used, and further details of document filtering
 using a Na{\"{\i}}ve Bayes classifier.
 
-Chapter 3 will discuss significant design decisions and implementation details
-of the document filtering software.
+Chapter 3 will discuss significant implementation details and optimisations of
+the document filtering software.
 
 Chapter 4 will evaluate the performance of the document filtering software over
 a range of different devices, with a comparison to a traditional CPU

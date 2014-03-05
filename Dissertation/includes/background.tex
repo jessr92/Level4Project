@@ -5,8 +5,8 @@
 Open Computing Language (OpenCL) is a framework for writing applications
 designed to be executed across heterogeneous platforms such as central
 processing units (CPUs), graphics processing units (GPUs), and accelerator
-devices such as the Intel Phi and Field Programmable Gate Arrays (FPGAs). The
-language is an open standard maintained by Khronos Group
+devices such as the Intel Xeon Phi and Field-Programmable Gate Arrays (FPGAs).
+The language is an open standard maintained by Khronos Group
 \footnote{\url{http://www.khronos.org/opencl}}. OpenCL is based on the C99
 standard and can be loosely thought of as a subset of the C99 language with some
 additional keywords. The first release of the OpenCL standard (OpenCL 1.0) was
@@ -22,10 +22,10 @@ C++. The host code executes as normal and makes use of APIs exposed by OpenCL to
 define how, and where, OpenCL device code is executed.
 
 OpenCL applications are called kernels. A kernel is a function that executes on
-an OpenCL capable device. Given the focus of OpenCL is on parallelism, a kernel
+an OpenCL capable device. Since the focus of OpenCL is on parallelism, a kernel
 is written from the perspective of a single thread instead of requiring explicit
-threading code from more familiar models such as POSIX Threads. An OpenCL work
-item is similar to a POSIX Thread with a notable exception that OpenCL has no
+threading code from more familiar models such as POSIX threads. An OpenCL work
+item is similar to a POSIX thread with a notable exception that OpenCL has no
 traditional stack, any `function' calls are actually in-lined by the compiler.
 OpenCL kernels are also compiled at runtime thus the host code, and the compiler
 itself, can make device-specific optimisations for optimal performance.

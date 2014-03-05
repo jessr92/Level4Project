@@ -13,14 +13,14 @@ results which follow.
 The Mac Pro was running Mac OS X version 10.8.5 (Build Version 12F45). Both the
 nVidia and Intel OpenCL SDKs were installed and up to date at time of writing.
 
-\begin{itemize}
+\begin{description}
 
 \item[CPU] The motherboard has two CPU sockets, both with an Intel Xeon E5462
 \footnote{\url{http://ark.intel.com/products/33084/Intel-Xeon-Processor-E5462
 -12M-Cache-2_80-GHz-1600-MHz-FSB}} processor. This is a quad core processor with
 a 2.8GHz clock speed and 12MB of Level 2 cache per processor.
 
-\item[RAM] There is 14GB of PC2-6400 (800MHz) DDR2 RAM installed, with error
+\item[Primary Memory] There is 14GB of PC2-6400 (800MHz) DDR2 RAM installed, with error
 correcting code (ECC) enabled.
 
 \item[GPU] The GPU is an nVidia Tesla C2075
@@ -31,7 +31,7 @@ frequency of 1.15GHz. It has been installed in a PCIe 1.0 slot with 16x lane
 bandwidth giving a total theoretical bandwidth between its on-board memory and
 main memory of 4GB/s (250MB/s per lane).
 
-\end{itemize}
+\end{description}
 
 \subsection{Intel Xeon Phi System}
 
@@ -40,7 +40,7 @@ system was used for running the software system on the Intel Xeon Phi both with
 and without the CPU as an OpenCL device. The system did not have a graphics card
 fitted.
 
-\begin{itemize}
+\begin{description}
 
 \item[CPU] There is a single Intel Xeon E5-2620
 \footnote{\url{http://ark.intel.com/products/64594/intel-xeon-processor-e5-2620
@@ -49,7 +49,7 @@ with hyper-threading to give twelve hardware threads. The standard clock
 frequency is 2GHz with a maximum turbo frequency of 2.5Ghz. There is a total of
 15MB ``Intel Smart Cache'' available which acts as Level 3 cache.
 
-\item[RAM] 16GB DDR3 RAM
+\item[Primary Memory] 16GB DDR3 RAM
 
 \item[Intel Xeon Phi] The Intel Xeon Phi is the 51100P
 \footnote{\url{http://ark.intel.com/products/71992/intel-xeon-phi-coprocessor-
@@ -60,7 +60,7 @@ theoretical maximum memory bandwidth of 320GB/s. It has been installed in a PCIe
 2.0 slot with 16x lane bandwidth giving a total theoretical bandwidth between
 its on-board memory and main memory of 8GB/s (500MB/ per lane).
 
-\end{itemize}
+\end{description}
 
 \subsection{AMD System}
 
@@ -68,7 +68,7 @@ The system is running the Fedora 18 Linux distribution. This system was used
 solely for running the software system on the AMD CPUs and did not have a
 graphics card fitted.
 
-\begin{itemize}
+\begin{description}
 
 \item[CPU] There are four AMD Opteron 6366 HE
 \footnote{\url{http://products.amd.com/en-us/OpteronCPUDetail.aspx?id=813&f1=&f2
@@ -77,9 +77,9 @@ fitted. Each processor has 16 cores running at a base clock speed of 1.8GHz with
 a maximum turbo frequency os 3.1GHz. There is 1MB of Level 2 and 16MB of Level 3
 Cache available per processor.
 
-\item[RAM] 512GB DDR3 RAM
+\item[Primary Memory] 512GB DDR3 RAM
 
-\end{itemize}
+\end{description}
 
 \section{Experiment Set up and Input Files}
 
