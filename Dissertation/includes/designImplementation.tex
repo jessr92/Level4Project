@@ -215,6 +215,22 @@ local size is 256. Only 1 work group (256 work items) can be enqueued. If local
 size is 4, 127 work groups (508) work items can be enqueued). global size mod
 local size has to be 0.
 
+Graph of local size effect on Tesla Figure~\ref{fig:teslaLocalSize}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{images/teslaLocalSize.png}
+\caption{Tesla C2075 Local Size Effect}
+\label{fig:teslaLocalSize}
+\end{figure}
+
+Graph of local size effect on Intel Xeon Phi Figure~\ref{fig:phiLocalSize}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{images/phiLocalSize.png}
+\caption{Intel Xeon Phi 5110P Local Size Effect}
+\label{fig:phiLocalSize}
+\end{figure}
+
 \subsection{Mapped Buffers}
 
 When using an accelerator device such as a graphics card, the data used by the

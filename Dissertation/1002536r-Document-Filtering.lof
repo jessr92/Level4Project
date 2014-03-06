@@ -7,8 +7,10 @@
 \contentsline {figure}{\numberline {3.1}{\ignorespaces OpenCL Host Pseudo-code}}{14}{figure.3.1}
 \contentsline {figure}{\numberline {3.2}{\ignorespaces Scoring Pseudo-code}}{15}{figure.3.2}
 \contentsline {figure}{\numberline {3.3}{\ignorespaces Parsing and Scoring Pseudo-code}}{16}{figure.3.3}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Tesla C2075 Local Size Effect}}{17}{figure.3.4}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Intel Xeon Phi 5110P Local Size Effect}}{18}{figure.3.5}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces PCI Express bus transfer rates}}{21}{figure.4.1}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Scoring Only Device Comparison}}{23}{figure.4.2}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Parsing and Scoring Device Comparison}}{25}{figure.4.3}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces PCI Express bus transfer rates}}{22}{figure.4.1}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Scoring Only Device Comparison}}{24}{figure.4.2}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Parsing and Scoring Device Comparison}}{26}{figure.4.3}
 \addvspace {10\p@ }
