@@ -204,18 +204,55 @@ for (char in documents[startIndex..endIndex]) {
 
 \section{Optimisations}
 
+OpenCL kernels can run on any device with a suitable compiler. This portability
+is helpful when using different types of devices which may come from a multitude
+of vendors. This portability has a cost however, there is no guarantee that the
+kernel will run well. For instance, CPUs and GPUs are significantly different in
+terms of how they cache and GPUs are more favourable for smaller tasks which can
+be done in parallel. This requires a developer to consider the architectural
+differences of different devices and tune each kernel for each device. Two
+significant optimisations that were employed during this project are discussed
+below. The ``Local Size'' optimisation involves changing the number of work
+items in a work group to suit the target device. The second optimisation,
+``Mapped Buffers'', is a simple optimisation to remove any unnecessary data
+transfers.
+
 \subsection{Local Size}
 
-Summary: Algorithm and device dependent changes to local size (number of work
-items in each dimension in a work group) affect performance. Large (128) =
-better latency hiding on GPU. Phi likes local size of 4 (4-way ht likely
-reason). If local size too big, compute unit used inefficiently (say compute
-unit can take 511 work items simultaneously (based on private memory usage), and
-local size is 256. Only 1 work group (256 work items) can be enqueued. If local
-size is 4, 127 work groups (508) work items can be enqueued). global size mod
-local size has to be 0.
+When executing a kernel, the host code specifies the number of work items to
+create (the global size) and the number of work items per work group (the local
+size). With a single work group being assigned to a single compute unit, and one
+compute unit being able to have multiple work groups simultaneously, the local
+size can have a significant effect on kernel performance. Different devices
+react better to larger work groups, for instance GPUs which can use large work
+groups to improve latency hiding. The type of algorithm also has an affect on
+the optimal local size, certain characteristics prefer larger work groups to
+others. For these two reasons, there is no hard and fast rule dictating what
+local size to use for what device and algorithm, experimentation to fine tune
+the kernel is the only way.
 
-Graph of local size effect on Tesla Figure~\ref{fig:teslaLocalSize}
+Local size can have a value from 1 up to 512, 1024, or 2048, depending on the
+device. This is specified by the ``CL\_DEVICE\_MAX\_WORK\_GROUP\_SIZE'' constant
+that can be queried at runtime. The value is typically a power of two. The only
+other restriction to the local size is that it must be a factor of the global
+size (for instance a local size of 64 and a global size of 4096). Given that
+global size can be any number, for instance the number of documents, it is
+common to round up the global size to the nearest number that makes local size a
+factor. The kernel can then conduct a bounds check and have the few work items
+extra to return straight away. These extra work items do not affect performance
+as they only appear as part of the last work group.
+
+Specific to this project, the Tesla C2075 and Intel Xeon Phi 5110P performance
+for the parsing and scoring kernel had an in-depth analysis regarding to their
+local size. It was found that the Tesla C2075 reacted well to a large local
+size, likely to assist with latency hiding of memory accesses, and achieved the
+best performance with a local size of 128.
+
+Graph of local size effect on the Tesla C2075 is shown in
+Figure~\ref{fig:teslaLocalSize}. There is a gradual improvement in performance
+up to a local size of 128 where performance then starts to drop off for larger
+work groups. In this example, choosing a poor work group size (1) will increase
+the time to score a set of documents by a factor of five.
 
 \begin{figure}[H]
 \includegraphics[width=\linewidth]{images/teslaLocalSize.png}
@@ -223,7 +260,20 @@ Graph of local size effect on Tesla Figure~\ref{fig:teslaLocalSize}
 \label{fig:teslaLocalSize}
 \end{figure}
 
-Graph of local size effect on Intel Xeon Phi Figure~\ref{fig:phiLocalSize}
+The Intel Xeon Phi 5110P reacted best to small local sizes, with a big jump in
+performance when going from a local size of 16 to 8. The optimum performance was
+with a local size of 4, which is likely due to the 4-way hyper-threading
+employed by the device.
+
+Graph of local size effect on Intel Xeon Phi is shown in
+Figure~\ref{fig:phiLocalSize}. There is a gradual improvement in performance as
+the local size is reduced from 512 to 16. Interestingly, there is a massive
+improvement when moving to a local size of 8. In this example, choosing a poor
+work group size (512) will increase the time to sore a set of documents by a
+factor of three. Regarding overall performance changes, the Tesla C2075 has a
+greater benefit of an optimum local size to the Intel Xeon Phi however the Intel
+Xeon Phi has a much sharper reaction when nearing the optimal value whereas the
+Tesla has a more gradual change.
 
 \begin{figure}[H]
 \includegraphics[width=\linewidth]{images/phiLocalSize.png}
