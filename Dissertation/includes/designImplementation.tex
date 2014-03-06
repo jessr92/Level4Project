@@ -249,6 +249,19 @@ factor. The kernel can then conduct a bounds check and have the few work items
 extra to return straight away. These extra work items do not affect performance
 as they only appear as part of the last work group.
 
+Another benefit of modifying the local size is occupancy of a compute unit. A
+work item uses a certain amount of memory, its private variables. A compute unit
+only has a limited capacity for these variables thus, based on the kernel code,
+can only simultaneously handle a maximum number of work items. Say the compute
+unit can handle 2048 work items at one time, thus any combination of local size
+(assuming powers of two) will allow for 100\% occupancy of the compute unit (say
+two work groups with size 1024 work items). If the unfortunate situation occurs
+where 2040 work items can be handled, a local size of 1024 will result in a
+single work group being handled by the compute unit resulting in just over 50\%
+occupancy. If the local size was 32, there would be 63 work groups assigned to
+the compute unit, resulting in just under 99\% occupancy. A higher occupancy can
+make better use of a computes resources and increase overall throughput.
+
 Specific to this project, the Tesla C2075 and Intel Xeon Phi 5110P performance
 for the parsing and scoring kernel had an in-depth analysis regarding to their
 local size. It was found that the Tesla C2075 reacted well to a large local
