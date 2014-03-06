@@ -553,3 +553,22 @@ easily be ignored in a real world implementation. Given that the Intel CPU
 has some benefit from a bloom filter, it could still be beneficial to try the
 bloom filter on the target system as a performance benefit on some devices is
 evidently still applicable.
+
+\subsection{Overall}
+
+In previous work, the parser was running on the CPU at 427MB/s
+\ref{HybridCPUFPGA} and was the bottle neck of the system when scoring was
+conducted on an FPGA. This is also true with the GPU however, if both the CPU
+and GPU are parsing and scoring their own set of documents, it is possible to
+achieve in excess of 620MB/s, around a 45\% increase in performance on a fairly
+typical two CPU and one GPU system. In comparison to the CPU and GPU results
+individually, there is only around a 15\% overhead when running the devices in
+parallel. Most of this overhead comes from the CPU time required to detect the
+beginnings of documents before sending the data off to the OpenCL device. If the
+CPU was used solely to read in documents from a network feed and work out the
+locations of document beginnings, it's likely the case that in a multi-GPU set
+up, the GPUs could each be used to parse and score, with the CPU host having
+plenty of cycles free to coordinate the system. Also, the PCI-E bandwidth is
+unlikely to be a bottleneck as the GPUs can be transferring data and executing
+kernels at slightly different times meaning a multi-GPU set up is unlikely to
+have significant overhead and scale almost linearly with the number of devices.
