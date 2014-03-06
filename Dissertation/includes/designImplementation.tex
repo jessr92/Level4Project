@@ -217,6 +217,10 @@ items in a work group to suit the target device. The second optimisation,
 ``Mapped Buffers'', is a simple optimisation to remove any unnecessary data
 transfers.
 
+A third optimisation, using bloom filters, was also employed however this is
+discussed in the next section as the three bloom filters, and their effect on
+performance demands a more thorough analysis.
+
 \subsection{Local Size}
 
 When executing a kernel, the host code specifies the number of work items to
@@ -268,12 +272,14 @@ employed by the device.
 Graph of local size effect on Intel Xeon Phi is shown in
 Figure~\ref{fig:phiLocalSize}. There is a gradual improvement in performance as
 the local size is reduced from 512 to 16. Interestingly, there is a massive
-improvement when moving to a local size of 8. In this example, choosing a poor
-work group size (512) will increase the time to sore a set of documents by a
-factor of three. Regarding overall performance changes, the Tesla C2075 has a
-greater benefit of an optimum local size to the Intel Xeon Phi however the Intel
-Xeon Phi has a much sharper reaction when nearing the optimal value whereas the
-Tesla has a more gradual change.
+improvement when moving to a local size of 8, the performance increases by over
+a factor of two. In this example, choosing a poor work group size (512) will
+increase the time to sore a set of documents by a factor of three.
+
+Regarding overall performance changes, the Tesla C2075 has a greater benefit of
+an optimum local size to the Intel Xeon Phi however the Intel Xeon Phi has a
+much sharper reaction when nearing the optimal value whereas the Tesla has a
+more gradual change.
 
 \begin{figure}[H]
 \includegraphics[width=\linewidth]{images/phiLocalSize.png}
