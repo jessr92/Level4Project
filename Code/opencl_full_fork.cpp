@@ -316,16 +316,6 @@ int main(int argc, char *argv[])
 #endif
     }
 #endif
-#ifdef PHIPHI
-    if (pid != 0)
-    {
-        // Devices will be out of sync in real application.
-        // Offset by 500ms so that the CPU marker code is
-        // only marking 1 set of documents at one time, as
-        // would be the case in real application.
-        usleep(500*1000*repetitions);
-    }
-#endif
     const std::vector<word_t> *positions;
     mark_time();
     for (int i = 0; i < repetitions; i++)
