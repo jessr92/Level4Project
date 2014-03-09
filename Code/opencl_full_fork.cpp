@@ -47,7 +47,11 @@ void executeFullOpenCL(const std::string *documents,
     unsigned long spamCount = 0;
     const char *docs = documents->c_str();
     char *tempDocs = NULL;
+#ifdef PHIPHI
+    if (false)
+#else
     if (pid != 0)
+#endif
     {
         tempDocs = new char[documents->size() + 1];
         tempDocs[documents->size()] = '\0';
@@ -77,8 +81,13 @@ void executeFullOpenCL(const std::string *documents,
 #ifdef DEVACC
 	if (pid != 0)
         {
+#ifdef PHIPHI
+            platforms[0].getDevices(CL_DEVICE_TYPE_ALL, &devices);
+            std::cout << "Device name: " << devices[1].getInfo<CL_DEVICE_NAME>() << std::endl;
+#else
             platforms[0].getDevices(CL_DEVICE_TYPE_CPU, &devices);
             std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
+#endif
         }
         else
         {
@@ -103,7 +112,11 @@ void executeFullOpenCL(const std::string *documents,
         cl::CommandQueue queue;
         if (pid != 0)
         {
+#ifdef PHIPHI
+            queue = cl::CommandQueue(context, devices[1]);
+#else
             queue = cl::CommandQueue(context, devices[0]);
+#endif
         }
         else
         {
@@ -121,7 +134,11 @@ void executeFullOpenCL(const std::string *documents,
         cl::Buffer d_profile;
         cl::Buffer d_positions;
         cl::Buffer d_scores;
+#ifdef PHIPHI
+        if (false)
+#else
         if (pid != 0)
+#endif
         {
             d_docs = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, docsSize, tempDocs);
             d_profile = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, profileSize, tempProfile);
@@ -138,7 +155,11 @@ void executeFullOpenCL(const std::string *documents,
 #ifdef BLOOM_FILTER
         int bloomFilterSize = sizeof(word_t) * bloomFilter->size();
         cl::Buffer d_bloomFilter;
+#ifdef PHIPHI
+        if (false)
+#else
         if (pid != 0)
+#endif
         {
             d_bloomFilter = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, bloomFilterSize, tempBloomFilter);
         }
@@ -167,7 +188,11 @@ void executeFullOpenCL(const std::string *documents,
 #endif
         for (int i = 0; i < repetitions; i++)
         {
+#ifdef PHIPHI
+            if (false)
+#else
             if (pid != 0)
+#endif
             {
                 queue.enqueueMapBuffer(d_profile, CL_FALSE, CL_MAP_READ, 0, profileSize);
                 queue.enqueueMapBuffer(d_docs, CL_FALSE, CL_MAP_READ, 0, docsSize);
@@ -186,7 +211,11 @@ void executeFullOpenCL(const std::string *documents,
                 std::cout << time_elapsed << " seconds to copy data HtoD." << std::endl;
             }
 #ifdef BLOOM_FILTER
+#ifdef PHIPHI
+            if (false)
+#else
             if (pid != 0)
+#endif
             {
                 queue.enqueueMapBuffer(d_bloomFilter, CL_FALSE, CL_MAP_READ, 0, bloomFilterSize);
             }
@@ -198,14 +227,22 @@ void executeFullOpenCL(const std::string *documents,
             // Execute the kernel
             mark_time();
             int localSize;
+#ifdef PHIPHI
+            localSize = 4;
+#else
             if (pid != 0)
             {
                 localSize = 1;
             }
             else
             {
-                localSize = 128;
+#ifdef DEVACC
+               localSize = 4;
+#else
+               localSize = 128;
+#endif
             }
+#endif
             int globalSize = positions->at(0);
             if (globalSize % localSize != 0)
             {
@@ -214,7 +251,11 @@ void executeFullOpenCL(const std::string *documents,
             cl::NDRange global(globalSize);
             cl::NDRange local(localSize);
             queue.enqueueNDRangeKernel(kernel, cl::NullRange, global, local);
+#ifdef PHIPHI
+            if (true)
+#else
             if (pid == 0)
+#endif
             {
                 queue.enqueueReadBuffer(d_scores, CL_TRUE, 0, scoresSize, scores);
             }
@@ -235,7 +276,7 @@ void executeFullOpenCL(const std::string *documents,
         std::cout << error.what() << "(" << clErrorString(error.err()) << ")" << std::endl;
         return;
     }
-    //return;
+    // return;
     for (word_t i = 0; i < positions->at(0); ++i)
     {
         scores[i] > THRESHOLD ? ++spamCount : ++hamCount;
@@ -270,7 +311,19 @@ int main(int argc, char *argv[])
 #ifdef BLOOM_FILTER
     if (pid != 0)
     {
+#ifndef PHIPHI
         repetitions *= 1.3;
+#endif
+    }
+#endif
+#ifdef PHIPHI
+    if (pid != 0)
+    {
+        // Devices will be out of sync in real application.
+        // Offset by 500ms so that the CPU marker code is
+        // only marking 1 set of documents at one time, as
+        // would be the case in real application.
+        usleep(500*1000*repetitions);
     }
 #endif
     const std::vector<word_t> *positions;
