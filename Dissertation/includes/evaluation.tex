@@ -310,11 +310,11 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 & Bloom Filter All Hits & 568 & 415.5 \\
 & Bloom Filter No Hits & 524 & 450.4 \\
 \hline
-\multirow{4}{*}{Intel Xeon E5-2620 \& Intel Xeon Phi}
-& No Bloom Filter & a & b \\
-& Bloom Filter & c & d \\
-& Bloom Filter All Hits & e & f \\
-& Bloom Filter No Hits & g & h \\
+\multirow{4}{*}{2x Intel Xeon Phi 5110P}
+& No Bloom Filter & 279 & 845.9 \\
+& Bloom Filter & 289 & 816.6 \\
+& Bloom Filter All Hits & 313 & 754 \\
+& Bloom Filter No Hits & 280 & 842.9 \\
 \hline
 \multirow{4}{*}{4x AMD Opteron 6366 HE}
 & No Bloom Filter & 239 & 987.4 \\
@@ -329,7 +329,10 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 
 Figure \ref{fig:parseScoringBest} takes each device's best result and compares
 them in a bar graph. From a single device perspective, the AMD System takes the
-lead easily. For the dual device perspective, ...
+lead easily. For the dual device perspective, the two Intel Xeon Phi 5110Ps come
+out top, with just over 800MB/s throughput. This is still beaten by the single
+device AMD system however, given that the AMD system has 64 CPU cores versus
+the Intel Phis lower clocked 60 cores, this is as expected.
 
 \begin{figure}[H]
 \centering
@@ -572,3 +575,10 @@ plenty of cycles free to coordinate the system. Also, the PCI-E bandwidth is
 unlikely to be a bottleneck as the GPUs can be transferring data and executing
 kernels at slightly different times meaning a multi-GPU set up is unlikely to
 have significant overhead and scale almost linearly with the number of devices.
+This can be shown in the dual Intel Xeon Phi runs, which experience a near
+linear increase (80\%) compared to the single Intel Xeon Phi. This is with both
+devices requirement documents at the same time, and would represent the worst
+case in a real life application. In reality, the devices would be at different
+stages of classification meaning CPU cycles are more likely to be used more
+evenly over a set time frame, rather than bursts of high activity, followed by
+period of little activity while both devices are parsing and scoring.

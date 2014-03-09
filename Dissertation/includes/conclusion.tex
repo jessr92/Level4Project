@@ -35,18 +35,18 @@ single system.
 On a single system, there can be upwards of four GPUs which can each
 independently score documents. With modern GPUs being significantly more
 powerful than the nVidia Tesla C2075 which achieves a throughput 363.6MB/s it
-wouldn't be hard to envisage upwards of 1GB/s per GPU for instance, a quad
-nVidia GTX Titan or GTX 780 Ti system. The move to nVidia's GeForce line (and
-equivalent consumer lines for other manufacturers) is acceptable in this
-scenario as double floating point precision and other enterprise class features
-are not required in the document filtering system. A single system could then
-process documents at a rate of 8GB/s. Given the targeted application being the
-classification of documents on a network stream and that Ethernet utilisation is
-rarely in excess of 30\% of capacity for a sustained period of time, this
-32Gbit/s rate is enough to handle 100Gbit/s Ethernet. As such, further work
-would be to make sure of a more modern, high end multiple GPU set up to
-investigate the amount of performance that can be achieved from devices attached
-to a single motherboard.
+wouldn't be hard to envisage upwards of 1GB/s per GPU for instance, a nVidia GTX
+Titan or GTX 780 Ti system. The move to nVidia's GeForce line (and equivalent
+consumer lines for other manufacturers) is acceptable in this scenario as double
+floating point precision and other enterprise class features are not required in
+the document filtering system. A single system can handle four GPUs so it could
+then process documents at a rate of 4GB/s. Given the targeted application being
+the classification of documents on a network stream and that Ethernet
+utilisation is rarely in excess of 30\% of capacity for a sustained period of
+time, this 32Gbit/s rate is enough to handle 100Gbit/s Ethernet. As such,
+further work would be to make sure of a more modern, high end multiple GPU set
+up to investigate the amount of performance that can be achieved from devices
+attached to a single motherboard.
 
 Neither the data structures or the algorithm was designed with the Intel Xeon
 Phi architecture in mind thus the performance of the device has the potential
