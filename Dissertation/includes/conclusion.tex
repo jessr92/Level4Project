@@ -1,3 +1,65 @@
 \section{Summary of Results}
 
+The use of GPUs, and OpenCL in general, for document filtering has potential
+benefits when it comes to performance. The Mac Pro System was able to parse and
+score documents using the GPU only at a rate of 363.6MB/s. The Tesla C2075 is
+the enterprise grade equivalent of a mid-range consumer graphics card so any
+reasonably modern desktop machine would have a similar throughput. To place the
+throughput rate in the context of classifying documents in a network stream,
+363.6MB/s is 2.84Gbit/s. If this machine was asked to classify an Ethernet
+stream, it could handle nearly 10Gbit/s Ethernet connection on its own. By using
+the CPU as well, the 622.7MB/s (4.86Gbit/s) throughput could handle a 15Gbit/s
+Ethernet connection as Ethernet utilisation is typically sustained at no more
+than 30\%.
+
+The use of bloom filters is a mixed bag when it comes to improving performance,
+as such the recommendation would be to investigate the performance difference
+when targeting a hardware set up as different architectures respond more
+positively to the data structure, even different variants of an architecture
+(Intel Xeon and AMD Opteron CPUs) react differently to one another.
+
+The Intel Xeon Phi was not the primary focus of the work, the GPU was the
+primary hardware target. The Intel Xeon Phi has solid performance for a single
+device, reaching 472.9MB/s (3.69Gbit/s) meaning it can filter a 10Gbit/s in its
+own right.
+
+\subsubsection{Conclusion}
+
+Document filtering is a suitable application for OpenCL and GPU acceleration.
+With each device able to classify its own distinct set of documents, the
+throughput of a single system can scale well with the number of devices on a
+single system.
+
 \section{Future Work}
+
+On a single system, there can be upwards of four GPUs which can each
+independently score documents. With modern GPUs being significantly more
+powerful than the nVidia Tesla C2075 which achieves a throughput 363.6MB/s it
+wouldn't be hard to envisage upwards of 1GB/s per GPU for instance, a quad
+nVidia GTX Titan or GTX 780 Ti system. The move to nVidia's GeForce line (and
+equivalent consumer lines for other manufacturers) is acceptable in this
+scenario as double floating point precision and other enterprise class features
+are not required in the document filtering system. A single system could then
+process documents at a rate of 8GB/s. Given the targeted application being the
+classification of documents on a network stream and that Ethernet utilisation is
+rarely in excess of 30\% of capacity for a sustained period of time, this
+32Gbit/s rate is enough to handle 100Gbit/s Ethernet. As such, further work
+would be to make sure of a more modern, high end multiple GPU set up to
+investigate the amount of performance that can be achieved from devices attached
+to a single motherboard.
+
+Neither the data structures or the algorithm was designed with the Intel Xeon
+Phi architecture in mind thus the performance of the device has the potential
+for improvement. With an in-depth review of the inner workings of the
+architecture, a more efficient implementation is perhaps possible.
+
+With Wim Vanderbauwhede et al. having implemented scoring code on the FPGA, with
+the view of also implementing the parsing code on the FPGA \cite{HybridCPUFPGA},
+the success of the parsing and scoring implementation on the GPU further
+suggests significant benefits can be obtained by doing so.
+
+In addition to the above, a detailed analysis of both the performance per watt
+and performance per dollar values of each set up will be of benefit to large
+organisations such as ISPs, who would be implementing such a system. In addition
+to the system's throughput, for-profit organisations also place significant
+emphasis on systems which are cheap to buy and run.

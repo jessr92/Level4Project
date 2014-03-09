@@ -13,14 +13,14 @@ results which follow.
 The Mac Pro was running Mac OS X version 10.8.5 (Build Version 12F45). Both the
 nVidia and Intel OpenCL SDKs were installed and up to date at time of writing.
 
-\begin{itemize}
+\begin{description}
 
 \item[CPU] The motherboard has two CPU sockets, both with an Intel Xeon E5462
 \footnote{\url{http://ark.intel.com/products/33084/Intel-Xeon-Processor-E5462
 -12M-Cache-2_80-GHz-1600-MHz-FSB}} processor. This is a quad core processor with
 a 2.8GHz clock speed and 12MB of Level 2 cache per processor.
 
-\item[RAM] There is 14GB of PC2-6400 (800MHz) DDR2 RAM installed, with error
+\item[Primary Memory] There is 14GB of PC2-6400 (800MHz) DDR2 RAM installed, with error
 correcting code (ECC) enabled.
 
 \item[GPU] The GPU is an nVidia Tesla C2075
@@ -31,7 +31,7 @@ frequency of 1.15GHz. It has been installed in a PCIe 1.0 slot with 16x lane
 bandwidth giving a total theoretical bandwidth between its on-board memory and
 main memory of 4GB/s (250MB/s per lane).
 
-\end{itemize}
+\end{description}
 
 \subsection{Intel Xeon Phi System}
 
@@ -40,7 +40,7 @@ system was used for running the software system on the Intel Xeon Phi both with
 and without the CPU as an OpenCL device. The system did not have a graphics card
 fitted.
 
-\begin{itemize}
+\begin{description}
 
 \item[CPU] There is a single Intel Xeon E5-2620
 \footnote{\url{http://ark.intel.com/products/64594/intel-xeon-processor-e5-2620
@@ -49,7 +49,7 @@ with hyper-threading to give twelve hardware threads. The standard clock
 frequency is 2GHz with a maximum turbo frequency of 2.5Ghz. There is a total of
 15MB ``Intel Smart Cache'' available which acts as Level 3 cache.
 
-\item[RAM] 16GB DDR3 RAM
+\item[Primary Memory] 16GB DDR3 RAM
 
 \item[Intel Xeon Phi] The Intel Xeon Phi is the 51100P
 \footnote{\url{http://ark.intel.com/products/71992/intel-xeon-phi-coprocessor-
@@ -60,7 +60,7 @@ theoretical maximum memory bandwidth of 320GB/s. It has been installed in a PCIe
 2.0 slot with 16x lane bandwidth giving a total theoretical bandwidth between
 its on-board memory and main memory of 8GB/s (500MB/ per lane).
 
-\end{itemize}
+\end{description}
 
 \subsection{AMD System}
 
@@ -68,7 +68,7 @@ The system is running the Fedora 18 Linux distribution. This system was used
 solely for running the software system on the AMD CPUs and did not have a
 graphics card fitted.
 
-\begin{itemize}
+\begin{description}
 
 \item[CPU] There are four AMD Opteron 6366 HE
 \footnote{\url{http://products.amd.com/en-us/OpteronCPUDetail.aspx?id=813&f1=&f2
@@ -77,9 +77,9 @@ fitted. Each processor has 16 cores running at a base clock speed of 1.8GHz with
 a maximum turbo frequency os 3.1GHz. There is 1MB of Level 2 and 16MB of Level 3
 Cache available per processor.
 
-\item[RAM] 512GB DDR3 RAM
+\item[Primary Memory] 512GB DDR3 RAM
 
-\end{itemize}
+\end{description}
 
 \section{Experiment Set up and Input Files}
 
@@ -236,7 +236,7 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 & Bloom Filter All Hits & 294 & 802.7 \\
 & Bloom Filter No Hits & 216 & 1092.6 \\
 \hline
-\multirow{4}{*}{Intel Xeon Phi}
+\multirow{4}{*}{Intel Xeon Phi 5110P}
 & No Bloom Filter & 381 & 619.4 \\
 & Bloom Filter & 409 & 577 \\
 & Bloom Filter All Hits & 456 & 517.5 \\
@@ -304,7 +304,7 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 & Bloom Filter All Hits & 455 & 518.7 \\
 & Bloom Filter No Hits & 379 & 622.7 \\
 \hline
-\multirow{4}{*}{Intel Xeon Phi}
+\multirow{4}{*}{Intel Xeon Phi 5110P}
 & No Bloom Filter & 499 & 472.9 \\
 & Bloom Filter & 514 & 459.1 \\
 & Bloom Filter All Hits & 568 & 415.5 \\
@@ -400,9 +400,7 @@ low compared to the scoring speed, the improved data transfer rates will only
 reduce latency in getting classification results back, but not improve
 throughput overall given that the parser is the bottleneck.
 
-\subsection{Document Classification}
-
-\subsubsection{C++ versus OpenCL throughput}
+\subsection{C++ versus OpenCL throughput}
 
 Although the scoring only experiments on the CPU was initially purely for
 reference, they also highlight a potential benefit of running a highly data
@@ -428,3 +426,149 @@ thread has significantly longer documents than its counterparts, it will still
 be working away while the others have finished. This can still happen on the
 OpenCL system but with the granularity being significantly finer, it can be
 mitigated.
+
+\subsection{Effect of Bloom Filters}
+
+The bloom filters were designed and added to the OpenCL kernel with the idea
+that they will be able to save trips to the on-board memory for the GPU. With
+GPUs having manual caching, the OpenCL kernel is responsible for moving the
+bloom filter from global memory to local memory. The benefit of this is that the
+bloom filter is guaranteed to be in the faster memory. This contrasts with the
+CPU where the bloom filter can still bring benefit by migrating to L3 or L2
+cache on the CPU but, since CPUs implement automatic caching, this is not
+guaranteed to happen.
+
+When a variable is moved in to cache, it isn't just that data value that is read
+in, an entire cache line is read in. A cache line is typically on the order of
+tens of bytes, with 64 bytes being the cache line size on all devices used. The
+idea behind this is locality of reference, if a value at address x is read from,
+it is likely the same process will need addresses near by in the near future.
+The benefit of this is for the scoring only code, a read of one term, will read
+in the next seven terms (8 terms are 64 bytes) into cache making subsequent
+reads faster. This also benefits the parsing and scoring only code, a read of
+one character will read in the next sixty three characters (64 characters are 64
+bytes) making subsequent reads faster. This also holds true for GPUs as reads
+from memory are done in chunks of around 64 bytes.
+
+\subsubsection{Scoring Only}
+
+Use of the bloom filter when running the scoring only code benefits almost all
+devices, with the Intel Xeon Phi being the exception. Even on the single
+threaded C++ code, a 26\% performance increase is observed in the best case (the
+``no hits'' bloom filter). With a realistic application of the document
+filtering being the case where most documents, and thus terms, are not of
+interest to the classifier, the ``no hits'' bloom filter is not only the best
+case, but is close to the average case as well.
+
+Both the Intel and AMD CPU systems experience just over a factor of two increase
+in performance when making use of the bloom filter in the best case. This is
+strong evidence to suggest that the bloom filter is being moved into L3, or L2
+cache and staying there for most of the kernel execution. This means the bloom
+filter can be checked without going to primary memory, and if the bloom filter
+returns a ``miss'' then the primary memory won't be read from at all.
+
+The nVidia GPU has a modest performance increase of around 11\% with the normal
+bloom filter, and 19\% in the best case. If one was to compare solely with the
+CPU this may seem disappointing however the performance increase is still
+significant, especially considering it's all from a 4KB buffer with little
+computational overhead. Also, since there is no automatic caching, the benefit
+of caching is limited by the memory model, and the kernel code itself.
+
+The Intel Xeon Phi has peculiar results compared to the other device, the bloom
+filter results in a performance drop of around 5\%. This is perhaps due to the
+complicated cache mechanism required given the high number of independent cores.
+Each code has its own, small L2 cache thus the bloom filter is unlikely to be
+present in all of the cores simultaneously thus the potential benefit of the
+bloom filter is small. It is possible for a single copy of data in cache to be
+available for all cores, thus maximises cache capacity as the bloom filter is
+only stored once, but this makes access significantly slower. Since
+communication between cores and access to memory, is dictated by a ring
+structure between cores, following a shortest distance algorithm
+\footnote{\url{http://www.intel.co.uk/content/dam/www/public/us/en/documents/dat
+asheets/xeon-phi-coprocessor-datasheet.pdf} Page 10}, this set up would appear
+to be unsuitable for a bloom filter whose benefit relies on fast local access.
+
+As discussed previously, the scoring code runs significantly faster on all
+devices in comparison to the parser, thus it is the parser which is the system
+bottleneck. Improvements in overall system performance can thus be obtained by
+having the parsing and scoring executed on the same device.
+
+\subsubsection{Parsing and Scoring}
+
+Use of the bloom filter is a mixed bag of results when looking across different
+devices. The Intel CPU benefits by up to 20\% in the best case whereas all other
+single device runs experience a performance hit of as little as 5\% with the
+Intel Xeon Phi to as much as 44\% with the AMD CPUs. Overall, the benefit is
+reduced or mitigated entirely in comparison to the scoring only kernel.
+
+Considering the Intel CPU system initially, it is the only system which still
+has a performance improvement of up to 20\%. In the scoring code the performance
+improvement exceeded 100\%. The bloom filter is used no more and no less than in
+the scoring only code. The two primary reasons for this are related to the
+amount of extra work in this kernel, and the extra variables required. As was
+identified earlier, the parser is the bottleneck. This fact will remain true
+even in this implementation which parses terms and scores them as soon as a full
+term has been parsed. This means that, in terms of instruction count, a reduced
+proportion is in the part of the code which would benefit from the bloom filter.
+As such it is natural that, percentage wise, throughput will not improve as
+much. The second relates to cache use itself. The scoring only code had very
+little private variables; it read in a term, created three n-grams, had a few
+variables to denote term range, score, and work item ID. This meant that less
+cache space was being used by private variables, increasing the chance that the
+bloom filter will not only migrate to CPU cache, but stay in cache for an
+extended period of time. The parsing and scoring kernel has around twice as many
+private variables, making fitting a bloom filter into the cache unlikely to be
+possible for an extended period of time.
+
+The AMD CPU experiences the biggest performance drop of nearly 50\%. This
+contrasts heavily with the larger than 100\% increase in performance for scoring
+only code. Everything discussed for the Intel CPUs is relevant to the AMD CPUs.
+The AMD CPU has 16MB of L2 cache in comparison to the 12MB on the Intel CPUs
+however, with the AMD CPUs core count being 16 compared to the Intel's count of
+4, the amount of L2 cache per core is three times higher (3MB) on the Intel CPU
+compared to the AMD CPU (1MB). This makes the situation of cache demand even
+more severe and is likely to contribute to the heavy performance drop. The bloom
+filter will be being read in regularly, removing other variables, just for those
+variables to be read in shortly after, removing the bloom filter. This is
+similar to the situation there primary memory and the swap space on disk are
+continually being read from and written to. This is known as thrashing and is
+responsible for significant drops of performance, similar to those experienced
+by the AMD system.
+
+The nVidia GPU experiences around a 20\% drop in performance in the best case by
+using a bloom filter. Even with the GPUs local memory being under control of the
+programmer, the extra demand of the local memory by the parser can have similar
+effect as on the CPU. The extra variables will affect the occupancy of a compute
+unit as less work items can be assigned simultaneously. The reduced number of
+work items per compute unit could also be affecting the memory latency technique
+effectiveness, resulting in the drop in performance.
+
+The Intel Xeon again has around a 5\% performance drop, identical to the scoring
+only version. With their being no difference in the bloom filter performance
+change, the reasons discussed in the scoring only section are likely just as
+valid for the parsing and scoring section.
+
+In general, the bloom filter has a negative affect on most devices and could
+easily be ignored in a real world implementation. Given that the Intel CPU
+has some benefit from a bloom filter, it could still be beneficial to try the
+bloom filter on the target system as a performance benefit on some devices is
+evidently still applicable.
+
+\subsection{Overall}
+
+In previous work, the parser was running on the CPU at 427MB/s
+\cite{HybridCPUFPGA} and was the bottle neck of the system when scoring was
+conducted on an FPGA. This is also true with the GPU however, if both the CPU
+and GPU are parsing and scoring their own set of documents, it is possible to
+achieve in excess of 620MB/s, around a 45\% increase in performance on a fairly
+typical two CPU and one GPU system. In comparison to the CPU and GPU results
+individually, there is only around a 15\% overhead when running the devices in
+parallel. Most of this overhead comes from the CPU time required to detect the
+beginnings of documents before sending the data off to the OpenCL device. If the
+CPU was used solely to read in documents from a network feed and work out the
+locations of document beginnings, it's likely the case that in a multi-GPU set
+up, the GPUs could each be used to parse and score, with the CPU host having
+plenty of cycles free to coordinate the system. Also, the PCI-E bandwidth is
+unlikely to be a bottleneck as the GPUs can be transferring data and executing
+kernels at slightly different times meaning a multi-GPU set up is unlikely to
+have significant overhead and scale almost linearly with the number of devices.

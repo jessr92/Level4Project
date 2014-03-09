@@ -5,8 +5,8 @@
 Open Computing Language (OpenCL) is a framework for writing applications
 designed to be executed across heterogeneous platforms such as central
 processing units (CPUs), graphics processing units (GPUs), and accelerator
-devices such as the Intel Phi and Field Programmable Gate Arrays (FPGAs). The
-language is an open standard maintained by Khronos Group
+devices such as the Intel Xeon Phi and Field-Programmable Gate Arrays (FPGAs).
+The language is an open standard maintained by Khronos Group
 \footnote{\url{http://www.khronos.org/opencl}}. OpenCL is based on the C99
 standard and can be loosely thought of as a subset of the C99 language with some
 additional keywords. The first release of the OpenCL standard (OpenCL 1.0) was
@@ -22,10 +22,10 @@ C++. The host code executes as normal and makes use of APIs exposed by OpenCL to
 define how, and where, OpenCL device code is executed.
 
 OpenCL applications are called kernels. A kernel is a function that executes on
-an OpenCL capable device. Given the focus of OpenCL is on parallelism, a kernel
+an OpenCL capable device. Since the focus of OpenCL is on parallelism, a kernel
 is written from the perspective of a single thread instead of requiring explicit
-threading code from more familiar models such as POSIX Threads. An OpenCL work
-item is similar to a POSIX Thread with a notable exception that OpenCL has no
+threading code from more familiar models such as POSIX threads. An OpenCL work
+item is similar to a POSIX thread with a notable exception that OpenCL has no
 traditional stack, any `function' calls are actually in-lined by the compiler.
 OpenCL kernels are also compiled at runtime thus the host code, and the compiler
 itself, can make device-specific optimisations for optimal performance.
@@ -77,7 +77,7 @@ across a single work group, which can contain multiple work items.
 
 \item[Private memory] This is memory that is unique to an individual work item.
 Any local variables and non-pointer kernel arguments are private by default.
-These are typically mapped to registers although thy can be spilled over to
+These are typically mapped to registers although they can be spilled over to
 higher latency memories if there is insufficient space available.
 
 \end{description}
@@ -91,7 +91,7 @@ higher latency memories if there is insufficient space available.
 \subsubsection{Concurrency and Execution Model}
 
 As shown in Figure \ref{fig:openCLMemoryModel}, OpenCL uses a number of
-different terms to describe it's execution model. There is no explicit `thread',
+different terms to describe its execution model. There is no explicit `thread',
 instead OpenCL has work items which are the closest relative to traditional
 threads. The OpenCL Concurrency and Execution Model is split into two parts,
 host and device, and both will be outlined below.
@@ -118,8 +118,9 @@ image is represented as a two dimensional array of pixels.
 
 \item[Device Type] OpenCL places devices into three different classifications.
 CPUs, GPUs, and Accelerators. An example accelerator device would be the Intel
-Phi \footnote{\url{http://www.intel.com/content/www/us/en/processors/xeon/xeon-
-phi-detail.html}}.
+Xeon Phi
+\footnote{\url{http://www.intel.com/content/www/us/en/processors/xeon/xeon- phi-
+detail.html}}.
 
 \end{description}
 
@@ -189,8 +190,8 @@ only does it run the user's wide variety of software, it also acts as the
 overall controller for the entire system. This necessitated a one-size-fits-all
 style of approach when designing the CPU chip and the corresponding instruction
 set architecture. A CPU typically has a high clock speed, in the range of 3-4GHz
-for a modern desktop. Each die can contain a small number, typically four, of
-cores that execute instructions independently.
+for a modern desktop. Each die can contain a small number of cores, typically
+four, that execute instructions independently.
 
 A GPU is the highly parallel oriented chip, with hundreds of cores running at a
 slower clock speed (about one fifth of a CPU core) and have a more restricted
@@ -250,7 +251,7 @@ as a divergent warp. Divergent warps can considerably reduce performance as it
 reduces the number of threads executing in parallel.
 
 In addition to instruction execution, memory accesses are done on a per warp
-basis. For ideal performance addressing should be such that threads in a warp
+basis. For ideal performance, addressing should be such that threads in a warp
 access coalesced memory locations to reduce memory transaction cost. For
 instance, an array where access is based on a hash function can result in poor
 performance as threads in a warp are likely to be accessing significantly
@@ -261,15 +262,15 @@ different parts of memory.
 In addition to the architecture differences between CPUs and GPUs, there is a
 separate consideration that must be made for GPUs and other discrete devices,
 the PCI-E bus. GPUs are unable to directly access main memory like a CPU, thus
-before any code is run on a GPU, data must be transferred between RAM and the
-GPUs on-board memory. This can take a significant period of time in comparison
-to the code runtime. This is due to the relatively slow speed of the PCI-E bus
-in comparison to on-board memory access. A GPU is able to access it's global
-memory at a rate of around 200GB/s on modern chips. Contrast this to the PCI-E
-link speed which can be as low as 250MB/s per lane. The most common systems have
-PCI-E 2.0 slots which run at 500MB/s per PCI-E lane with 16 lanes available for
-the GPU giving a maximum theoretical transfer speed of 8GB/s, 25 times slower
-than access from on-board memory.
+before any code is run on a GPU, data must be transferred between primary memory
+and the GPUs on-board memory. This can take a significant period of time in
+comparison to the code runtime. This is due to the relatively slow speed of the
+PCI-E bus in comparison to on-board memory access. A GPU is able to access its
+global memory at a rate of around 200GB/s on modern chips. Contrast this to the
+PCI-E link speed which can be as low as 250MB/s per lane. The most common
+systems have PCI-E 2.0 slots which run at 500MB/s per PCI-E lane with 16 lanes
+available for the GPU giving a maximum theoretical transfer speed of 8GB/s, 25
+times slower than access from on-board memory.
 
 \subsection{Bridging the gap - APUs}
 
@@ -277,7 +278,7 @@ Both CPUs and GPUs are strong in their respective application areas. Ideally, a
 system should be able to make best use of both types of device with as little
 overhead as possible. One of the obvious potential bottlenecks is the PCI-E bus
 to devices discrete from the CPU. This led to the design of an Accelerated
-Processing Unit (APU), these have a traditional CPU in addition to a GPU (or
+Processing Unit (APU). These have a traditional CPU in addition to a GPU (or
 FPGA) on the same die and are a good example of a Heterogeneous System
 Architecture (HSA). This design isn't new, CPUs have typically contained a small
 GPU, especially in the small laptop market. With the growth of Heterogeneous
@@ -287,11 +288,11 @@ overhead. The primary consumer implementation of this is AMDs HSA
 \footnote{\url{http://developer.amd.com/resources/heterogeneous-computing/}}.
 The joint die allows power to be managed so that different applications can make
 most effective use of the CPU and GPU cycles available. In addition, there is
-also work going on to completely unify address space, to make the heterogeneous
+also work going on to completely unify address spaces, to make the heterogeneous
 architecture more seamless to work with.
 
 For the purposes of this report, APU discussion ends here. At present consumer
-devices are relatively immature and for a majority of applications, a distinct
+devices are relatively immature and for a majority of applications, a discrete
 GPU or accelerator card is more likely to achieve the best overall performance.
 
 \subsection{Intel Xeon Phi}
@@ -308,7 +309,7 @@ Each CPU core is on a bi-directional ring bus to memory and each core is capable
 of 4-way hyper threading resulting in 240 hardware threads per device. Clock
 speeds are typically lower than a CPU at around 1GHz. The Intel Xeon Phi is
 designed to allow CPU-like programming versatility with the high performance and
-efficient power use of an accelerator chips.
+efficient power use of an accelerator chip.
 
 In addition to being an OpenCL capable device, the Xeon Phi is capable of
 running applications written in traditional source code such as C, C++, or
@@ -326,7 +327,7 @@ between cores on the `opposite side' of the ring will be significantly slower.
 
 \section{Document Classification}
 
-As discussed in Section~\ref{sec:relatedResearch} on related research, the work
+As discussed in Section~\ref{sec:relatedResearch} on relates research, the work
 in this report directly related to and builds on work by Wim Vanderbauwhede et
 al. The purpose of their work is to classify a stream of text documents based on
 significant terms in the documents. A classic example would be emails, where
@@ -376,7 +377,7 @@ variant of Baudot encoding
 \footnote{\url{http://rabbit.eng.miami.edu/info/baudot.html}}. Most text
 compression algorithms are lossless, the original text can always be returned
 during a decompression stage. Baudot code is different, it is lossy. The
-compressed text can still be read as English, just with some unusual character
+compressed text can still be read as English, just with some character
 substitutions. The algorithm is outlined in Figure~\ref{baudotCode}:
 
 \begin{figure}[H]
@@ -412,11 +413,11 @@ to5BitEncoding(char c)
 \end{figure}
 
 In short, characters which look like a 1 (`i', `j', `I', and `J') are converted
-to 1. Characters which look like a 0 (`o', `O') are converted to 0. `u' and `v',
-and `U' and `V' are treated to be identical. All other characters have their
-ASCII value reduced so that they fit into numbers lower than 32. All lower case
-characters are now upper case meaning now, in total, there are 10 (numeric) + 26
-(letters) - 4 (`I', `J', `O', and `U' = `V') = 32 characters.
+to 1. Characters which look like a 0 (`o', `O') are converted to 0. `u', `v',
+`U', and `V' are treated to be `U'. All other characters have their ASCII value
+reduced so that they fit into numbers lower than 32. All lower case characters
+are now upper case meaning now, in total, there are 10 (numeric) + 26 (letters)
+- 4 (`I', `J', `O', and `V') = 32 characters.
 
 \subsection{Scorer}
 
