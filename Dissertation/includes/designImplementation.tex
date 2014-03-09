@@ -9,32 +9,35 @@ results was conducted, it was determined that the parsing code (also written in
 C++) was the bottleneck to the system and the project then began to investigate
 also porting the parsing code to OpenCL.
 
-A note on terminology: When a contiguous block of memory is allocated on the
-host device it is normally referred to as an array. When the array is
-transferred to an OpenCL device it is referred to as a buffer. These are
-functionally the same with the primary distinction being where they are
-allocated.
+This section will detail the implementation of both systems before going on to
+discuss optimisations in the next section.
+
+A note on terminology when discussing blocks of contiguous memory. When a
+contiguous block of memory is allocated on the host device it is normally
+referred to as an array. When the array is transferred to an OpenCL device it is
+referred to as a buffer. These are functionally the same with the primary
+distinction being where they are allocated.
 
 \subsection{All implementations}
 
 Most OpenCL applications are implemented in much the same way from the host
 code's perspective. There is a significant amount of boiler plate code to detect
 OpenCL platforms and devices available on the target system. Each device that is
-going to be used needs it's own command queue. An OpenCL command queue is as the
+going to be used needs its own command queue. An OpenCL command queue is as the
 same suggests, any data transfers or kernel executions are placed on the
 device's command queue and executed in order of arrival to the queue (although
 out of order execution is possible). Command queues, memory, program, and kernel
 objects are all managed by an OpenCL context. The kernel itself also has to be
 compiled, it is read in from disk as a string and built for the required
 devices. This is what allows a single kernel to run on any available device
-selected, it's compiled at run time. After compilation is completed, the
+selected, it's compiled at run time. After compilation has completed, the
 kernel's arguments are set to the appropriate device buffers. The host's arrays
 that contain data the kernel needs are then transferred to the device's buffers
 and the kernel is executed. After the kernel has finished executing, any buffers
 relating to results, in this case the document scores, are written back by en-
 queuing a read buffer command.
 
-As discussed in the background, the Naive-Bayes classifier makes use of a
+As discussed in the background, the Na{\"{\i}}ve-Bayes classifier makes use of a
 profile. This is a 128MB file containing the terms and associated term weights.
 This is read in from disk by the C++ host device code, and passed in as a buffer
 of unsigned long values to the OpenCL kernel. It does not change between
@@ -86,13 +89,13 @@ kernel and are used to calculate a document's score.
 The array of terms is a one dimensional array thus the C++ code has to iterate
 over the array and find the beginnings of documents to know how many work items
 to create (one per document) and over what range of terms represent each
-document. This simply involves the creation of indexes containing the location
-of terms with length 0 as this was used to delimit document beginnings. The
-array of document marker addresses is prefixed by the number of documents and
-has the total number of terms added to the end of the array. The total term
-number is required by the work item scoring the last document as there is no
-next document to determine where to stop scoring terms at. This buffer is also
-transferred to the device.
+document. This simply involves the creation of an index containing the location
+of terms with length zero as this was used to delimit document beginnings in the
+original parser. The array of document marker addresses is prefixed by the
+number of documents and has the total number of terms added to the end of the
+array. The total term number is required by the work item scoring the last
+document as there is no next document to determine where to stop scoring terms
+at. This buffer is also transferred to the device.
 
 All buffers are read only with the exception of the scores buffer. This is a
 write-only buffer with length equal to the number of documents being scored. It
@@ -100,12 +103,13 @@ is this buffer that the kernel writes the results to and is the only buffer that
 needs to be written back to the host memory after kernel execution.
 
 After the kernel has the arguments set to the appropriate buffer, and the data
-has been transferred to the device the kernel can execute. During kernel
-execution, each work item iterates of the terms for their associated document. A
-work item knows which document to score because the location of the document
-starting term is the work item's ID + 1, up to the work item's ID + 2. Each term
-in this range is scored and the total score for the document is stored in a
-scores buffer at location equal to the work item's ID.
+has been transferred to the device, the kernel can execute. During kernel
+execution, each work item iterates over the terms for their associated document.
+A work item knows which document to score because the location of the document
+starting term is the work item's ID + 1, up to the work item's ID + 2 into the
+document index buffer. Each term in this range is scored and the total score for
+the document is stored in a scores buffer at location equal to the work item's
+ID.
 
 The OpenCL kernel code is summarised in the pseudo-code in
 Figure~\ref{fig:scoringPseudocode}.
@@ -211,18 +215,18 @@ OpenCL kernels can run on any device with a suitable compiler. This portability
 is helpful when using different types of devices which may come from a multitude
 of vendors. This portability has a cost however, there is no guarantee that the
 kernel will run well. For instance, CPUs and GPUs are significantly different in
-terms of how they cache and GPUs are more favourable for smaller tasks which can
-be done in parallel. This requires a developer to consider the architectural
-differences of different devices and tune each kernel for each device. Two
-significant optimisations that were employed during this project are discussed
-below. The ``Local Size'' optimisation involves changing the number of work
-items in a work group to suit the target device. The second optimisation,
+terms of how they cache and GPUs are more favourable towards smaller tasks which
+can be executed in parallel. This requires a developer to consider the
+architectural differences of different devices and tune each kernel for each
+device. Two significant optimisations that were employed during this project are
+discussed below. The ``Local Size'' optimisation involves changing the number of
+work items in a work group to suit the target device. The second optimisation,
 ``Mapped Buffers'', is a simple optimisation to remove any unnecessary data
 transfers.
 
 A third optimisation, using bloom filters, was also employed however this is
 discussed in the next section as the three bloom filters, and their effect on
-performance demands a more thorough analysis.
+performance, demands a more thorough analysis.
 
 \subsection{Local Size}
 
@@ -290,7 +294,7 @@ Figure~\ref{fig:phiLocalSize}. There is a gradual improvement in performance as
 the local size is reduced from 512 to 16. Interestingly, there is a massive
 improvement when moving to a local size of 8, the performance increases by over
 a factor of two. In this example, choosing a poor work group size (512) will
-increase the time to sore a set of documents by a factor of three.
+increase the time to score a set of documents by a factor of three.
 
 Regarding overall performance changes, the Tesla C2075 has a greater benefit of
 an optimum local size to the Intel Xeon Phi however the Intel Xeon Phi has a

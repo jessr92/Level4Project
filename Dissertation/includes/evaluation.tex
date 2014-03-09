@@ -3,7 +3,7 @@
 For the purposes of evaluating the performance of both the scorer and the scorer
 and parser, a Mac Pro (Early 2008 - MacPro3,1) was used. This was fitted with
 two Intel Xeon E5462 processors, and a nVidia Tesla C2075 GPU. In addition,
-there was a separate machine fitted with an Intel Xeon Phi 51100P. An AMD system
+there was a separate machine fitted with an Intel Xeon Phi 5110P. An AMD system
 with a traditional CPU setup with 4x AMD Operon 6366 HE CPUs was also used. A
 brief overview of the hardware will be given to provide some perspective to the
 results which follow.
@@ -20,8 +20,8 @@ nVidia and Intel OpenCL SDKs were installed and up to date at time of writing.
 -12M-Cache-2_80-GHz-1600-MHz-FSB}} processor. This is a quad core processor with
 a 2.8GHz clock speed and 12MB of Level 2 cache per processor.
 
-\item[Primary Memory] There is 14GB of PC2-6400 (800MHz) DDR2 RAM installed, with error
-correcting code (ECC) enabled.
+\item[Primary Memory] There is 14GB of PC2-6400 (800MHz) DDR2 RAM installed,
+with error correcting code (ECC) enabled.
 
 \item[GPU] The GPU is an nVidia Tesla C2075
 \footnote{\url{http://www.nvidia.co.uk/docs/IO/43395/NV-DS-Tesla-C2075.pdf}}.
@@ -36,9 +36,10 @@ main memory of 4GB/s (250MB/s per lane).
 \subsection{Intel Xeon Phi System}
 
 The system is running the SUSE Enterprise Server 11 Linux distribution. This
-system was used for running the software system on the Intel Xeon Phi both with
-and without the CPU as an OpenCL device. The system did not have a graphics card
-fitted.
+system was used for running the software system on the Intel Xeon Phi. There are
+two Intel Xeon Phis fitted and these were used to investigate the performance of
+a single and a dual Intel Xeon Phi set up. The system does not have a graphics
+card fitted.
 
 \begin{description}
 
@@ -51,7 +52,7 @@ frequency is 2GHz with a maximum turbo frequency of 2.5Ghz. There is a total of
 
 \item[Primary Memory] 16GB DDR3 RAM
 
-\item[Intel Xeon Phi] The Intel Xeon Phi is the 51100P
+\item[Intel Xeon Phi] The Intel Xeon Phi is the 5110P
 \footnote{\url{http://ark.intel.com/products/71992/intel-xeon-phi-coprocessor-
 5110p-8gb-1_053-ghz-60-core}} variant. There are sixty physical CPU cores
 running at 1.053GHz, the cores are 4-way hyper-threaded resulting in 240
@@ -65,7 +66,7 @@ its on-board memory and main memory of 8GB/s (500MB/ per lane).
 \subsection{AMD System}
 
 The system is running the Fedora 18 Linux distribution. This system was used
-solely for running the software system on the AMD CPUs and did not have a
+solely for running the software system on the AMD CPUs and does not have a
 graphics card fitted.
 
 \begin{description}
@@ -560,7 +561,7 @@ evidently still applicable.
 \subsection{Overall}
 
 In previous work, the parser was running on the CPU at 427MB/s
-\cite{HybridCPUFPGA} and was the bottle neck of the system when scoring was
+\cite{HybridCPUFPGA} and was the bottleneck of the system when scoring was
 conducted on an FPGA. This is also true with the GPU however, if both the CPU
 and GPU are parsing and scoring their own set of documents, it is possible to
 achieve in excess of 620MB/s, around a 45\% increase in performance on a fairly
