@@ -265,3 +265,9 @@ Code/opencl_full_fork
 *.fls
 
 *.warc
+
+*.nav
+
+Presentation/presentation.pdf
+
+*.snm
