@@ -8,7 +8,11 @@ Requirements
 
 OpenCL SDK for target device installed.
 
-Required parsed collection or plain text documents.
+Parsed collection or plain text documents.
+
+Profile
+
+Bloom filter (optional)
 
 List of binaries
 ================
