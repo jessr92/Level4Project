@@ -8,11 +8,11 @@ Requirements
 
 OpenCL SDK for target device installed.
 
-Parsed collection or plain text documents.
+Parsed collection 'collection.raw' or plain text documents 'TREC_ALL.txt'.
 
-Profile
+Profile of interesting terms 'profile.bin'.
 
-Bloom filter (optional)
+Bloom filter 'bloomfilter.raw' (optional)
 
 List of binaries
 ================
@@ -53,7 +53,7 @@ Compiles all binaries for the default options.
 
 \> make CPPFLAGS+=-DDEVx (where x = CPU, GPU, or ACC)
 
-Compiles all binaries and, for non-cpu-prexied binaries, changes the target
+Compiles all binaries and, for non-cpu-prefixed binaries, changes the target
 device to either CPU, GPU, or ACC.
 
 \> make CPPFLAGS+=-DHTML_PARSE
