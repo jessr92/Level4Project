@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
 #endif
     }
 #endif
-    const std::vector<word_t> *positions;
+    const std::vector<word_t> *positions = NULL;
     mark_time();
     for (int i = 0; i < repetitions; i++)
     {
