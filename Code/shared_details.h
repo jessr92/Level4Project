@@ -25,13 +25,19 @@
 
 #define DOCS_PER_THREAD 1
 
+#ifndef COLLECTION_FILE
 #define COLLECTION_FILE "collection.raw"
+#endif
 #define PROFILE_FILE "profile.bin"
 
+#ifndef DOCUMENT_FILE
 #define DOCUMENT_FILE "TREC_all.txt"
+#endif
 #define DOCUMENT_MARKER "<DOC>"
 
+#ifndef HTML_FILE
 #define HTML_FILE "02.warc"
+#endif
 #define WARC_MARKER "Content-Type: text/html"
 
 #define SKIPPING 0
@@ -55,7 +61,9 @@
 #endif
 
 #ifdef BF15
+#ifndef BLOOM_FILTER_FILE
 #define BLOOM_FILTER_FILE "bloomfilter.raw"
+#endif
 #define BLOOM_SIZE 514
 #define ADDR_BITS 15
 #define ADDR_MASK 0x7FFF

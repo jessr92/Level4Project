@@ -86,7 +86,11 @@ void executeCPUImplementation(const std::vector<word_t> *collection,
         // Make program from the source code
         cl::Program program = cl::Program(context, source);
         // Build the program for the devices
+#ifdef BLOOM_FILTER
+        program.build(devices, "-DBLOOM_FILTER");
+#else
         program.build(devices);
+#endif
         // Make kernel
         cl::Kernel kernel(program, KERNEL_NAME);
         // Set the kernel arguments

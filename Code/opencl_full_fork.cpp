@@ -79,7 +79,7 @@ void executeFullOpenCL(const std::string *documents,
         // Get a list of devices on this platform.
         cl::vector<cl::Device> devices;
 #ifdef DEVACC
-	if (pid != 0)
+        if (pid != 0)
         {
 #ifdef PHIPHI
             platforms[0].getDevices(CL_DEVICE_TYPE_ALL, &devices);
@@ -175,7 +175,11 @@ void executeFullOpenCL(const std::string *documents,
         // Make program from the source code
         cl::Program program = cl::Program(context, source);
         // Build the program for the devices
+#ifdef BLOOM_FILTER
+        program.build(devices, "-DBLOOM_FILTER");
+#else
         program.build(devices);
+#endif
         // Make kernel
         cl::Kernel kernel(program, KERNEL_FULL_NAME);
         // Set the kernel arguments
@@ -237,9 +241,9 @@ void executeFullOpenCL(const std::string *documents,
             else
             {
 #ifdef DEVACC
-               localSize = 4;
+                localSize = 4;
 #else
-               localSize = 128;
+                localSize = 128;
 #endif
             }
 #endif
