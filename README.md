@@ -40,7 +40,7 @@ Score 'collection.raw'.
 
 Parse 'TREC_all.txt'.
 
-Running the code
+Compiling the code
 ================
 
 \> make
@@ -75,3 +75,10 @@ for the plain text input file, and HTML_FILE for the WARC file.
 CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll0.raw\"'
 
 Compiles all devices to use the CPU with the bloomfilterAll0.raw bloom filter.
+
+Running the code
+================
+
+All binaries can run without arguments and will load the profile 'profile.bin'.
+
+All binaries can take an optional argument for the profile name.
