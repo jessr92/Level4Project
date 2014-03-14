@@ -196,6 +196,10 @@ not going to cause significant impact on overall performance.
 
 \section{Scoring Only Results}
 
+This experiment is to investigate how well GPUs score documents, having been
+given a parsed document set. Scoring is a highly parallel task thus GPUs are
+suited for this kind of task.
+
 Table \ref{table:scoringOnly} contains the results from the scoring only
 experiments. The results are the average time and throughput of the system over
 the twelve profiles.
@@ -268,6 +272,11 @@ be some part of the system conducting the parsing section.
 \end{figure}
 
 \section{Parsing and Scoring Results}
+
+Having shown that scoring on the GPU is faster than the parsing on the CPU
+(427MB/s \cite{HybridCPUFPGA}), the parsing and scoring experiment was set up
+to investigate if GPUs and the Intel Xeon Phi was suitable for both parsing
+and scoring, in an attempt to remove the CPU parsing bottleneck.
 
 Table \ref{table:parsingScoring} contains the results from the parsing and
 scoring experiments. The results are the average time and throughput of the
