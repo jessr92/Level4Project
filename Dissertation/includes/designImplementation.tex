@@ -175,9 +175,11 @@ Baudot encoding discussed and shown in Figure~\ref{baudotCode}, scoreTerm(term)
 contains the profile lookup and scoring addition code from
 Figure~\ref{fig:scoringPseudocode}, and updateState(state) works out the parser
 state machine transition based on the current state, and what character has just
-been found. States tell the parser to either skip characters, write characters
-to the term, `flush' the term (aka score the term), or that a tag has been
-encountered.
+been found. During implementation, an array-based and a case statement based
+method for updating state was investigated, neither had a performance advantage
+so the case statement method was used. States tell the parser to either skip
+characters, write characters to the term, `flush' the term (aka score the term),
+or that a tag has been encountered.
 
 \begin{figure}
 \small\begin{verbatim}
