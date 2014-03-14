@@ -100,26 +100,26 @@ inefficient, irrespective of the processing power of the accelerator.
 
 There are currently four PCI Express bus standards in place, the first two are
 in use in the systems discussed above. Each standard doubles (or nearly doubles)
-the theoretical maximum bandwidth of a single PCI-E lane in each direction.
+the theoretical maximum bandwidth of a single PCIe lane in each direction.
 Table~\ref{table:pciE} shows this alongside the sampling rate in gigatransfers
 per second (GT/s) and encoding of data.
 
 \begin{table}[H]
 \begin{tabular}{|l|l|l|l|l|}
 \hline
-PCI-E Standard & Sampling rate per lane & Data encoding & Single lane speed &
+PCIe Standard & Sampling rate per lane & Data encoding & Single lane speed &
 Sixteen lane speed\\
 \hline
-PCI-E 1.0 & 2.5 GT/s & 8b/10b & 250MB/s & 4GB/s\\
+PCIe 1.0 & 2.5 GT/s & 8b/10b & 250MB/s & 4GB/s\\
 \hline
-PCI-E 2.0 & 5 GT/s & 8b/10b & 500MB/s & 8GB/s\\
+PCIe 2.0 & 5 GT/s & 8b/10b & 500MB/s & 8GB/s\\
 \hline
-PCI-E 3.0 & 8GT/s & 128b/130b & 985MB/s & 15.75GB/s\\
+PCIe 3.0 & 8GT/s & 128b/130b & 985MB/s & 15.75GB/s\\
 \hline
-PCI-E 4.0 & 16GT/s & 128b/130b & 1969MB/s & 31.51GB/s\\
+PCIe 4.0 & 16GT/s & 128b/130b & 1969MB/s & 31.51GB/s\\
 \hline
 \end{tabular}
-\caption{PCI-E Bus Speeds (each direction)}
+\caption{PCIe Bus Speeds (each direction)}
 \label{table:pciE}
 \end{table}
 
@@ -129,9 +129,9 @@ iteration. The change from 8b/10b encoding, with 20\% transfer overhead, to
 of bandwidth of nearly 100\% even though the sampling rate only increased by
 60\%.
 
-The Mac Pro system connects the Tesla C2075 to a sixteen lane PCI-E 1.0 slot and
-the Intel Phi system connects the Intel Xeon Phi to an eight lane PCI-E 2.0 slot
-which theoretically has the same bandwidth as the sixteen lane PCI-E 1.0 slot.
+The Mac Pro system connects the Tesla C2075 to a sixteen lane PCIe 1.0 slot and
+the Intel Phi system connects the Intel Xeon Phi to an eight lane PCIe 2.0 slot
+which theoretically has the same bandwidth as the sixteen lane PCIe 1.0 slot.
 
 nVidia's CUDA SDK supplies a bandwidth test which was used to determined the
 bandwidth of the Mac Pro system. The tool, called ``bandwidthTest'' has a mode
@@ -367,13 +367,13 @@ score some documents. For instance the nVidia Tesla C2075 bloom filter
 experiment has a scoring time is 232ms. This is a significant overhead. Given
 that the PCI express bus speed was the original 1.0 specification with 4GB/s
 maximum throughput, moving to a graphics card with similar compute performance,
-but with PCI-E 3.0 capabilities would reduce the data transfer overhead to
+but with PCIe 3.0 capabilities would reduce the data transfer overhead to
 around 30ms, improving overall time to 152ms, a reduction of around one third.
 
 For the parsing and scoring results, the transfer time only represents at most
 one fifth of the total time on the Intel Xeon Phi (The no bloom filter
 experiment runs in 499ms). This is still a substantial overhead however, the
-move to PCI-E 3.0 would only reduce this time to around 429ms, a throughput
+move to PCIe 3.0 would only reduce this time to around 429ms, a throughput
 improvement of around 16\%.
 
 The simple reason behind the differences in effect of transfer rates on
@@ -555,7 +555,7 @@ beginnings of documents before sending the data off to the OpenCL device. If the
 CPU was used solely to read in documents from a network feed and work out the
 locations of document beginnings, it's likely the case that in a multi-GPU set
 up, the GPUs could each be used to parse and score, with the CPU host having
-plenty of cycles free to coordinate the system. Also, the PCI-E bandwidth is
+plenty of cycles free to coordinate the system. Also, the PCIe bandwidth is
 unlikely to be a bottleneck as the GPUs can be transferring data and executing
 kernels at slightly different times meaning a multi-GPU set up is unlikely to
 have significant overhead and scale almost linearly with the number of devices.

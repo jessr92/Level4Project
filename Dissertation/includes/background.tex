@@ -263,14 +263,14 @@ different parts of memory.
 
 In addition to the architecture differences between CPUs and GPUs, there is a
 separate consideration that must be made for GPUs and other discrete devices,
-the PCI-E bus. GPUs are unable to directly access main memory like a CPU, thus
+the PCIe bus. GPUs are unable to directly access main memory like a CPU, thus
 before any code is run on a GPU, data must be transferred between primary memory
 and the GPUs on-board memory. This can take a significant period of time in
 comparison to the code runtime. This is due to the relatively slow speed of the
-PCI-E bus in comparison to on-board memory access. A GPU is able to access its
+PCIe bus in comparison to on-board memory access. A GPU is able to access its
 global memory at a rate of around 200GB/s on modern chips. Contrast this to the
-PCI-E link speed which can be as low as 250MB/s per lane. The most common
-systems have PCI-E 2.0 slots which run at 500MB/s per PCI-E lane with 16 lanes
+PCIe link speed which can be as low as 250MB/s per lane. The most common
+systems have PCIe 2.0 slots which run at 500MB/s per PCIe lane with 16 lanes
 available for the GPU giving a maximum theoretical transfer speed of 8GB/s, 25
 times slower than access from on-board memory.
 
@@ -278,14 +278,14 @@ times slower than access from on-board memory.
 
 Both CPUs and GPUs are strong in their respective application areas. Ideally, a
 system should be able to make best use of both types of device with as little
-overhead as possible. One of the obvious potential bottlenecks is the PCI-E bus
+overhead as possible. One of the obvious potential bottlenecks is the PCIe bus
 to devices discrete from the CPU. This led to the design of an Accelerated
 Processing Unit (APU). These have a traditional CPU in addition to a GPU (or
 FPGA) on the same die and are a good example of a Heterogeneous System
 Architecture (HSA). This design isn't new, CPUs have typically contained a small
 GPU, especially in the small laptop market. With the growth of Heterogeneous
 Systems, there has been a trend to increasing the GPU performance on die with
-the CPU. This reduces the gap between CPU and GPU and removes the PCI-E bus
+the CPU. This reduces the gap between CPU and GPU and removes the PCIe bus
 overhead. The primary consumer implementation of this is AMDs HSA
 \footnote{\url{http://developer.amd.com/resources/heterogeneous-computing/}}.
 The joint die allows power to be managed so that different applications can make
@@ -301,8 +301,8 @@ GPU or accelerator card is more likely to achieve the best overall performance.
 
 The Intel Xeon Phi is similar in many respects to a CPU, with around 60
 x86-compatible CPU cores. The device additionally has 8GB of on-board GDDR5
-memory, similar to a GPU. The device sits in a PCI-E slot like a GPU and thus
-has the same performance considerations for the PCI-E bus as a GPU. A detailed
+memory, similar to a GPU. The device sits in a PCIe slot like a GPU and thus
+has the same performance considerations for the PCIe bus as a GPU. A detailed
 look at the inner workings of the Intel Xeon Phi architecture can be found on
 Intel's website \footnote{\url{http://software.intel.com/en-us/articles/intel-
 xeon-phi-coprocessor-codename-knights-corner}}.
@@ -322,7 +322,7 @@ separate internal network device.
 
 \subsubsection{Performance Considerations}
 
-In addition to the PCI-E bus consideration, the ring bus to memory needs to be
+In addition to the PCIe bus consideration, the ring bus to memory needs to be
 taken into consideration. This is most notable with communication between cores.
 Communication between neighbouring cores will be fast, however communication
 between cores on the `opposite side' of the ring will be significantly slower.

@@ -167,6 +167,8 @@ same way as the scoring code.
 After the kernel has finished, the scores are written back to the host and the
 classifications are calculated as before.
 
+The parser is a state-machine parser optimised for speed, as designed for the
+CPU-FPGA Hybrid Implementation \cite{HybridCPUFPGA} by Wim Vanderbauwhede et al.
 The OpenCL kernel code is summarised in the pseudo-code in
 Figure~\ref{fig:parsingScoringPseudocode} where to5BitEncoding(char) is the
 Baudot encoding discussed and shown in Figure~\ref{baudotCode}, scoreTerm(term)
@@ -310,8 +312,8 @@ more gradual change.
 \subsection{Mapped Buffers}
 
 When using an accelerator device such as a graphics card, the data used by the
-kernel has to be transferred over the PCI-E bus by en-queueing a write buffer
-command. This incurs an unavoidable time cost as the PCI-E bus has limited
+kernel has to be transferred over the PCIe bus by en-queueing a write buffer
+command. This incurs an unavoidable time cost as the PCIe bus has limited
 bandwidth. When running OpenCL code on the CPU this is not the case as the
 OpenCL buffers can stay in primary memory. Unfortunately, the write buffer
 command does not realise that this is the case, and when executing a write
