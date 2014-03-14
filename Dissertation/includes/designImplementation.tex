@@ -1,4 +1,4 @@
-\section{Implementation}
+\section{Base Implementation}
 
 The project implementation is split into two primary sections. The first is the
 scoring only implementation, the second is the parsing and scoring
@@ -18,7 +18,7 @@ referred to as an array. When the array is transferred to an OpenCL device it is
 referred to as a buffer. These are functionally the same with the primary
 distinction being where they are allocated.
 
-\subsection{All implementations}
+\subsection{Parser and Scorer Implementation}
 
 Most OpenCL applications are implemented in much the same way from the host
 code's perspective. There is a significant amount of boiler plate code to detect
@@ -55,7 +55,7 @@ OpenCL host code is summarised in the pseudo-code in
 Figure~\ref{fig:openCLPseudocode}.
 
 \begin{figure}
-\begin{verbatim}
+\small\begin{verbatim}
 // One time set up
 platforms = getPlatforms()
 devices = getDevices(platforms[0])
@@ -80,7 +80,7 @@ readBuffer(resultsBuffer)
 \label{fig:openCLPseudocode}
 \end{figure}
 
-\subsection{Scoring Only}
+\subsection{Scoring Only Implementation}
 
 In addition to the profile and bloom filter, the scoring only implementation
 reads in the parsed document terms from disk. These are passed to the OpenCL
@@ -115,7 +115,7 @@ The OpenCL kernel code is summarised in the pseudo-code in
 Figure~\ref{fig:scoringPseudocode}.
 
 \begin{figure}
-\begin{verbatim}
+\small\begin{verbatim}
 documentNumber = get_global_id(0) + 1 // work item ID
 startIndex = docAddresses[documentNumber]
 endIndex = docAddresses[documentNumber + 1]
@@ -144,7 +144,7 @@ to a host device array, the actual classifications of each document is
 recovered. A document is classed as significant (spam in the spam or not spam
 example) if the score is above a certain threshold.
 
-\subsection{Parsing and Scoring}
+\subsection{Parsing and Scoring Implementation}
 
 For the parsing and scoring version, the host code is very similar. The only
 differences relate to the documents themselves. For scoring only, the documents
@@ -178,7 +178,7 @@ to the term, `flush' the term (aka score the term), or that a tag has been
 encountered.
 
 \begin{figure}
-\begin{verbatim}
+\small\begin{verbatim}
 documentNumber = get_global_id(0) + 1 // work item ID
 startIndex = docAddresses[documentNumber]
 endIndex = docAddresses[documentNumber + 1]

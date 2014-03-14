@@ -229,7 +229,8 @@ as this reduces the number of fetch and decode operations on instructions
 required. A performance consequence of this is in code with conditional
 branches.
 
-\begin{verbatim}
+\begin{figure}[H]
+\small\begin{verbatim}
 if (someCondition)
 {
     nonTrivialCode();
@@ -239,6 +240,7 @@ else
     someMoreNonTrivialCode();
 }
 \end{verbatim}
+\end{figure}
 
 For a simple example, consider the situation when someCondition is true for half
 of the threads, and false for the other half threads. For a CPU each thread
@@ -381,7 +383,7 @@ compressed text can still be read as English, just with some character
 substitutions. The algorithm is outlined in Figure~\ref{baudotCode}:
 
 \begin{figure}[H]
-\begin{verbatim}
+\small\begin{verbatim}
 to5BitEncoding(char c)
 {
     if (c == 'i' || c == 'j' || c == 'I' || c == 'J')
