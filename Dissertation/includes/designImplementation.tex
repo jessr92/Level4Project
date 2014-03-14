@@ -323,4 +323,8 @@ The solution to the issue is to map the OpenCL buffer to the host array. This is
 done by executing an en-queue map buffer command. The OpenCL buffer can then
 read from the host address space and removes the requirement for the unnecessary
 duplication of memory. The benefits of mapping a buffer is essentially a free
-lunch as the call takes an insignificant amount of time to execute.
+lunch as the call takes an insignificant amount of time to execute. This speeds
+up the CPU implementation by up to ten milliseconds. This, in practice, only
+increases throughput by up to 5\% in the best case for this application however,
+given that it's a simple optimisation, removing a small overhead is still
+worthwhile.
