@@ -55,11 +55,11 @@ frequency is 2GHz with a maximum turbo frequency of 2.5Ghz. There is a total of
 \item[Intel Xeon Phi] The Intel Xeon Phi is the 5110P
 \footnote{\url{http://ark.intel.com/products/71992/intel-xeon-phi-coprocessor-
 5110p-8gb-1_053-ghz-60-core}} variant. There are sixty physical CPU cores
-running at 1.053GHz, the cores are 4-way hyper-threaded resulting in 240
+running at 1.053GHz, and the cores are 4-way hyper-threaded resulting in 240
 hardware threads. There is 8GB of on board memory running at 5GT/s for a
 theoretical maximum memory bandwidth of 320GB/s. It has been installed in a PCIe
-2.0 slot with 8x lane bandwidth giving a total theoretical bandwidth between
-its on-board memory and main memory of 4GB/s (500MB/ per lane).
+2.0 slot with 8x lane bandwidth giving a total theoretical bandwidth between its
+on-board memory and main memory of 4GB/s (500MB/ per lane).
 
 \end{description}
 
@@ -261,8 +261,12 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 Figure \ref{fig:scoringOnlyBest} takes each device's best result and compares
 them in a bar graph. The AMD system has the clear lead, having nearly three
 times the performance of the second fastest system. It's important to note
-however that these figures are only used for reference. There would need to
-be some part of the system conducting the parsing section.
+however that these figures are only used for reference, there would need to
+be some part of the system conducting the parsing section making the scoring
+slower.
+
+The Tesla C2075 GPU can score in excess of 1GB/s showing that the CPU parsing
+code is the bottleneck of the system, running at 427MB/s \cite{HybridCPUFPGA}.
 
 \begin{figure}[H]
 \centering
@@ -283,15 +287,15 @@ scoring experiments. The results are the average time and throughput of the
 system over the twelve profiles.
 
 Each profile run is repeated ten times to improve the accuracy and reliability
-of the timing mechanism. The exception to this rule is the Intel CPU and nVidia
-GPU system which, due to the fact that both devices were running in parallel and
-run at slightly different rates, required different numbers of repetitions to
-finish at the same time. The ``No Bloom Filter'' experiment required twenty
-repetitions in total (ten for each device), ``Bloom Filter'' and ``Bloom Filter
-No Hits'' required twenty three repetitions (CPU had three extra), and ``Bloom
-Filter All Hits'' required twenty two repetitions (CPU had two extra). The
-experiment with the two Intel Xeon Phi 5110Ps had twenty repetitions in total,
-ten for each device.
+of the timing mechanism. The exceptions to this rule are the Intel CPU and
+nVidia GPU system which, due to the fact that both devices were running in
+parallel and run at slightly different rates, required different numbers of
+repetitions to finish at the same time. The ``No Bloom Filter'' experiment
+required twenty repetitions in total (ten for each device), ``Bloom Filter'' and
+``Bloom Filter No Hits'' required twenty three repetitions (CPU had three
+extra), and ``Bloom Filter All Hits'' required twenty two repetitions (CPU had
+two extra). The experiment with the two Intel Xeon Phi 5110Ps had twenty
+repetitions in total, ten for each device.
 
 \begin{table}[H]
 \begin{tabular}{|l|l|l|l|}
@@ -371,9 +375,9 @@ but with PCIe 3.0 capabilities would reduce the data transfer overhead to
 around 30ms, improving overall time to 152ms, a reduction of around one third.
 
 For the parsing and scoring results, the transfer time only represents at most
-one fifth of the total time on the Intel Xeon Phi (The no bloom filter
-experiment runs in 499ms). This is still a substantial overhead however, the
-move to PCIe 3.0 would only reduce this time to around 429ms, a throughput
+one fifth of the total time. Consider the Intel Xeon Phi, the no bloom filter
+experiment runs in 499ms. This is still a substantial overhead however, the move
+to PCIe 3.0 would only reduce this time to around 429ms, a throughput
 improvement of around 16\%.
 
 The simple reason behind the differences in effect of transfer rates on
@@ -383,13 +387,13 @@ transferred. Both scoring, and parsing and scoring require a similar amount of
 data to be transferred yet the latter does more work thus parsing and scoring on
 the one device is the better option based on data transfer overhead alone. It is
 also worth noting again that due to the speed of parsing on the C++ system being
-low compared to the scoring speed, the improved data transfer rates will only
-reduce latency in getting classification results back, but not improve
-throughput overall given that the parser is the bottleneck.
+low compared to the scoring speed on a GPU, the improved data transfer rates
+would only reduce latency in getting classification results back, but not
+improve throughput overall given that the parser is the bottleneck.
 
 \subsection{C++ versus OpenCL throughput}
 
-Although the scoring only experiments on the CPU was initially purely for
+Although the scoring only experiments on the CPU were initially only for
 reference, they also highlight a potential benefit of running a highly data
 parallel algorithm on the CPU using OpenCL. The C++ version uses POSIX threads
 to become multi-threaded and, with eight hardware threads, experience up to
@@ -405,14 +409,13 @@ explained. With POSIX threads, the document set is split evenly into eight sets,
 one for each hardware thread. In terms of scheduling and memory access, this is
 as granular as things go, each thread goes through its documents one by one. For
 OpenCL, it has the same number of work items as there are documents. For the
-TREC data set, this is around 77876 documents. OpenCL is free to schedule work
-items on compute units allowing for more granular scheduling. This can enable
-the runtime system to better hid memory access latency, resulting in the higher
-throughput. Also, given that documents can be of different lengths, if a POSIX
-thread has significantly longer documents than its counterparts, it will still
-be working away while the others have finished. This can still happen on the
-OpenCL system but with the granularity being significantly finer, it can be
-mitigated.
+TREC data set, this is 77876 documents. OpenCL is free to schedule work items on
+compute units allowing for more granular scheduling. This can enable the runtime
+system to better hid memory access latency, resulting in the higher throughput.
+Also, given that documents can be of different lengths, if a POSIX thread has
+significantly longer documents than its counterparts, it will still be working
+away while the others have finished. This can still happen on the OpenCL system
+but with the granularity being significantly finer, it can be mitigated.
 
 \subsection{Effect of Bloom Filters}
 
@@ -464,12 +467,12 @@ of caching is limited by the memory model, and the kernel code itself.
 The Intel Xeon Phi has peculiar results compared to the other device, the bloom
 filter results in a performance drop of around 5\%. This is perhaps due to the
 complicated cache mechanism required given the high number of independent cores.
-Each code has its own, small L2 cache thus the bloom filter is unlikely to be
+Each core has its own, small L2 cache thus the bloom filter is unlikely to be
 present in all of the cores simultaneously thus the potential benefit of the
 bloom filter is small. It is possible for a single copy of data in cache to be
-available for all cores, thus maximises cache capacity as the bloom filter is
+available for all cores, thus maximising cache capacity as the bloom filter is
 only stored once, but this makes access significantly slower. Since
-communication between cores and access to memory, is dictated by a ring
+communication between cores and access to memory is dictated by a ring
 structure between cores, following a shortest distance algorithm
 \footnote{\url{http://www.intel.co.uk/content/dam/www/public/us/en/documents/dat
 asheets/xeon-phi-coprocessor-datasheet.pdf} Page 10}, this set up would appear
@@ -497,15 +500,15 @@ identified earlier, the parser is the bottleneck. This fact will remain true
 even in this implementation which parses terms and scores them as soon as a full
 term has been parsed. This means that, in terms of instruction count, a reduced
 proportion is in the part of the code which would benefit from the bloom filter.
-As such it is natural that, percentage wise, throughput will not improve as
-much. The second relates to cache use itself. The scoring only code had very
-little private variables; it read in a term, created three n-grams, had a few
-variables to denote term range, score, and work item ID. This meant that less
-cache space was being used by private variables, increasing the chance that the
-bloom filter will not only migrate to CPU cache, but stay in cache for an
-extended period of time. The parsing and scoring kernel has around twice as many
-private variables, making fitting a bloom filter into the cache unlikely to be
-possible for an extended period of time.
+As such it is natural that, percentage wise, throughput will not improve as much
+with a bloom filter. The second relates to cache use itself. The scoring only
+code had very little private variables; it read in a term, created three
+n-grams, had a few variables to denote term range, score, and work item ID. This
+meant that less cache space was being used by private variables, increasing the
+chance that the bloom filter will not only migrate to CPU cache, but stay in
+cache for an extended period of time. The parsing and scoring kernel has around
+twice as many private variables, making fitting a bloom filter into the cache
+unlikely to be possible for an extended period of time.
 
 The AMD CPU experiences the biggest performance drop of nearly 50\%. This
 contrasts heavily with the larger than 100\% increase in performance for scoring
@@ -517,7 +520,7 @@ compared to the AMD CPU (1MB). This makes the situation of cache demand even
 more severe and is likely to contribute to the heavy performance drop. The bloom
 filter will be being read in regularly, removing other variables, just for those
 variables to be read in shortly after, removing the bloom filter. This is
-similar to the situation there primary memory and the swap space on disk are
+similar to the situation where primary memory and the swap space on disk are
 continually being read from and written to. This is known as thrashing and is
 responsible for significant drops of performance, similar to those experienced
 by the AMD system.
@@ -530,10 +533,10 @@ unit as less work items can be assigned simultaneously. The reduced number of
 work items per compute unit could also be affecting the memory latency technique
 effectiveness, resulting in the drop in performance.
 
-The Intel Xeon again has around a 5\% performance drop, identical to the scoring
-only version. With their being no difference in the bloom filter performance
-change, the reasons discussed in the scoring only section are likely just as
-valid for the parsing and scoring section.
+The Intel Xeon Phi again has around a 5\% performance drop, identical to the
+scoring only version. With their being no difference in the bloom filter
+performance change, the reasons discussed in the scoring only section are likely
+just as valid for the parsing and scoring section.
 
 In general, the bloom filter has a negative affect on most devices and could
 easily be ignored in a real world implementation. Given that the Intel CPU
@@ -561,7 +564,7 @@ kernels at slightly different times meaning a multi-GPU set up is unlikely to
 have significant overhead and scale almost linearly with the number of devices.
 This can be shown in the dual Intel Xeon Phi runs, which experience a near
 linear increase (80\%) compared to the single Intel Xeon Phi. This is with both
-devices requirement documents at the same time, and would represent the worst
+devices requiring documents at the same time, and would represent the worst
 case in a real life application. In reality, the devices would be at different
 stages of classification meaning CPU cycles are more likely to be used more
 evenly over a set time frame, rather than bursts of high activity, followed by
