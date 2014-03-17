@@ -74,8 +74,9 @@ graphics card fitted.
 \item[CPU] There are four AMD Opteron 6366 HE
 \footnote{\url{http://products.amd.com/en-us/OpteronCPUDetail.aspx?id=813&f1=&f2=&f3=Yes&f4=&f5=&f6=&f7=&f8=&f9=&f10=&f11=&}}
 (high efficiency) processors fitted. Each processor has 16 cores running at a
-base clock speed of 1.8GHz with a maximum turbo frequency of 3.1GHz. There is
-1MB of Level 2 and 16MB of Level 3 Cache available per processor.
+base clock speed of 1.8GHz with a maximum turbo frequency of 3.1GHz. When eight
+or more cores are active, turbo frequency goes down to 2.3GHz. There is 1MB of
+Level 2 and 16MB of Level 3 Cache available per processor.
 
 \item[Primary Memory] 512GB DDR3 RAM
 
@@ -346,8 +347,9 @@ Figure \ref{fig:parseScoringBest} takes each device's best result and compares
 them in a bar graph. From a single device perspective, the AMD System takes the
 lead easily. For the dual device perspective, the two Intel Xeon Phi 5110Ps come
 out top, with just over 800MB/s throughput. This is still beaten by the single
-device AMD system however, given that the AMD system has 64 CPU cores versus
-the Intel Phis lower clocked 60 cores, this is as expected.
+device AMD system however, given that the AMD system has 64 CPU cores at 2.3GHz
+versus the two Intel Xeon Phis lower clocked 120 cores at around 1GHz, this is
+as expected.
 
 \begin{figure}[H]
 \centering
