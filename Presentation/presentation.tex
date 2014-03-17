@@ -41,7 +41,7 @@
 \section{OpenCL}
 \subsection{Overview}
 \frame{
-    \frametitle{OpenCL}
+    \frametitle{OpenCL Overview}
     \begin{itemize}
         \item Open Computing Language.
         \item Framework for applications designed for heterogenous platforms.
@@ -51,9 +51,9 @@
         \item Device code, the kernel, in OpenCL which runs on target device.
     \end{itemize}
 }
-\subsection{How it was used}
+\subsection{OpenCL meets Document Classification}
 \frame{
-    \frametitle{How OpenCL was used}
+    \frametitle{OpenCL meets Document Classification}
     \begin{itemize}
         \item Host code reads in documents and sets up OpenCL environment.
         \item Device given documents and profile of terms.
@@ -64,11 +64,22 @@
         \item Target devices include Tesla C2075 and Intel Xeon Phi 5110P.
     \end{itemize}
 }
+\section{TREC Data Collection}
+\frame{
+    \frametitle{TREC Data Collection}
+    \begin{itemize}
+        \item Text Retrieval Conference document set.
+        \item Around 78000 plain text documents.
+        \item News articles fitting into seven different categories.
+        \item Three selected for one class, four for the other class.
+        \item Twelve profiles for each class combination created.
+    \end{itemize}
+}
 \section{Scoring}
 \frame{
     \frametitle{Scoring}
     \begin{itemize}
-        \item Use a pre-parsed collection of document terms.
+        \item Use a pre-parsed collection of document terms for TREC collection.
         \item OpenCL kernel scores this collection based on profile.
         \item Bloom filter checks to see if term might be in profile.
         \item Scores returned back to host.
