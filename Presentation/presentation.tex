@@ -9,19 +9,123 @@
 \frame{\titlepage}
 \frame{\tableofcontents}
 \section{Document Classification}
+\subsection{Introduction}
 \frame{
     \frametitle{Document Classification}
+    \begin{itemize}
+        \item A problem of growing importance, data centres handle terabytes of
+        data daily.
+        \item Need fast, but efficient, method of filtering.
+        \item Data parallel problem, each document independent from one another.
+    \end{itemize}
+    Classification Method
+    \begin{itemize}
+        \item Na{\"{\i}}ve Bayes Classifier for plain text documents.
+        \item Two classes, A or B. Think spam or not spam.
+        \item Profile of interesting terms used to score document terms.
+        \item N-Grams of terms also scored. `Rolex' versus `Cheap Real Rolex'.
+        \item Documents with a high enough score are given class A, otherwise B.
+    \end{itemize}
+}
+\subsection{Previous system setup}
+\frame{
+    \frametitle{Previous system setup}
+    \begin{itemize}
+        \item CPU parses documents in a C++ application.
+        \item Scoring can be off-loaded to FPGA.
+        \item Parsing is bottleneck, 427MB/s. FPGA scores at 749MB/s.
+        \item Work looking into parsing and scoring on FPGA.
+    \end{itemize}
+    This project looks into use of OpenCL and GPUs.
 }
 \section{OpenCL}
+\subsection{Overview}
 \frame{
     \frametitle{OpenCL}
+    \begin{itemize}
+        \item Open Computing Language.
+        \item Framework for applications designed for heterogenous platforms.
+        \item Can run on CPUs, GPUs, FPGAs, and more.
+        \item Roughly a subset of C99.
+        \item Host code in C++ which runs on CPU.
+        \item Device code, the kernel, in OpenCL which runs on target device.
+    \end{itemize}
+}
+\subsection{How it was used}
+\frame{
+    \frametitle{How OpenCL was used}
+    \begin{itemize}
+        \item Host code reads in documents and sets up OpenCL environment.
+        \item Device given documents and profile of terms.
+        \item Device given optional bloom filter, to reduce trips to memory.
+        \item Both scoring only, and parsing and scoring kernels.
+        \item Host reads back scores from target device.
+        \item Document classification output based on score.
+        \item Target devices include Tesla C2075 and Intel Xeon Phi 5110P.
+    \end{itemize}
 }
 \section{Scoring}
 \frame{
     \frametitle{Scoring}
+    \begin{itemize}
+        \item Use a pre-parsed collection of document terms.
+        \item OpenCL kernel scores this collection based on profile.
+        \item Bloom filter checks to see if term might be in profile.
+        \item Scores returned back to host.
+    \end{itemize}
+}
+\subsection{Results}
+\frame{
+    \frametitle{Scoring Results}
+    \includegraphics[width=\linewidth,height=\textheight,keepaspectratio]{../Dissertation/images/scoringOnlyBest.png}
+}
+\subsection{Discussion}
+\frame{
+    \frametitle{Discussion of Results}
+    \begin{itemize}
+        \item AMD CPU system comes out top. 64 cores at 1.8GHz up to 3.1GHz
+        \item Tesla C2075 exceeds 1GB/s. CPU parser would be bottleneck still.
+        \item OpenCL on CPU improves performance compared to C++ version.
+        \item CPU results only for reference, some part of system would need
+        to be parsing.
+        \item Confirms parser and scorer on one device required.
+    \end{itemize}
 }
 \section{Parsing and Scoring}
 \frame{
     \frametitle{Parsing and Scoring}
+    \begin{itemize}
+        \item Use plain text documents, TREC collection.
+        \item OpenCL kernel parses documents as well as scoring them based on
+        given profile.
+        \item Bloom filter checks to see if term might be in profile.
+        \item Scores returned back to host.
+    \end{itemize}
+}
+\subsection{Results}
+\frame{
+    \frametitle{Parsing and Scoring Results}
+    \includegraphics[width=\linewidth,height=\textheight,keepaspectratio]{../Dissertation/images/parsingScoringBest.png}
+}
+\subsection{Discussion}
+\frame{
+    \frametitle{Discussion of Results}
+    \begin{itemize}
+        \item AMD CPU system comes out top again at nearly 1GB/s.
+        \item Two Intel Xeon Phis a close second. Almost linear scaling compared
+        to single Phi.
+        \item Dual CPU and GPU system also has near-linear scaling.
+        \item All dual device results improve on previous bottleneck of 427MB/s.
+    \end{itemize}
+}
+\section{Conclusion}
+\frame{
+    \frametitle{Conclusion}
+    \begin{itemize}
+        \item Document filtering suitable application of OpenCL.
+        \item GPU acceleration is effective.
+        \item Modern, consumer class devices are more efficient.
+        \item Adding multiple devices scales well.
+    \end{itemize}
 }
 \end{document}
