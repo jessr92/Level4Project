@@ -16,9 +16,9 @@ nVidia and Intel OpenCL SDKs were installed and up to date at time of writing.
 \begin{description}
 
 \item[CPU] The motherboard has two CPU sockets, both with an Intel Xeon E5462
-\footnote{\url{http://ark.intel.com/products/33084/Intel-Xeon-Processor-E5462
--12M-Cache-2_80-GHz-1600-MHz-FSB}} processor. This is a quad core processor with
-a 2.8GHz clock speed and 12MB of Level 2 cache per processor.
+\footnote{\url{http://ark.intel.com/products/33084/Intel-Xeon-Processor-E5462-12M-Cache-2_80-GHz-1600-MHz-FSB}}
+processor. This is a quad core processor with a 2.8GHz clock speed and 12MB of
+Level 2 cache per processor.
 
 \item[Primary Memory] There is 14GB of PC2-6400 (800MHz) DDR2 RAM installed,
 with error correcting code (ECC) enabled.
@@ -44,22 +44,22 @@ card fitted.
 \begin{description}
 
 \item[CPU] There is a single Intel Xeon E5-2620
-\footnote{\url{http://ark.intel.com/products/64594/intel-xeon-processor-e5-2620
--15m-cache-2_00-ghz-7_20-gts-intel-qpi}} fitted. This is a six core processor
-with hyper-threading to give twelve hardware threads. The standard clock
-frequency is 2GHz with a maximum turbo frequency of 2.5Ghz. There is a total of
-15MB ``Intel Smart Cache'' available which acts as Level 3 cache.
+\footnote{\url{http://ark.intel.com/products/64594/intel-xeon-processor-e5-2620-15m-cache-2_00-ghz-7_20-gts-intel-qpi}}
+fitted. This is a six core processor with hyper-threading to give twelve
+hardware threads. The standard clock frequency is 2GHz with a maximum turbo
+frequency of 2.5Ghz. There is a total of 15MB ``Intel Smart Cache'' available
+which acts as Level 3 cache.
 
 \item[Primary Memory] 16GB DDR3 RAM
 
 \item[Intel Xeon Phi] The Intel Xeon Phi is the 5110P
-\footnote{\url{http://ark.intel.com/products/71992/intel-xeon-phi-coprocessor-
-5110p-8gb-1_053-ghz-60-core}} variant. There are sixty physical CPU cores
-running at 1.053GHz, and the cores are 4-way hyper-threaded resulting in 240
-hardware threads. There is 8GB of on board memory running at 5GT/s for a
-theoretical maximum memory bandwidth of 320GB/s. It has been installed in a PCIe
-2.0 slot with 8x lane bandwidth giving a total theoretical bandwidth between its
-on-board memory and main memory of 4GB/s (500MB/ per lane).
+\footnote{\url{http://ark.intel.com/products/71992/intel-xeon-phi-coprocessor-5110p-8gb-1_053-ghz-60-core}}
+variant. There are sixty physical CPU cores running at 1.053GHz, and the cores
+are 4-way hyper-threaded resulting in 240 hardware threads. There is 8GB of on
+board memory running at 5GT/s for a theoretical maximum memory bandwidth of
+320GB/s. It has been installed in a PCIe 2.0 slot with 8x lane bandwidth giving
+a total theoretical bandwidth between its on-board memory and main memory of
+4GB/s (500MB/ per lane).
 
 \end{description}
 
@@ -72,11 +72,10 @@ graphics card fitted.
 \begin{description}
 
 \item[CPU] There are four AMD Opteron 6366 HE
-\footnote{\url{http://products.amd.com/en-us/OpteronCPUDetail.aspx?id=813&f1=&f2
-=&f3=Yes&f4=&f5=&f6=&f7=&f8=&f9=&f10=&f11=&}} (high efficiency) processors
-fitted. Each processor has 16 cores running at a base clock speed of 1.8GHz with
-a maximum turbo frequency of 3.1GHz. There is 1MB of Level 2 and 16MB of Level 3
-Cache available per processor.
+\footnote{\url{http://products.amd.com/en-us/OpteronCPUDetail.aspx?id=813&f1=&f2=&f3=Yes&f4=&f5=&f6=&f7=&f8=&f9=&f10=&f11=&}}
+(high efficiency) processors fitted. Each processor has 16 cores running at a
+base clock speed of 1.8GHz with a maximum turbo frequency of 3.1GHz. There is
+1MB of Level 2 and 16MB of Level 3 Cache available per processor.
 
 \item[Primary Memory] 512GB DDR3 RAM
 
@@ -472,11 +471,11 @@ present in all of the cores simultaneously thus the potential benefit of the
 bloom filter is small. It is possible for a single copy of data in cache to be
 available for all cores, thus maximising cache capacity as the bloom filter is
 only stored once, but this makes access significantly slower. Since
-communication between cores and access to memory is dictated by a ring
-structure between cores, following a shortest distance algorithm
-\footnote{\url{http://www.intel.co.uk/content/dam/www/public/us/en/documents/dat
-asheets/xeon-phi-coprocessor-datasheet.pdf} Page 10}, this set up would appear
-to be unsuitable for a bloom filter whose benefit relies on fast local access.
+communication between cores and access to memory is dictated by a ring structure
+between cores, following a shortest distance algorithm
+\footnote{\url{http://www.intel.co.uk/content/dam/www/public/us/en/documents/datasheets/xeon-phi-coprocessor-datasheet.pdf}
+Page 10}, this set up would appear to be unsuitable for a bloom filter whose
+benefit relies on fast local access.
 
 As discussed previously, the scoring code runs significantly faster on all
 devices in comparison to the parser, thus it is the parser which is the system
