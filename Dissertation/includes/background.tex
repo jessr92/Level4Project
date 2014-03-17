@@ -211,7 +211,7 @@ video output.
 \subsubsection{Threading and Cache}
 
 A CPU has a few hardware threads, one or two per CPU core which occasional
-context swtiching, with multi-level caching to reduce off-chip memory access
+context switching, with multi-level caching to reduce off-chip memory access
 latency.
 
 GPUs have many threads to keep compute units busy, if some threads are waiting
@@ -508,7 +508,7 @@ aren't contained in the profile. In other words, a bloom filter cannot have a
 false negative result (all terms in profile can be looked up) but can have false
 positive results like term 3.
 
-This is the space/time tradeoff that Bloom discusses. A Bloom filter can be
+This is the space-time trade-off that Bloom discusses. A Bloom filter can be
 very small compared to the data structure it's supporting but lookups can take
 more time due to the false positive results. If the false positive rate is low
 enough, the time saved from the reads from memory avoided by true negatives
