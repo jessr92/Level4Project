@@ -195,6 +195,29 @@ if [ "$HOSTNAME" = "manipa" ]; then
     echo "Testing full system with bloom filter all ones on Phi and Phi"
     PHIPHI "htmlResultsBloomAll1/PhiPhi"
 fi
+# Togian has a 64 core CPU
+if [ "$HOSTNAME" = "togian.dcs.gla.ac.uk" ]; then
+    # No Bloom CPU
+    make clean
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVCPU
+    mkdir -p htmlResultsNoBloom/CPU
+    CPU "htmlResultsNoBloom/CPU"
+    # Bloom CPU
+    make clean
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilter.raw\"' CPPFLAGS+=-DDEVCPU
+    mkdir -p htmlResultsBloom/CPU
+    CPU "htmlResultsBloom/CPU"
+    # BloomAll0 CPU
+    make clean
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll0.raw\"' CPPFLAGS+=-DDEVCPU
+    mkdir -p htmlResultsBloomAll0/CPU
+    CPU "htmlResultsBloomAll0/CPU"
+    # BloomAll1 CPU
+    make clean
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll1.raw\"' CPPFLAGS+=-DDEVCPU
+    mkdir -p htmlResultsBloomAll1/CPU
+    CPU "htmlResultsBloomAll1/CPU"
+fi
 python summary.py htmlResultsNoBloom
 python summary.py htmlResultsBloom
 python summary.py htmlResultsBloomAll0
