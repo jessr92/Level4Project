@@ -91,57 +91,61 @@ if [ "$HOSTNAME" = "fara.dcs.gla.ac.uk" ]; then
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsNoBloom/CPU
+    echo "Testing full system without bloom filter on CPU"
     CPU "htmlResultsNoBloom/CPU"
     # Bloom GPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilter.raw\"'
     mkdir -p htmlResultsBloom/GPU
-    echo "Testing full system without bloom filter on GPU"
+    echo "Testing full system with bloom filter on GPU"
     GPU "htmlResultsBloom/GPU"
     # Bloom CPUGPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilter.raw\"'
     mkdir -p htmlResultsBloom/CPUGPU
-    echo "Testing full system without bloom filter on CPU and GPU"
+    echo "Testing full system with bloom filter on CPU and GPU"
     CPUGPU "htmlResultsBloom/CPUGPU"
     # Bloom CPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilter.raw\"' CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsBloom/CPU
+    echo "Testing full system with bloom filter on CPU"
     CPU "htmlResultsBloom/CPU"
     # BloomAll0 GPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll0.raw\"'
     mkdir -p htmlResultsBloomAll0/GPU
-    echo "Testing full system without bloom filter on GPU"
+    echo "Testing full system with bloom filter all zeroes on GPU"
     GPU "htmlResultsBloomAll0/GPU"
     # BloomAll0 CPUGPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll0.raw\"'
     mkdir -p htmlResultsBloomAll0/CPUGPU
-    echo "Testing full system without bloom filter on CPU and GPU"
+    echo "Testing full system with bloom filter all zeroes on CPU and GPU"
     CPUGPU "htmlResultsBloomAll0/CPUGPU"
     # BloomAll0 CPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll0.raw\"' CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsBloomAll0/CPU
+    echo "Testing full system with bloom filter all zeroes on CPU"
     CPU "htmlResultsBloomAll0/CPU"
     # BloomAll1 GPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll1.raw\"'
     mkdir -p htmlResultsBloomAll1/GPU
-    echo "Testing full system without bloom filter on GPU"
+    echo "Testing full system with bloom filter all ones on GPU"
     GPU "htmlResultsBloomAll1/GPU"
     # BloomAll1 CPUGPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll1.raw\"'
     mkdir -p htmlResultsBloomAll1/CPUGPU
-    echo "Testing full system without bloom filter on CPU and GPU"
+    echo "Testing full system with bloom filter all ones on CPU and GPU"
     CPUGPU "htmlResultsBloomAll1/CPUGPU"
     # BloomAll1 CPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll1.raw\"' CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsBloomAll1/CPU
+    echo "Testing full system with bloom filter all ones on CPU"
     CPU "htmlResultsBloomAll1/CPU"
 fi
 # Manipa has the Intel Phi we're testing with
@@ -201,21 +205,25 @@ if [ "$HOSTNAME" = "togian.dcs.gla.ac.uk" ]; then
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsNoBloom/CPU
+    echo "Testing full system without bloom filter on CPU"
     CPU "htmlResultsNoBloom/CPU"
     # Bloom CPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilter.raw\"' CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsBloom/CPU
+    echo "Testing full system with bloom filter on CPU"
     CPU "htmlResultsBloom/CPU"
     # BloomAll0 CPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll0.raw\"' CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsBloomAll0/CPU
+    echo "Testing full system with bloom filter all zeroes on CPU"
     CPU "htmlResultsBloomAll0/CPU"
     # BloomAll1 CPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll1.raw\"' CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsBloomAll1/CPU
+    echo "Testing full system with bloom filter all ones on CPU"
     CPU "htmlResultsBloomAll1/CPU"
 fi
 python summary.py htmlResultsNoBloom
