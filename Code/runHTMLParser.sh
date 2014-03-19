@@ -95,55 +95,55 @@ if [ "$HOSTNAME" = "fara.dcs.gla.ac.uk" ]; then
     CPU "htmlResultsNoBloom/CPU"
     # Bloom GPU
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilter.raw\"'
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilter.raw\"'
     mkdir -p htmlResultsBloom/GPU
     echo "Testing full system with bloom filter on GPU"
     GPU "htmlResultsBloom/GPU"
     # Bloom CPUGPU
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilter.raw\"'
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilter.raw\"'
     mkdir -p htmlResultsBloom/CPUGPU
     echo "Testing full system with bloom filter on CPU and GPU"
     CPUGPU "htmlResultsBloom/CPUGPU"
     # Bloom CPU
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilter.raw\"' CPPFLAGS+=-DDEVCPU
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilter.raw\"' CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsBloom/CPU
     echo "Testing full system with bloom filter on CPU"
     CPU "htmlResultsBloom/CPU"
     # BloomAll0 GPU
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll0.raw\"'
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll0.raw\"'
     mkdir -p htmlResultsBloomAll0/GPU
     echo "Testing full system with bloom filter all zeroes on GPU"
     GPU "htmlResultsBloomAll0/GPU"
     # BloomAll0 CPUGPU
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll0.raw\"'
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll0.raw\"'
     mkdir -p htmlResultsBloomAll0/CPUGPU
     echo "Testing full system with bloom filter all zeroes on CPU and GPU"
     CPUGPU "htmlResultsBloomAll0/CPUGPU"
     # BloomAll0 CPU
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll0.raw\"' CPPFLAGS+=-DDEVCPU
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll0.raw\"' CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsBloomAll0/CPU
     echo "Testing full system with bloom filter all zeroes on CPU"
     CPU "htmlResultsBloomAll0/CPU"
     # BloomAll1 GPU
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll1.raw\"'
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll1.raw\"'
     mkdir -p htmlResultsBloomAll1/GPU
     echo "Testing full system with bloom filter all ones on GPU"
     GPU "htmlResultsBloomAll1/GPU"
     # BloomAll1 CPUGPU
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll1.raw\"'
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll1.raw\"'
     mkdir -p htmlResultsBloomAll1/CPUGPU
     echo "Testing full system with bloom filter all ones on CPU and GPU"
     CPUGPU "htmlResultsBloomAll1/CPUGPU"
     # BloomAll1 CPU
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll1.raw\"' CPPFLAGS+=-DDEVCPU
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll1.raw\"' CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsBloomAll1/CPU
     echo "Testing full system with bloom filter all ones on CPU"
     CPU "htmlResultsBloomAll1/CPU"
@@ -164,37 +164,37 @@ if [ "$HOSTNAME" = "manipa" ]; then
     PHIPHI "htmlResultsNoBloom/PhiPhi"
     # Bloom Phi
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilter.raw\"'
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilter.raw\"'
     mkdir -p htmlResultsBloom/Phi
     echo "Testing full system with bloom filter on Phi"
     PHI "htmlResultsBloom/Phi"
     # Bloom PhiPhi
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DPHIPHI CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilter.raw\"'
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DPHIPHI CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilter.raw\"'
     mkdir -p htmlResultsBloom/PhiPhi
     echo "Testing full system with bloom filter on Phi and Phi"
     PHIPHI "htmlResultsBloom/PhiPhi"
     # BloomAll0 Phi
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll0.raw\"'
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll0.raw\"'
     mkdir -p htmlResultsBloomAll0/Phi
     echo "Testing full system with bloom filter all zeroes on Phi"
     PHI "htmlResultsBloomAll0/Phi"
     # BloomAll0 PhiPhi
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DPHIPHI CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll0.raw\"'
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DPHIPHI CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll0.raw\"'
     mkdir -p htmlResultsBloomAll0/PhiPhi
     echo "Testing full system with bloom filter all zeroes on Phi and Phi"
     PHIPHI "htmlResultsBloomAll0/PhiPhi"
     # BloomAll1 Phi
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll1.raw\"'
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll1.raw\"'
     mkdir -p htmlResultsAll1/Phi
     echo "Testing full system with bloom filter all ones on Phi"
     PHI "htmlResultsBloomAll1/Phi"
     # BloomAll1 PhiPhi
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DPHIPHI CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll1.raw\"'
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DPHIPHI CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll1.raw\"'
     mkdir -p htmlResultsAll1/PhiPhi
     echo "Testing full system with bloom filter all ones on Phi and Phi"
     PHIPHI "htmlResultsBloomAll1/PhiPhi"
@@ -209,19 +209,19 @@ if [ "$HOSTNAME" = "togian.dcs.gla.ac.uk" ]; then
     CPU "htmlResultsNoBloom/AMDCPU"
     # Bloom CPU
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilter.raw\"' CPPFLAGS+=-DDEVCPU
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilter.raw\"' CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsBloom/AMDCPU
     echo "Testing full system with bloom filter on CPU"
     CPU "htmlResultsBloom/AMDCPU"
     # BloomAll0 CPU
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll0.raw\"' CPPFLAGS+=-DDEVCPU
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll0.raw\"' CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsBloomAll0/AMDCPU
     echo "Testing full system with bloom filter all zeroes on CPU"
     CPU "htmlResultsBloomAll0/AMDCPU"
     # BloomAll1 CPU
     make clean
-    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll1.raw\"' CPPFLAGS+=-DDEVCPU
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll1.raw\"' CPPFLAGS+=-DDEVCPU
     mkdir -p htmlResultsBloomAll1/AMDCPU
     echo "Testing full system with bloom filter all ones on CPU"
     CPU "htmlResultsBloomAll1/AMDCPU"
