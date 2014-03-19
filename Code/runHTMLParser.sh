@@ -143,13 +143,13 @@ if [ "$HOSTNAME" = "manipa" ]; then
     # BloomAll1 Phi
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll1.raw\"'
-    mkdir -p htmlResultsAll1/Phi
+    mkdir -p htmlResultsBloomAll1/Phi
     echo "Testing full system with bloom filter all ones on Phi"
     OPENCL_FULL "htmlResultsBloomAll1/Phi"
     # BloomAll1 PhiPhi
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVACC CPPFLAGS+=-DPHIPHI CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll1.raw\"'
-    mkdir -p htmlResultsAll1/PhiPhi
+    mkdir -p htmlResultsBloomAll1/PhiPhi
     echo "Testing full system with bloom filter all ones on Phi and Phi"
     OPENCL_FULL_FORK "htmlResultsBloomAll1/PhiPhi"
 fi
