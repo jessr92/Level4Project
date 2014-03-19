@@ -204,27 +204,27 @@ if [ "$HOSTNAME" = "togian.dcs.gla.ac.uk" ]; then
     # No Bloom CPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DDEVCPU
-    mkdir -p htmlResultsNoBloom/CPU
+    mkdir -p htmlResultsNoBloom/AMDCPU
     echo "Testing full system without bloom filter on CPU"
-    CPU "htmlResultsNoBloom/CPU"
+    CPU "htmlResultsNoBloom/AMDCPU"
     # Bloom CPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilter.raw\"' CPPFLAGS+=-DDEVCPU
-    mkdir -p htmlResultsBloom/CPU
+    mkdir -p htmlResultsBloom/AMDCPU
     echo "Testing full system with bloom filter on CPU"
-    CPU "htmlResultsBloom/CPU"
+    CPU "htmlResultsBloom/AMDCPU"
     # BloomAll0 CPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll0.raw\"' CPPFLAGS+=-DDEVCPU
-    mkdir -p htmlResultsBloomAll0/CPU
+    mkdir -p htmlResultsBloomAll0/AMDCPU
     echo "Testing full system with bloom filter all zeroes on CPU"
-    CPU "htmlResultsBloomAll0/CPU"
+    CPU "htmlResultsBloomAll0/AMDCPU"
     # BloomAll1 CPU
     make clean
     make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomFilterAll1.raw\"' CPPFLAGS+=-DDEVCPU
-    mkdir -p htmlResultsBloomAll1/CPU
+    mkdir -p htmlResultsBloomAll1/AMDCPU
     echo "Testing full system with bloom filter all ones on CPU"
-    CPU "htmlResultsBloomAll1/CPU"
+    CPU "htmlResultsBloomAll1/AMDCPU"
 fi
 python summary.py htmlResultsNoBloom
 python summary.py htmlResultsBloom
