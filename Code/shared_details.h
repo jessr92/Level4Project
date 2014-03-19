@@ -13,7 +13,9 @@
 
 #define NUM_THREADS 8
 
+#ifndef REPETITIONS
 #define REPETITIONS 10
+#endif
 
 #define NUM_NGRAMS 3
 #define CHAR_SIZE 5
@@ -36,7 +38,7 @@
 #define DOCUMENT_MARKER "<DOC>"
 
 #ifndef HTML_FILE
-#define HTML_FILE "02.warc"
+#define HTML_FILE "01.warc"
 #endif
 #define WARC_MARKER "Content-Type: text/html"
 
