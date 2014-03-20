@@ -6,14 +6,15 @@ Open Computing Language (OpenCL) is a framework for writing applications
 designed to be executed across heterogeneous platforms such as central
 processing units (CPUs), graphics processing units (GPUs), and accelerator
 devices such as the Intel Xeon Phi and Field-Programmable Gate Arrays (FPGAs).
-The language is an open standard maintained by Khronos Group
+The language is an open standard maintained by the Khronos Group
 \footnote{\url{http://www.khronos.org/opencl}}. OpenCL is based on the C99
-\footnote{\url{http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf}}
-standard and can be loosely thought of as a subset of the C99 language with some
-additional keywords. The first release of the OpenCL standard (OpenCL 1.0) was
-on the 8th of December 2008. There have been two subsequent stable releases of
-the standard, OpenCL 1.1 and 1.2, on the 14th of June 2010 and 15th of November
-2011 respectively. The version with most hardware support is OpenCL 1.1
+language standard
+\footnote{\url{http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf}} and
+can be loosely thought of as a subset of the C99 language with some additional
+keywords. The first release of the OpenCL standard (OpenCL 1.0) was on the 8th
+of December 2008. There have been two subsequent stable releases of the
+standard, OpenCL 1.1 and 1.2, on the 14th of June 2010 and 15th of November 2011
+respectively. The version with most hardware support is OpenCL 1.1
 \footnote{\url{http://www.khronos.org/registry/cl/specs/opencl-1.1.pdf}} and
 this standard forms the basis of all discussion on OpenCL in this report.
 
@@ -26,8 +27,9 @@ is executed.
 OpenCL applications are called kernels. A kernel is a function that executes on
 an OpenCL capable device. Since the focus of OpenCL is on parallelism, a kernel
 is written from the perspective of a single thread instead of requiring explicit
-threading code from more familiar models such as POSIX threads. An OpenCL work
-item is similar to a POSIX thread with a notable exception that OpenCL has no
+threading code that is required by more familiar models for
+multi-threading/parallelism such as POSIX threads. An OpenCL work item is
+similar to a POSIX thread with a notable exception that OpenCL has no
 traditional stack, any `function' calls by the OpenCL kernel are actually
 in-lined by the compiler in some implementations. OpenCL kernels are also
 compiled at runtime thus the host code, and the compiler itself, can make
@@ -67,7 +69,7 @@ OpenCL kernel.
 
 \item[Constant memory] Constant memory resides in the same space as global
 memory and is used for data which is accessed simultaneously by all work items,
-or for variables whose values never change. Constant memory is denoted as
+and for variables whose values never change. Constant memory is denoted as
 `\_\_constant' in an OpenCL kernel.
 
 \item[Local memory] This is scratch pad memory which is only visible to a single
@@ -190,8 +192,8 @@ There are numerous important architecture differences between different classes
 of device. At the high level, CPUs are aimed at being good all-rounders,
 suitable for a multitude of tasks whereas GPUs have focused on the problem of
 pixel value generation in a highly parallel fashion. This had led to the
-evolution of different devices taking distinct paths. The important differences
-will be outlined in this section.
+evolution of different device architectures that are suitable for different
+types of task. The important differences will be outlined in this section.
 
 \subsection{CPU and GPU}
 
@@ -210,14 +212,20 @@ video output.
 
 \subsubsection{Threading and Cache}
 
-A CPU has a few hardware threads, one or two per CPU core which occasional
-context switching, with multi-level caching to reduce off-chip memory access
-latency.
+A CPU has a few hardware threads, one or two per CPU core with occasional
+context switching. The CPU has multiple levels of cache, typically two or three,
+to reduce memory access latency by exploting spatial and temporal locality of
+memory accesses. It does this by automatically copying data in the same
+`cache-line' (around 64 bytes) of the requested memory from primary memory into
+the cache. The idea behind this is that a program will likely need data values
+nearby the memory location just accessed, for instance iterating over the array,
+this is called spatial locality. Temporal locality is where a data value used
+now is likely to be used again a short time later on.
 
 GPUs have many threads to keep compute units busy, if some threads are waiting
 on memory accesses, other threads are available to run. Latency is thus hidden
-rather than reduced. This has led to the design of a context switch for GPU
-threads to have insignificant cost to help facilitate the latency hiding.
+rather than reduced. To help facilitate this latency hiding, the context switch
+for GPU threads is designed to have insignificant cost.
 
 \subsubsection{Arithmetic Throughput}
 
@@ -229,7 +237,7 @@ repetitive computations more than a CPU.
 
 CPUs have a very free implementation of the OpenCL execution model. Threads are
 free to take their own execution path, and aren't directly affected by other
-thread's progress except from at explicit synchronisation stages.
+thread's progress except from at explicit synchronisation points.
 
 GPUs, on the other hand, have a Single Instruction Multiple Threads (SIMT)
 execution model. This means that GPUs have one instruction unit for multiple
@@ -251,6 +259,7 @@ else
     someMoreNonTrivialCode();
 }
 \end{verbatim}
+\caption{Divergent Warp Example}
 \end{figure}
 
 For a simple example, consider the situation when someCondition is true for half
@@ -488,8 +497,9 @@ Coding with Allowable Errors'' \cite{bloom1970space}.
 
 A Bloom filter is used to store the possibility that a term exists in the
 profile. With the size of the Bloom filter being small, it's likely it will
-migrate into a cache of both the CPU and GPU allowing for efficient lookup of
-the bloom filter and minimised trips to memory for non-existent profile terms.
+migrate into a cache of the CPU and can be copied into the local memory of the
+GPU allowing for efficient lookup of the bloom filter and minimised trips to
+memory for non-existent profile terms.
 
 A Bloom filter works as follows. It is an array of bit values where 0 indicates
 absent and 1 indicates present. When constructing the profile, each entry is
