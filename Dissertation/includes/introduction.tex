@@ -1,17 +1,17 @@
 \section{Introduction}
 
-With traditional CPUs experiencing slowdowns in improvements to raw performance,
-the computing industry is looking for an alternative hardware and software
-paradigm to take us into the next era of computing performance. This has led to
-the increase in the number of cores on a single CPU die, with most consumer
-devices containing four cores. This allows four individual threads of control to
-run simultaneously on a single chip. In addition to this, the growth of
-computational power available in GPUs has led to the idea of using the GPUs for
-general purpose computing tasks (GPGPUs). This is known as Heterogeneous
-Computing and refers to any system that uses more than one kind of processor. In
-addition to this, there are growing numbers of devices with a Heterogeneous
-System Architecture (HSA) where multiple processor types (such as CPUs and GPUs)
-exist on the same die.
+With traditional CPUs experiencing slowdowns in improvements to raw performance
+for a single core, the computing industry is looking for an alternative hardware
+and software paradigm to take us into the next era of computing performance.
+This has led to the increase in the number of cores on a single CPU die, with
+most consumer devices containing four cores. This allows four individual threads
+of control to run simultaneously on a single chip. In addition to this, the
+growth of computational power available in GPUs has led to the idea of using the
+GPUs for general purpose computing tasks (GPGPUs). This is known as
+Heterogeneous Computing and refers to any system that uses more than one kind of
+processor. In addition to this, there are growing numbers of devices with a
+Heterogeneous System Architecture (HSA) where multiple processor types (such as
+CPUs and GPUs) exist on the same die.
 
 \section{Problem Description}
 
@@ -31,7 +31,7 @@ At the end of scoring, if the document has a high enough score, it is classed as
 spam, otherwise it is not spam. This works for any two classification
 possibilities. For example, using the Text Retrieval Conference (TREC) data
 collection, the ``not spam'' class could be Entertainment articles, and the
-``spam'' case could be Financial articles.
+``spam'' class could be Financial articles.
 
 \section{Motivation}
 
@@ -42,15 +42,17 @@ sent every day. Emails, and other kinds of documents, sometimes need to be
 filtered. This problem is highly data parallel in nature as the classification
 of one document does not affect the classification of another. With GPU
 manufacturers concentrating on parallelism in their chip designs for pixel
-colour value genferation, these devices are thought of as being a suitable device
-for other highly parallel tasks.
+colour value generation, these devices are thought of as having a suitable
+architecture for other highly parallel tasks.
 
 In addition to the large amounts of data which needs to be filtered, there is a
 growing need for large enterprise data centres to be more cost effective, and to
 use less energy. A heterogeneous system can not only improve performance in raw
 terms, but also improve performance when measured against power and cost of
 equipment. These metrics are typically quoted as performance per watt, and
-performance per dollar.
+performance per dollar. A slower, cheaper system could be the preferable option
+over a fast, expensive system if the former system is more efficient to buy and
+run, informally referred to by the idiom `more bang for the buck'.
 
 \section{Related Research}
 \label{sec:relatedResearch}
@@ -59,8 +61,8 @@ Document classification is an active area of research, with a number of papers
 regularly dedicated to the creation, analysis, and tuning of filtering
 algorithms. A large number concentrate on Na{\"{\i}}ve Bayes classification
 \cite{androutsopoulos2000evaluation} \cite{androutsopoulos2000learning}  with
-different statistical models (for instance multi-variate Bernoulli model or a
-multinomial model \cite{Schneider:2003:CEM:1067807.1067848}
+different statistical models (for instance multi-variate Bernoulli model
+\cite{Schneider:2003:CEM:1067807.1067848} or a multinomial model
 \cite{mccallum1998comparison}).
 
 There has also been work looking into the efficiency of different architectures
