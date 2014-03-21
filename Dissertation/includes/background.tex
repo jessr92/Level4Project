@@ -233,6 +233,31 @@ GPUs use more of the transistor budget on arithmetic units than memory cache
 compared to CPUs. This makes GPUs more suitable to high density arithmetic and
 repetitive computations more than a CPU.
 
+\subsubsection{Architecture Layout}
+
+Figure~\ref{fig:gulftownArchitecture} shows a block diagram of Intel's Gulftown
+architecture for CPUs. The CPUs have private L2 cache, not labelled in the
+diagram, with L3 cache shared.
+
+Figure~\ref{fig:gk110Architecture} shows a block diagram of nVidia's GK110
+architecture for GPUs. This is a newer variation to the architecture used in one
+of the target devices, nVidia Tesla C2075, however the layout is very similar
+and still provides a good representation of the chip layout. Each SMX is a
+streaming multiprocessor with a private L1 cache. All streaming multiprocessors
+share a unified L2 cache.
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{images/gulftownArchitecture.jpg}
+\caption{Intel CPU Gulftown Architecture}
+\label{fig:gulftownArchitecture}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{images/gk110Architecture.jpg}
+\caption{nVidia GK110 Architecture}
+\label{fig:gk110Architecture}
+\end{figure}
+
 \subsubsection{Execution Model Implementation}
 
 CPUs have a very free implementation of the OpenCL execution model. Threads are
@@ -336,12 +361,23 @@ speeds are typically lower than a CPU at around 1GHz. The Intel Xeon Phi is
 designed to allow CPU-like programming versatility with the high performance and
 efficient power use of an accelerator chip.
 
+A figure showing a brief overview of the microarchitecture is shown in
+Figure~\ref{fig:phiMicroarchitecture}. This is taken from the  Intel website linked
+above. It shows a subset of the x86 cores and their corresponding private L2
+cache, all connected to the rest of the device by the bi-directional ring bus.
+
 In addition to being an OpenCL capable device, the Xeon Phi is capable of
 running applications written in traditional source code such as C, C++, or
 FORTRAN. The device itself contains a Linux operating system which is
 automatically started up and loads a file system, allows secure shell logins,
 and enables a TCP/IP stack to facilitate communication as if the device was a
 separate internal network device.
+
+\begin{figure}[H]
+\includegraphics[width=\linewidth]{images/intelXeonPhiMicroarchitecture.jpg}
+\caption{Intel Xeon Phi Microarchitecture}
+\label{fig:phiMicroarchitecture}
+\end{figure}
 
 \subsubsection{Performance Considerations}
 
