@@ -235,9 +235,11 @@ repetitive computations more than a CPU.
 
 \subsubsection{Architecture Layout}
 
-Figure~\ref{fig:gulftownArchitecture} shows a block diagram of Intel's Gulftown
-architecture for CPUs. The CPUs have private L2 cache, not labelled in the
-diagram, with L3 cache shared.
+Figure~\ref{fig:gulftownArchitecture} shows a block diagram of Intel's ``Gulftown''
+architecture for CPUs. The CPUs have private L1 and L2 caches, not labelled in
+the diagram, with L3 cache shared. The Intel CPU used has a similar architecture
+known as ``Harpertown''. The primary difference is the lack of L3 cache, instead
+the shared cache is L2 cache, with CPUs only having a private L1 cache.
 
 Figure~\ref{fig:gk110Architecture} shows a block diagram of nVidia's GK110
 architecture for GPUs. This is a newer variation to the architecture used in one
@@ -247,14 +249,16 @@ streaming multiprocessor with a private L1 cache. All streaming multiprocessors
 share a unified L2 cache.
 
 \begin{figure}[H]
-\includegraphics[width=\linewidth]{images/gulftownArchitecture.jpg}
-\caption{Intel CPU Gulftown Architecture}
+\centering
+\includegraphics[width=0.9\linewidth]{images/gulftownArchitecture.jpg}
+\caption{Intel CPU Gulftown Architecture - Copyright Intel Corporation \textcopyright}
 \label{fig:gulftownArchitecture}
 \end{figure}
 
 \begin{figure}[H]
-\includegraphics[width=\linewidth]{images/gk110Architecture.jpg}
-\caption{nVidia GK110 Architecture}
+\centering
+\includegraphics[width=0.9\linewidth]{images/gk110Architecture.jpg}
+\caption{nVidia GK110 Architecture - Copyright nVidia Corporation \textcopyright}
 \label{fig:gk110Architecture}
 \end{figure}
 
@@ -375,7 +379,7 @@ separate internal network device.
 
 \begin{figure}[H]
 \includegraphics[width=\linewidth]{images/intelXeonPhiMicroarchitecture.jpg}
-\caption{Intel Xeon Phi Microarchitecture}
+\caption{Intel Xeon Phi Microarchitecture - Copyright Intel Corporation \textcopyright}
 \label{fig:phiMicroarchitecture}
 \end{figure}
 
