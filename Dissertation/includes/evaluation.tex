@@ -236,19 +236,19 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 & Bloom Filter All Hits & 298 & 791.9 \\
 & Bloom Filter No Hits & 104 & 2269.2 \\
 \hline
-\multirow{4}{*}{nVidia Tesla C2075}
+\multirow{4}{*}{nVidia Tesla C2075 OpenCL}
 & No Bloom Filter & 258 & 914.7 \\
 & Bloom Filter & 232 & 1017.2 \\
 & Bloom Filter All Hits & 294 & 802.7 \\
 & Bloom Filter No Hits & 216 & 1092.6 \\
 \hline
-\multirow{4}{*}{Intel Xeon Phi 5110P}
+\multirow{4}{*}{Intel Xeon Phi 5110P OpenCL}
 & No Bloom Filter & 381 & 619.4 \\
 & Bloom Filter & 409 & 577 \\
 & Bloom Filter All Hits & 456 & 517.5 \\
 & Bloom Filter No Hits & 402 & 587.1 \\
 \hline
-\multirow{4}{*}{4x AMD Opteron 6366 HE}
+\multirow{4}{*}{4x AMD Opteron 6366 HE OpenCL}
 & No Bloom Filter & 87 & 2712.6 \\
 & Bloom Filter & 50 & 4720 \\
 & Bloom Filter All Hits & 96 & 2458.3 \\
@@ -285,7 +285,8 @@ and scoring, in an attempt to remove the CPU parsing bottleneck.
 
 Table \ref{table:parsingScoring} contains the results from the parsing and
 scoring experiments. The results are the average time and throughput of the
-system over the twelve profiles.
+system over the twelve profiles. All experiment runs involved OpenCL without
+using any of the pre-existing C++ code.
 
 Each profile run is repeated ten times to improve the accuracy and reliability
 of the timing mechanism. The exceptions to this rule are the Intel CPU and

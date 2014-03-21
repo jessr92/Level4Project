@@ -18,7 +18,9 @@
         \item Need fast, but efficient, method of filtering.
         \item Data parallel problem, each document independent from one another.
     \end{itemize}
-    Classification Method
+}
+\frame{
+    \frametitle{Classification Method}
     \begin{itemize}
         \item Na{\"{\i}}ve Bayes Classifier for plain text documents.
         \item Two classes, A or B. Think spam or not spam.
@@ -27,11 +29,12 @@
         \item Documents with a high enough score are given class A, otherwise B.
     \end{itemize}
 }
-\subsection{Previous system setup}
+\subsection{Prior Work}
 \frame{
-    \frametitle{Previous system setup}
+    \frametitle{Prior Work}
     \begin{itemize}
-        \item CPU parses documents in a C++ application.
+        \item Parser for plain text documents documents using a C++ application.
+        \item Parser runs on a CPU.
         \item Scoring can be off-loaded to FPGA.
         \item Parsing is bottleneck, 427MB/s. FPGA scores at 749MB/s.
         \item Work looking into parsing and scoring on FPGA.
@@ -57,7 +60,6 @@
     \begin{itemize}
         \item Host code reads in documents and sets up OpenCL environment.
         \item Device given documents and profile of terms.
-        \item Device given optional bloom filter, to reduce trips to memory.
         \item Both scoring only, and parsing and scoring kernels.
         \item Host reads back scores from target device.
         \item Document classification output based on score.
@@ -81,14 +83,13 @@
     \begin{itemize}
         \item Use a pre-parsed collection of document terms for TREC collection.
         \item OpenCL kernel scores this collection based on profile.
-        \item Bloom filter checks to see if term might be in profile.
         \item Scores returned back to host.
     \end{itemize}
 }
 \subsection{Results}
 \frame{
     \frametitle{Scoring Results}
-    \includegraphics[width=\linewidth,height=\textheight,keepaspectratio]{../Dissertation/images/scoringOnlyBest.png}
+    \includegraphics[width=\linewidth,height=\textheight,keepaspectratio]{images/scoringOnlyBest.png}
 }
 \subsection{Discussion}
 \frame{
@@ -97,8 +98,8 @@
         \item AMD CPU system comes out top. 64 cores at 1.8GHz up to 2.3GHz
         \item Tesla C2075 exceeds 1GB/s. CPU parser would be bottleneck still.
         \item OpenCL on CPU improves performance compared to C++ version.
-        \item CPU results only for reference, some part of system would need
-        to be parsing.
+        \item CPU results for reference only. The CPU would need to also be
+        parsing documents so actual scoring throughput would be lower.
         \item Confirms parser and scorer on one device required.
     \end{itemize}
 }
@@ -109,14 +110,13 @@
         \item Use plain text documents, TREC collection.
         \item OpenCL kernel parses documents as well as scoring them based on
         given profile.
-        \item Bloom filter checks to see if term might be in profile.
         \item Scores returned back to host.
     \end{itemize}
 }
 \subsection{Results}
 \frame{
     \frametitle{Parsing and Scoring Results}
-    \includegraphics[width=\linewidth,height=\textheight,keepaspectratio]{../Dissertation/images/parsingScoringBest.png}
+    \includegraphics[width=\linewidth,height=\textheight,keepaspectratio]{images/parsingScoringBest.png}
 }
 \subsection{Discussion}
 \frame{
@@ -127,6 +127,9 @@
         to single Phi.
         \item Dual CPU and GPU system also has near-linear scaling.
         \item All dual device results improve on previous bottleneck of 427MB/s.
+        \item 1GB/s result is 8Gbit/s and so could parse 10Gbit/s Ethernet.
+        \item With an average throughput of Ethernet of around 30\%, this system
+        could parse, in real time, nearly 30Gbit/s.
     \end{itemize}
 }
 \section{Conclusion}
