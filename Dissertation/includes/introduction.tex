@@ -23,15 +23,15 @@ performance of the system.
 Document filtering can place documents into two categories, with the canonical
 example being spam or not spam. Plain text documents are given to a parser which
 generates a collection of terms for each document. This collection is given to a
-scorer which works out  each document's score. For each term in a document, it
-is looked up in a profile of spam terms. Terms in a document that are typically
-detected in a spam document will have a score assigned to them in the profile,
-it is this score which is collected and added to the document's overall score.
-At the end of scoring, if the document has a high enough score, it is classed as
-spam, otherwise it is not spam. This works for any two classification
-possibilities. For example, using the Text Retrieval Conference (TREC) data
-collection, the ``not spam'' class could be Entertainment articles, and the
-``spam'' class could be Financial articles.
+scorer which works out each document's score. For each term in a document, it is
+looked up in a profile which contains the ``interesting'' terms. Terms in a
+document that are typically detected in a spam document will have a score
+assigned to them in the profile, it is this score which is collected and added
+to the document's overall score. At the end of scoring, if the document has a
+high enough score, it is classed as spam, otherwise it is not spam. This works
+for any two classification possibilities. For example, using the Text Retrieval
+Conference (TREC) data collection, the ``not spam'' class could be Entertainment
+articles, and the ``spam'' class could be Financial articles.
 
 \section{Motivation}
 

@@ -543,10 +543,10 @@ GPU allowing for efficient lookup of the bloom filter and minimised trips to
 memory for non-existent profile terms.
 
 A Bloom filter works as follows. It is an array of bit values where 0 indicates
-absent and 1 indicates present. When constructing the profile, each entry is
-run through a number of hash functions (for example, four) to get a number of
-numerical values. These numerical values are indices for bit positions in the
-bloom filter. These bit positions are set to 1.
+absent and 1 indicates present. When constructing the bloom filter, each entry
+in the profile is run through a number of hash functions (for example, four) to
+get a number of numerical values. These numerical values are indices for bit
+positions in the bloom filter. These bit positions are set to 1.
 
 To use the bloom filter, the term to be looked up is run through the same hash
 functions. If all locations returned by the hash functions have their bit set to
