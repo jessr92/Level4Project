@@ -1,17 +1,17 @@
 \section{Introduction}
 
-With traditional CPUs experiencing slowdowns in improvements to raw performance
-for a single core, the computing industry is looking for an alternative hardware
-and software paradigm to take us into the next era of computing performance.
-This has led to the increase in the number of cores on a single CPU die, with
-most consumer devices containing four cores. This allows four individual threads
-of control to run simultaneously on a single chip. In addition to this, the
-growth of computational power available in GPUs has led to the idea of using the
-GPUs for general purpose computing tasks (GPGPUs). This is known as
-Heterogeneous Computing and refers to any system that uses more than one kind of
-processor. In addition to this, there are growing numbers of devices with a
-Heterogeneous System Architecture (HSA) where multiple processor types (such as
-CPUs and GPUs) exist on the same die.
+With traditional CPUs experiencing slowdowns in improvements to clock speed due
+to thermal limitations for a single core, the computing industry is looking for
+an alternative hardware and/or software paradigm to take us into the next era of
+computing performance. This has led to the increase in the number of cores on a
+single CPU die, with most consumer devices containing four cores. This allows
+four individual threads of control to run simultaneously on a single chip. In
+addition to this, the growth of computational power available in GPUs has led to
+the idea of using the GPUs for general purpose computing tasks (GPGPUs). This is
+known as Heterogeneous Computing and refers to any system that uses more than
+one kind of processor, for instance a CPU and a GPU. In addition to this, there
+are growing numbers of devices with a Heterogeneous System Architecture (HSA)
+where multiple processor types (such as CPUs and GPUs) exist on the same die.
 
 \section{Problem Description}
 
@@ -24,14 +24,15 @@ Document filtering can place documents into two categories, with the canonical
 example being spam or not spam. Plain text documents are given to a parser which
 generates a collection of terms for each document. This collection is given to a
 scorer which works out each document's score. For each term in a document, it is
-looked up in a profile which contains the ``interesting'' terms. Terms in a
-document that are typically detected in a spam document will have a score
-assigned to them in the profile, it is this score which is collected and added
-to the document's overall score. At the end of scoring, if the document has a
-high enough score, it is classed as spam, otherwise it is not spam. This works
-for any two classification possibilities. For example, using the Text Retrieval
-Conference (TREC) data collection, the ``not spam'' class could be Entertainment
-articles, and the ``spam'' class could be Financial articles.
+looked up in a profile which contains the significant terms. Terms in a document
+that are typically detected in a spam document will have a score assigned to
+them in the profile, it is this score which is collected and added to the
+document's overall score. At the end of scoring, if the document has a high
+enough score, it is classed as spam, otherwise it is not spam. This works for
+any two classification possibilities. For example, using the Text Retrieval
+Conference (TREC \footnote{\url{http://trec.nist.gov}}) data collection, the
+\emph{not spam} class could be Entertainment articles, and the \emph{spam}
+class could be Financial articles.
 
 \section{Motivation}
 
@@ -42,8 +43,8 @@ sent every day. Emails, and other kinds of documents, sometimes need to be
 filtered. This problem is highly data parallel in nature as the classification
 of one document does not affect the classification of another. With GPU
 manufacturers concentrating on parallelism in their chip designs for pixel
-colour value generation, these devices are thought of as having a suitable
-architecture for other highly parallel tasks.
+colour value generation, these devices have a suitable architecture for other
+highly parallel tasks.
 
 In addition to the large amounts of data which needs to be filtered, there is a
 growing need for large enterprise data centres to be more cost effective, and to
@@ -70,7 +71,7 @@ in the area of information filtering \cite{chen2012invited}
 \cite{he2013massively} in general.
 
 This report more specifically relates to, and builds upon, work by Wim
-Vanderbauwhede et al. which has primarily focused on the use of Field-
+Vanderbauwhede et al.\ which has primarily focused on the use of Field-
 Programmable Gate Arrays (FPGAs) to accelerate a document parser and scoring
 system \cite{vanderbauwhede2013high} \cite{HybridCPUFPGA}
 \cite{chalamalasetti2012evaluating} with significant success.

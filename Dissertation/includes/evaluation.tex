@@ -10,7 +10,7 @@ results which follow.
 
 \subsection{Mac Pro System}
 
-The Mac Pro was running Mac OS X version 10.8.5 (Build Version 12F45). Both the
+The Mac Pro runs Mac OS X version 10.8.5 (Build Version 12F45). Both the
 nVidia and Intel OpenCL SDKs were installed and up to date at time of writing.
 
 \begin{description}
@@ -35,11 +35,11 @@ main memory of 4GB/s (250MB/s per lane).
 
 \subsection{Intel Xeon Phi System}
 
-The system is running the SUSE Enterprise Server 11 Linux distribution. This
-system was used for running the software system on the Intel Xeon Phi. There are
-two Intel Xeon Phis fitted and these were used to investigate the performance of
-a single and a dual Intel Xeon Phi set up. The system does not have a graphics
-card fitted.
+The host system is running the SUSE Enterprise Server 11 Linux distribution.
+This system was used for running the software system on the Intel Xeon Phi.
+There are two Intel Xeon Phis fitted and these were used to investigate the
+performance of a single and a dual Intel Xeon Phi set up. The system does not
+have a graphics card fitted.
 
 \begin{description}
 
@@ -98,9 +98,10 @@ time to transfer. If the transfer time is significant in regards to the actual
 time to score the transferred documents, use of an accelerator device could be
 inefficient, irrespective of the processing power of the accelerator.
 
-There are currently four PCI Express bus standards in place, the first two are
-in use in the systems discussed above. Each standard doubles (or nearly doubles)
-the theoretical maximum bandwidth of a single PCIe lane in each direction.
+There are currently four PCI Express bus standards
+\footnote{\url{http://www.pcisig.com}} in place, the first two are in use in the
+systems discussed above. Each standard doubles (or nearly doubles) the
+theoretical maximum bandwidth of a single PCIe lane in each direction.
 Table~\ref{table:pciE} shows this alongside the sampling rate in gigatransfers
 per second (GT/s) and encoding of data.
 
@@ -180,7 +181,8 @@ of performance values possible when using a bloom filter.
 Figure \ref{fig:dataTransfer} shows the data transfer speeds between host and
 device on the Mac Pro system. The theoretical maximum bandwidth of the system is
 4GB/s and, with large enough transfers, around 3.2GB/s (80\% of theoretical)
-is achieved.
+is achieved. This is a lightly loaded system so bus contention isn't a factor
+during these experiments.
 
 Transfers that are less than 100 kilobytes, for instance the 4KB bloom filter,
 suffer very low transfer speeds, with the bloom filter being transferred at
@@ -206,9 +208,9 @@ experiments. The results are the average time and throughput of the system over
 the twelve profiles.
 
 Each profile run is repeated ten times to improve the accuracy and reliability
-of the timing mechanism. The exception to this rule is the AMD system which,
-due to its significantly higher throughput, required one hundred repetitions
-per profile to achieve reliable results.
+of the wall clock times. The exception to this rule is the AMD system which, due
+to its significantly higher throughput, required one hundred repetitions per
+profile to achieve reliable results.
 
 The C++ Single Threaded and C++ Multi-threaded results are there for reference
 and to indicate how effective parallelism is for document filtering.
@@ -289,7 +291,7 @@ system over the twelve profiles. All experiment runs involved OpenCL without
 using any of the pre-existing C++ code.
 
 Each profile run is repeated ten times to improve the accuracy and reliability
-of the timing mechanism. The exceptions to this rule are the Intel CPU and
+of the wall clock times. The exceptions to this rule are the Intel CPU and
 nVidia GPU system which, due to the fact that both devices were running in
 parallel and run at slightly different rates, required different numbers of
 repetitions to finish at the same time. The ``No Bloom Filter'' experiment
@@ -488,11 +490,12 @@ having the parsing and scoring executed on the same device.
 
 \subsubsection{Parsing and Scoring}
 
-Use of the bloom filter is a mixed bag of results when looking across different
-devices. The Intel CPU benefits by up to 20\% in the best case whereas all other
-single device runs experience a performance hit of as little as 5\% with the
-Intel Xeon Phi to as much as 44\% with the AMD CPUs. Overall, the benefit is
-reduced or mitigated entirely in comparison to the scoring only kernel.
+Use of the bloom filter provides no guarantee of improved throughput results
+when looking across different devices. The Intel CPU benefits by up to 20\% in
+the best case whereas all other single device runs experience a performance hit
+of as little as 5\% with the Intel Xeon Phi to as much as 44\% with the AMD
+CPUs. Overall, the benefit is reduced or mitigated entirely in comparison to the
+scoring only kernel.
 
 Considering the Intel CPU system initially, it is the only system which still
 has a performance improvement of up to 20\%. In the scoring code the performance
@@ -523,10 +526,10 @@ compared to the AMD CPU (1MB). This makes the situation of cache demand even
 more severe and is likely to contribute to the heavy performance drop. The bloom
 filter will be being read in regularly, removing other variables, just for those
 variables to be read in shortly after, removing the bloom filter. This is
-similar to the situation where primary memory and the swap space on disk are
-continually being read from and written to. This is known as thrashing and is
-responsible for significant drops of performance, similar to those experienced
-by the AMD system.
+similar to the situation where primary memory and the swap space on disk in a
+virtual memory system are continually being read from and written to. This is
+known as thrashing and is responsible for significant drops of performance,
+similar to those experienced by the AMD system.
 
 The nVidia GPU experiences around a 20\% drop in performance in the best case by
 using a bloom filter. Even with the GPUs local memory being under control of the

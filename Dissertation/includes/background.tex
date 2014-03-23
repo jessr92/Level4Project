@@ -11,10 +11,11 @@ The language is an open standard maintained by the Khronos Group
 language standard
 \footnote{\url{http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf}} and
 can be loosely thought of as a subset of the C99 language with some additional
-keywords. The first release of the OpenCL standard (OpenCL 1.0) was on the 8th
-of December 2008. There have been two subsequent stable releases of the
-standard, OpenCL 1.1 and 1.2, on the 14th of June 2010 and 15th of November 2011
-respectively. The version with most hardware support is OpenCL 1.1
+keywords. One of the majory omissions from the OpenCL language is the lack of
+dynamic memory allocation. The first release of the OpenCL standard (OpenCL 1.0)
+was on the 8th of December 2008. There have been two subsequent stable releases
+of the standard, OpenCL 1.1 and 1.2, on the 14th of June 2010 and 15th of
+November 2011 respectively. The version with most hardware support is OpenCL 1.1
 \footnote{\url{http://www.khronos.org/registry/cl/specs/opencl-1.1.pdf}} and
 this standard forms the basis of all discussion on OpenCL in this report.
 
@@ -25,13 +26,13 @@ makes use of APIs exposed by OpenCL to define how, and where, OpenCL device code
 is executed.
 
 OpenCL applications are called kernels. A kernel is a function that executes on
-an OpenCL capable device. Since the focus of OpenCL is on parallelism, a kernel
-is written from the perspective of a single thread instead of requiring explicit
-threading code that is required by more familiar models for
-multi-threading/parallelism such as POSIX threads. An OpenCL work item is
-similar to a POSIX thread with a notable exception that OpenCL has no
-traditional stack, any `function' calls by the OpenCL kernel are actually
-in-lined by the compiler in some implementations. OpenCL kernels are also
+an OpenCL capable device such as any CPU or GPU manufactured within the last few
+years. Since the focus of OpenCL is on parallelism, a kernel is written from the
+perspective of a single thread instead of requiring explicit threading code that
+is required by more familiar models for multi-threading/parallelism such as
+POSIX threads. An OpenCL work item is similar to a POSIX thread with a notable
+exception that OpenCL has no traditional stack, any `function' calls by the
+OpenCL kernel are actually in-lined by the compiler. OpenCL kernels are also
 compiled at runtime thus the host code, and the compiler itself, can make
 device-specific optimisations for optimal performance.
 
@@ -41,8 +42,8 @@ To accommodate the variety of devices OpenCL is designed to work with, a more
 abstract memory model, and concurrency and execution model was designed to allow
 the programmer full access to the target devices' capabilities. This complicates
 the developer's job, by requiring them to think at a lower level of abstraction
-than what they may be used to, however this is required to allow the application
-to make the most out of the target hardware.
+than what they may be used to in traditional C/C++ applications, however this is
+required to allow the application to make the most out of the target hardware.
 
 \subsubsection{Memory Model}
 
@@ -62,10 +63,10 @@ memory model is shown in Figure \ref{fig:openCLMemoryModel}.
 \item[Global memory] This memory is accessible by all compute units and is
 similar to primary memory on a traditional CPU system. All work items are able
 to access and update everything stored in this memory. For a GPU this is memory
-mapped to the primary memory of the GPU and is typically 1-4GB in size. When
-transferring data between the host's primary memory and the OpenCL device, this
-is where the data has to reside. Global memory is denoted as `\_\_global' in an
-OpenCL kernel.
+mapped to the primary memory of the GPU, called GDDR, and is typically 1-4GB in
+size. When transferring data between the host's primary memory and the OpenCL
+device, this is where the data has to reside. Global memory is denoted as
+`\_\_global' in an OpenCL kernel.
 
 \item[Constant memory] Constant memory resides in the same space as global
 memory and is used for data which is accessed simultaneously by all work items,
@@ -90,7 +91,8 @@ multiple work items.
 \item[Private memory] This is memory that is unique to an individual work item.
 Any local variables and non-pointer kernel arguments are private by default.
 These are typically mapped to registers although they can be spilled over to
-higher latency memories if there is insufficient space available.
+higher latency memories, such as local memory, if there is insufficient space
+available.
 
 \end{description}
 
@@ -151,7 +153,8 @@ work item (thread).
 
 \item[Work group] This is a collection of work items. An entire work group is
 assigned to one compute unit. The work items that are associated with the work
-group can share local memory and can synchronise with one another.
+group can share local memory and can synchronise with one another at explicit
+synchronisation points in the kernel.
 
 \item[Work item] This closely resembles a single thread. Each work item is
 assigned a work group. Every work item can access local memory of its work
@@ -172,7 +175,7 @@ size evenly.
 
 \begin{figure}
 \includegraphics[width=\linewidth]{images/openCLExecutionModel.png}
-\caption{Simplified visualisation of OpenCL Execution Model}
+\caption{Simplified visualisation of OpenCL Execution Model with a 2D range}
 \label{fig:openCLExecutionModel}
 \end{figure}
 
@@ -206,13 +209,17 @@ for a modern desktop. Each die can contain a small number of cores, typically
 four, that execute instructions simultaneously.
 
 A GPU is the highly parallel oriented chip, with hundreds of cores running at a
-slower clock speed (about one fifth of a CPU core) and with a more restricted
+slower clock speed (about one fifth of a CPU core) and with a restricted
 instruction set, primarily designed for simple, repetitive tasks needed for
-video output.
+video output. For instance, an OpenCL kernel is currently unable to call another
+kernel itself, the host CPU needs to do this on the device's behalf. With the
+growth of the use of GPGPUs, the restricted instruction set is becoming less of
+an issue, and CPUs and GPUs are becoming able to communicate and share directly
+with plans to introduced unified memory spaces.
 
 \subsubsection{Threading and Cache}
 
-A CPU has a few hardware threads, one or two per CPU core with occasional
+A CPU has a few hardware threads, typically one per CPU core, with occasional
 context switching. The CPU has multiple levels of cache, typically two or three,
 to reduce memory access latency by exploting spatial and temporal locality of
 memory accesses. It does this by automatically copying data in the same
@@ -220,7 +227,10 @@ memory accesses. It does this by automatically copying data in the same
 the cache. The idea behind this is that a program will likely need data values
 nearby the memory location just accessed, for instance iterating over the array,
 this is called spatial locality. Temporal locality is where a data value used
-now is likely to be used again a short time later on.
+now is likely to be used again a short time later on. Exploiting this locality
+can lead to significant gains in performance of one or two orders of magnitude
+as main memory can take tens or hundreds of clock cycles to respond to a
+request.
 
 GPUs have many threads to keep compute units busy, if some threads are waiting
 on memory accesses, other threads are available to run. Latency is thus hidden
@@ -235,29 +245,30 @@ repetitive computations more than a CPU.
 
 \subsubsection{Architecture Layout}
 
-Figure~\ref{fig:gulftownArchitecture} shows a block diagram of Intel's ``Gulftown''
-architecture for CPUs. The CPUs have private L1 and L2 caches, not labelled in
-the diagram, with L3 cache shared. The Intel CPU used has a similar architecture
-known as ``Harpertown''. The primary difference is the lack of L3 cache, instead
-the shared cache is L2 cache, with CPUs only having a private L1 cache.
+Figure~\ref{fig:gulftownArchitecture} shows a block diagram of Intel's
+``Gulftown'' architecture for CPUs. The CPUs have private L1 and L2 caches, not
+labelled in the diagram, with L3 cache shared. The Intel CPU used for
+experiments has a similar architecture known as ``Harpertown''. The primary
+difference is the lack of L3 cache, instead the shared cache is L2 cache, with
+CPUs only having a private L1 cache.
 
 Figure~\ref{fig:gk110Architecture} shows a block diagram of nVidia's GK110
-architecture for GPUs. This is a newer variation to the architecture used in one
-of the target devices, nVidia Tesla C2075, however the layout is very similar
+architecture for GPUs. This is a newer variation to the architecture in the GPU
+used for experiments, the nVidia Tesla C2075, however the layout is very similar
 and still provides a good representation of the chip layout. Each SMX is a
 streaming multiprocessor with a private L1 cache. All streaming multiprocessors
 share a unified L2 cache.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\linewidth]{images/gulftownArchitecture.jpg}
+\includegraphics[width=\linewidth]{images/gulftownArchitecture.jpg}
 \caption{Intel CPU Gulftown Architecture - Copyright Intel Corporation \textcopyright}
 \label{fig:gulftownArchitecture}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\linewidth]{images/gk110Architecture.jpg}
+\includegraphics[width=\linewidth]{images/gk110Architecture.jpg}
 \caption{nVidia GK110 Architecture - Copyright nVidia Corporation \textcopyright}
 \label{fig:gk110Architecture}
 \end{figure}
@@ -302,14 +313,14 @@ known as a divergent warp. Divergent warps can considerably reduce performance
 as it reduces the number of threads executing in parallel and should be avoided
 when developing an OpenCL kernel as much as possible.
 
-In addition to instruction execution, memory accesses are done on a per warp
-basis. For ideal performance, addressing should be such that threads in a warp
-access coalesced memory locations to reduce memory transaction cost. For
-instance, an array where access is based on a hash function can result in poor
-performance as threads in a warp are likely to be accessing significantly
-different parts of memory. If all threads access consecutive memory locations,
-then one or two reads can be enough to supply data required by tens of threads,
-rather than one read per thread.
+In addition to instruction execution, memory accesses to any of the on-board
+memories are done on a per warp basis. For ideal performance, addressing should
+be such that threads in a warp access coalesced memory locations to reduce
+memory transaction cost. For instance, an array where access is based on a hash
+function can result in poor performance as threads in a warp are likely to be
+accessing significantly different parts of memory. If all threads access
+consecutive memory locations, then one or two reads can be enough to supply data
+required by tens of threads, rather than one read per thread.
 
 \subsubsection{Extra performance consideration}
 
@@ -366,9 +377,10 @@ designed to allow CPU-like programming versatility with the high performance and
 efficient power use of an accelerator chip.
 
 A figure showing a brief overview of the microarchitecture is shown in
-Figure~\ref{fig:phiMicroarchitecture}. This is taken from the  Intel website linked
-above. It shows a subset of the x86 cores and their corresponding private L2
-cache, all connected to the rest of the device by the bi-directional ring bus.
+Figure~\ref{fig:phiMicroarchitecture}. This is taken from the Intel website
+linked above. It shows a subset of the x86 cores and their corresponding private
+L2 cache, all connected to the rest of the device by the bi-directional ring
+bus.
 
 In addition to being an OpenCL capable device, the Xeon Phi is capable of
 running applications written in traditional source code such as C, C++, or
@@ -405,8 +417,8 @@ the University of Waterloo \cite{peng2003combining} for text classification and
 Greek \cite{metsis2006spam} and German \cite{Schneider:2003:CEM:1067807.1067848}
 academics for spam filtering itself.
 
-The most recent papers by Wim Vanderbauwhede et al. discuss the use of FPGAs for
-high throughput document filtering. The inherent parallelism in document
+The most recent papers by Wim Vanderbauwhede et al.\ discuss the use of FPGAs
+for high throughput document filtering. The inherent parallelism in document
 classification (as is also true with many data-centric algorithms) and the
 parallelism focus of FPGAs, was found to be a suitable pairing to create a power
 efficient, high throughput scoring system for parsed documents
@@ -418,8 +430,7 @@ the same initial steps, implementing the scoring on a GPU, and then, due to the
 parser being the bottleneck to performance, look into having parsing and scoring
 on the GPU and other devices. This is similar to the work by Altera Toronto
 Technology Center which focuses on performance per watt ratios
-\cite{chen2012invited} but use manufacturer quoted board figures for power
-usage, rather than measuring energy used from the power socket.
+\cite{chen2012invited} instead of only looking at raw performance.
 
 \subsection{Parser}
 
@@ -511,8 +522,8 @@ After the n-grams have been generated, each one is taken in turn and looked up
 in the profile of terms. The profile is a hashed data structure of (term,
 weight) pairs. If the term exists in the profile, the weight of the term is
 added to the document's score. It is this score which is ultimately used to
-determine a document's classification. If the score is above a certain threshold
-value, the document is significant to us, otherwise it isn't.
+determine a document's classification. If the score is above a certain user
+defined threshold value, the document is significant to us, otherwise it isn't.
 
 A profile is typically quite large, 128MB in this case. As such, the profile is
 organised in such a way that it is a hashed array allowing for O(1) (constant
@@ -564,4 +575,11 @@ This is the space-time trade-off that Bloom discusses. A Bloom filter can be
 very small compared to the data structure it's supporting but lookups can take
 more time due to the false positive results. If the false positive rate is low
 enough, the time saved from the reads from memory avoided by true negatives
-outweighs the time wasted looking up false positive results.
+outweighs the time wasted looking up false positive results. To investigate the
+effect of false positives, when experiments are conducted, three bloom filters
+were used. One bloom filter is generated from the profile, another has all zero
+bits to represent a situation with no false positives, and the third has all one
+bits to represent a situation with as many false positives as possible. The last
+two give a range of possible throughput values possible by using a bloom filter
+with the all zero bits bloom filter being the best case, and the all one bits
+bloom filter being the worst case.

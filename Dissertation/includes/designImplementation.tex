@@ -18,43 +18,7 @@ referred to as an array. When the array is transferred to an OpenCL device it is
 referred to as a buffer. These are functionally the same with the primary
 distinction being where they are allocated.
 
-\subsection{Both Implementations}
-
-Most OpenCL applications are implemented in much the same way from the host
-code's perspective. There is a significant amount of boiler plate code to detect
-OpenCL platforms and devices available on the target system. Each device that is
-going to be used needs its own command queue. An OpenCL command queue is as the
-name suggests, any commands for data transfers or kernel executions are placed
-on the device's command queue and executed in order of arrival to the queue
-(although out of order execution is possible). Command queues, memory, program,
-and kernel objects are all managed by an OpenCL context. The kernel itself also
-has to be compiled, it is read in from disk as a string and built for the
-required devices. This is what allows a single kernel to run on any available
-device selected, it's compiled at run time. After compilation has completed, the
-kernel's arguments are set to the appropriate device buffers. The host's arrays
-that contain data the kernel needs are then transferred to the device's buffers
-and the kernel is executed. After the kernel has finished executing, any buffers
-relating to results, in this case the document scores, are written back by en-
-queuing a read buffer command.
-
-As discussed in the background, the Na{\"{\i}}ve-Bayes classifier makes use of a
-profile. This is a 128MB file containing the terms and associated term weights.
-This is read in from disk by the C++ host device code, and passed in as a buffer
-of unsigned long values to the OpenCL kernel. It does not change between
-invocations of the kernel, as all sets of documents are scored using the same
-profile.
-
-The use of a bloom filter was also discussed in the background. This is a 4KB
-array of bit values used by the OpenCL kernel to see if there is a chance that
-the document term being scored exists in the profile. As with the profile, this
-is read in from disk and passed in as a buffer to the OpenCL kernel. It also
-does not change between invocations of the kernel because the profile does not
-change.
-
-OpenCL host code is summarised in the pseudo-code in
-Figure~\ref{fig:openCLPseudocode}.
-
-\begin{figure}
+\begin{figure}[H]
 \small\begin{verbatim}
 // One time set up
 platforms = getPlatforms()
@@ -78,6 +42,68 @@ readBuffer(resultsBuffer)
 \end{verbatim}
 \caption{OpenCL Host Pseudo-code}
 \label{fig:openCLPseudocode}
+\end{figure}
+
+\subsection{Both Implementations}
+
+Most OpenCL applications are implemented in much the same way from the host
+code's perspective. There is a significant amount of boiler plate code to detect
+OpenCL platforms and devices available on the target system. Each device that is
+going to be used needs its own command queue. An OpenCL command queue is as the
+name suggests, any commands for data transfers or kernel executions are placed
+on the device's command queue and executed in order of arrival to the queue
+(although out of order execution is possible). Command queues, memory, program,
+and kernel objects are all managed by an OpenCL context. The kernel itself also
+has to be compiled, it is read in from disk as a string and built for the
+required devices. This is what allows a single kernel to run on any available
+device selected, it's compiled at run time. After compilation has completed, the
+kernel's arguments are set to the appropriate device buffers. The host's arrays
+that contain data the kernel needs are then transferred to the device's buffers
+and the kernel is executed. After the kernel has finished executing, any buffers
+relating to results, in this case the document scores, are written back by en-
+queuing a read buffer command.
+
+As discussed in the background, the Na{\"{\i}}ve-Bayes classifier makes use of a
+profile. This is a 128MB file containing the terms and associated term weights.
+This is read in from disk to main memory by the C++ host device code, and
+transferred to the Opencl device as a buffer of unsigned long values to the
+OpenCL kernel. It does not change between invocations of the kernel, as all sets
+of documents are scored using the same profile.
+
+The use of a bloom filter was also discussed in the background. This is a 4KB
+array of bit values used by the OpenCL kernel to see if there is a chance that
+the document term being scored exists in the profile. As with the profile, this
+is read in from disk and passed in as a buffer to the OpenCL kernel. It also
+does not change between invocations of the kernel because the profile does not
+change.
+
+OpenCL host code is summarised in the pseudo-code in
+Figure~\ref{fig:openCLPseudocode}. When creating buffers, the options that can be
+passed in include whether or not the buffer is read-only, write-only, or both.
+
+\begin{figure}[H]
+\small\begin{verbatim}
+documentNumber = get_global_id(0) + 1 // work item ID
+startIndex = docAddresses[documentNumber]
+endIndex = docAddresses[documentNumber + 1]
+score = 0
+for (term in terms[startIndex..endIndex]) {
+    generateNGrams(term)
+    for (ngram in ngrams) {
+        address = getTermAddress(ngram)
+        profileEntryVector = profile[address]
+        for (i = 0; i < 4; i++) {
+            profileEntry = profileEntryVector[i]
+            if (profileEntry contains ngram) {
+                score += getWeight(profileEntry)
+            }
+        }
+    }
+}
+scores[documentNumber -1] = score
+\end{verbatim}
+\caption{Scoring Pseudo-code}
+\label{fig:scoringPseudocode}
 \end{figure}
 
 \subsection{Scoring Only Implementation}
@@ -114,35 +140,47 @@ ID.
 The OpenCL kernel code is summarised in the pseudo-code in
 Figure~\ref{fig:scoringPseudocode}.
 
-\begin{figure}
-\small\begin{verbatim}
-documentNumber = get_global_id(0) + 1 // work item ID
-startIndex = docAddresses[documentNumber]
-endIndex = docAddresses[documentNumber + 1]
-score = 0
-for (term in terms[startIndex..endIndex]) {
-    generateNGrams(term)
-    for (ngram in ngrams) {
-        address = getTermAddress(ngram)
-        profileEntryVector = profile[address]
-        for (i = 0; i < 4; i++) {
-            profileEntry = profileEntryVector[i]
-            if (profileEntry contains ngram) {
-                score += getWeight(profileEntry)
-            }
-        }
-    }
-}
-scores[documentNumber -1] = score
-\end{verbatim}
-\caption{Scoring Pseudo-code}
-\label{fig:scoringPseudocode}
-\end{figure}
-
 After the kernel has finished executing, and the scores buffer has been written
 to a host device array, the actual classifications of each document is
 recovered. A document is classed as significant (spam in the spam or not spam
 example) if the score is above a certain threshold.
+
+\begin{figure}[H]
+\small\begin{verbatim}
+documentNumber = get_global_id(0) + 1 // work item ID
+startIndex = docAddresses[documentNumber]
+endIndex = docAddresses[documentNumber + 1]
+state = SKIPPING
+score = 0
+for (char in documents[startIndex..endIndex]) {
+    if (char is alphanumeric) {
+        // If inside a tag, keep skipping characters
+        updateState(state, 0)
+        if (state is WRITING) {
+            term += to5BitEncoding(char)
+        }
+    } else if (char is whitespace) {
+        // If valid term, time to score this term
+        updateState(state, 2)
+        if (length(term) > 0 and state is FLUSHING) {
+            score += scoreTerm(term)
+            term = 0 // Parse a new term now
+        }
+    } else if (char is '<') {
+        // Start skipping characters
+        updateState(state, 3)
+    } else if (char is '>') {
+        // Stop skipping characters
+        updateState(state, 4)
+    } else {
+        // Keep skipping characters
+        updateState(state, 1)
+    }
+}
+\end{verbatim}
+\caption{Parsing and Scoring Pseudo-code}
+\label{fig:parsingScoringPseudocode}
+\end{figure}
 
 \subsection{Parsing and Scoring Implementation}
 
@@ -181,43 +219,6 @@ so the case statement method was used. States tell the parser to either skip
 characters, write characters to the term, `flush' the term (aka score the term),
 or that a tag has been encountered.
 
-\begin{figure}
-\small\begin{verbatim}
-documentNumber = get_global_id(0) + 1 // work item ID
-startIndex = docAddresses[documentNumber]
-endIndex = docAddresses[documentNumber + 1]
-state = SKIPPING
-score = 0
-for (char in documents[startIndex..endIndex]) {
-    if (char is alphanumeric) {
-        // If inside a tag, keep skipping characters
-        updateState(state, 0)
-        if (state is WRITING) {
-            term += to5BitEncoding(char)
-        }
-    } else if (char is whitespace) {
-        // If valid term, time to score this term
-        updateState(state, 2)
-        if (length(term) > 0 and state is FLUSHING) {
-            score += scoreTerm(term)
-            term = 0 // Parse a new term now
-        }
-    } else if (char is '<') {
-        // Start skipping characters
-        updateState(state, 3)
-    } else if (char is '>') {
-        // Stop skipping characters
-        updateState(state, 4)
-    } else {
-        // Keep skipping characters
-        updateState(state, 1)
-    }
-}
-\end{verbatim}
-\caption{Parsing and Scoring Pseudo-code}
-\label{fig:parsingScoringPseudocode}
-\end{figure}
-
 \section{Optimisations}
 
 OpenCL kernels can run on any device with a suitable compiler. This portability
@@ -228,16 +229,18 @@ terms of how they cache and GPUs are more favourable towards smaller tasks which
 can be executed in parallel. This requires a developer to consider the
 architectural differences of different devices and tune each kernel for each
 device. Two significant optimisations that were employed during this project are
-discussed below. The ``Local Size'' optimisation involves changing the number of
-work items in a work group to suit the target device. The second optimisation,
-``Mapped Buffers'', is a simple optimisation to remove any unnecessary data
-transfers.
+discussed below. The ``Local Size'' optimisation discussed in
+Section~\ref{sec:localSize} involves changing the number of work items in a work
+group to suit the target device. The second optimisation, ``Mapped Buffers''
+discussed in Section~\ref{sec:mappedBuffers}, is a simple optimisation to remove
+any unnecessary data transfers.
 
 A third optimisation, using bloom filters, was also employed however this is
 discussed in the next section as the three bloom filters, and their effect on
 performance, demands a more thorough analysis.
 
 \subsection{Local Size}
+\label{sec:localSize}
 
 When executing a kernel, the host code specifies the number of work items to
 create (the global size) and the number of work items per work group (the local
@@ -252,16 +255,16 @@ local size to use for what device and algorithm, experimentation to fine tune
 the kernel is the only way.
 
 Local size can have a value from 1 up to 512, 1024, or 2048, depending on the
-device. This is specified by the ``CL\_DEVICE\_MAX\_WORK\_GROUP\_SIZE'' constant
-that can be queried at runtime. The value is typically a power of two. The only
-other restriction to the local size is that it must be a factor of the global
-size (for instance a local size of 64 and a global size of 4096). Given that
-global size can be any number, for instance the number of documents, it is
-common to round up the global size to the nearest number that makes the desired
-local size a factor. The kernel can then conduct a bounds check on work item
-global IDs and have the few work items extra to return straight away. These
-extra work items do not affect performance as they only appear as part of the
-last work group.
+device. This is specified by the \emph{CL\_DEVICE\_MAX\_WORK\_GROUP\_SIZE}
+constant that can be queried at runtime by the host for each device. The value
+is typically a power of two. The only other restriction to the local size is
+that it must be a factor of the global size (for instance a local size of 64 and
+a global size of 4096). Given that global size can be any number, for instance
+the number of documents, it is common to round up the global size to the nearest
+number that makes the desired local size a factor. The kernel can then conduct a
+bounds check on work item global IDs and have the few work items extra to return
+straight away. These extra work items do not affect performance as they only
+appear as part of the last work group.
 
 Another benefit of modifying the local size is occupancy of a compute unit. A
 work item uses a certain amount of memory, its private variables. A compute unit
@@ -287,12 +290,13 @@ likely assisting with latency hiding of memory accesses and keeping compute
 units as busy as possible, and achieved the best performance with a local size
 of 128.
 
-The graph of the local size effect on the Tesla C2075 throughput is shown in
-Figure~\ref{fig:teslaLocalSize}. There is a gradual improvement in performance
-up to a local size of 128 where performance then starts to drop off for larger
-work groups, perhaps due to a compute unit's occupancy going down. In this
-example, choosing a poor work group size (1) will increase the time to score a
-set of documents by a factor of five.
+The graph of the local size effect on the Tesla C2075 throughput for the parsing
+and scoring kernel is shown in Figure~\ref{fig:teslaLocalSize}. There is a
+gradual improvement in performance up to a local size of 128 where performance
+then starts to drop off for larger work groups, due to a compute unit's
+occupancy going down. In this example, choosing a poor work group size, for
+example 1 work item, will increase the time to score a set of documents by a
+factor of five.
 
 \begin{figure}[H]
 \includegraphics[width=\linewidth]{images/teslaLocalSize.png}
@@ -315,12 +319,13 @@ compiler isn't mature enough yet to make full use of its capabilities. This
 project was not concentrating on the Intel Xeon Phi so precise reasons why this
 behaviour is being observed was not investigated.
 
-The graph of local size effect on Intel Xeon Phi throughput is shown in
-Figure~\ref{fig:phiLocalSize}. There is a gradual improvement in performance as
-the local size is reduced from 512 to 16. Interestingly, there is a massive
-improvement when moving to a local size of 8, the performance increases by over
-a factor of two. In this example, choosing a poor work group size (512) will
-increase the time to score a set of documents by a factor of three.
+The graph of local size effect on Intel Xeon Phi throughput for the parsing and
+scoring kernel is shown in Figure~\ref{fig:phiLocalSize}. There is a gradual
+improvement in performance as the local size is reduced from 512 to 16.
+Interestingly, there is a massive improvement when moving to a local size of 8,
+the performance increases by over a factor of two. In this example, choosing a
+poor work group size (512) will increase the time to score a set of documents by
+a factor of three.
 
 Regarding overall performance changes, the Tesla C2075 has a greater benefit of
 an optimum local size to the Intel Xeon Phi however the Intel Xeon Phi has a
@@ -334,6 +339,7 @@ more gradual change.
 \end{figure}
 
 \subsection{Mapped Buffers}
+\label{sec:mappedBuffers}
 
 When using an accelerator device such as a graphics card, the data used by the
 kernel has to be transferred over the PCIe bus by en-queueing a write buffer
@@ -348,9 +354,9 @@ avoidable time cost.
 The solution to the issue is to map the OpenCL buffer to the host array. This is
 done by executing an en-queue map buffer command. The OpenCL buffer can then
 read from the host address space and removes the requirement for the unnecessary
-duplication of memory. The benefits of mapping a buffer is essentially a free
-lunch as the command takes an insignificant amount of time to execute. This
-speeds up the CPU implementation by up to ten milliseconds. This, in practice,
+duplication of memory. The benefits of mapping a buffer come with very little
+overhead as the command takes an insignificant amount of time to execute. This
+speeds up the CPU implementation by up to ten milliseconds. This in practice
 only increases throughput by up to 5\% in the best case for this application
 however, given that it's a simple optimisation, removing a small overhead is
 still worthwhile.
