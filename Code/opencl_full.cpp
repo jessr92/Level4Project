@@ -198,6 +198,8 @@ void executeFullOpenCL(const std::string *documents,
     }
     std::cout << "Ham documents: " << hamCount << std::endl;
     std::cout << "Spam documents " << spamCount << std::endl;
+    delete tempProfile;
+    delete tempPositions;
 }
 
 int main(int argc, char *argv[])
@@ -231,5 +233,9 @@ int main(int argc, char *argv[])
     std::cout << time_elapsed << " seconds to get marker positions." << std::endl;
     executeFullOpenCL(docs, profile, bloomFilter, positions);
     std::cout << totalt << " seconds to score documents." << std::endl;
+    delete bloomFilter;
+    delete profile;
+    delete docs;
+    delete positions;
     return 0;
 }
