@@ -197,7 +197,7 @@ locations, and is transferred to the OpenCL kernel in the same way.
 Again, each work item is responsible for a single document. During the kernel
 invocation, each work item parses the documents character by character and, as
 soon as a full term has been parsed, scores the term. A term is ready to score
-when a white space character has been reached, and the term is of non-zero
+when a white space character has been reached and the term is of non-zero
 length. Any characters inside tags, for instance the start and end doc tags, are
 ignored. After all characters have been parsed, the scores are stored in the
 same way as the scoring code.
@@ -280,7 +280,7 @@ the compute unit, resulting in just under 99\% occupancy. A higher occupancy can
 make better use of a compute unit's resources and increase overall throughput.
 
 Specific to this project, the Tesla C2075 and Intel Xeon Phi 5110P performance
-for the parsing and scoring kernel had an in-depth analysis regarding to their
+for the parsing and scoring kernel had an in-depth analysis relating to their
 local size.
 
 \subsubsection{Tesla C2075}
@@ -293,10 +293,9 @@ of 128.
 The graph of the local size effect on the Tesla C2075 throughput for the parsing
 and scoring kernel is shown in Figure~\ref{fig:teslaLocalSize}. There is a
 gradual improvement in performance up to a local size of 128 where performance
-then starts to drop off for larger work groups, due to a compute unit's
-occupancy going down. In this example, choosing a poor work group size, for
-example 1 work item, will increase the time to score a set of documents by a
-factor of five.
+then starts to drop off for larger work groups due to a compute unit's occupancy
+going down. In this example, choosing a poor work group size, for example 1 work
+item, will increase the time to score a set of documents by a factor of five.
 
 \begin{figure}[H]
 \includegraphics[width=\linewidth]{images/teslaLocalSize.png}
@@ -310,9 +309,9 @@ The Intel Xeon Phi 5110P reacted best to small local sizes, with a big jump in
 performance when going from a local size of 16 to 8. The optimum performance was
 with a local size of 4, which is likely due to the 4-way hyper-threading
 employed by the device. Normally, the vectorisation capabilities of the device
-would be expected to play a part in performance, with the effect of local size
-having a less drastic effect on performance. The Intel Xeon Phi's vector
-processing unit (VPU) officially supports floating point and integer numbers
+would be expected to play a part in performance, with the local size having a
+less drastic effect on performance. The Intel Xeon Phi's vector processing unit
+(VPU) officially supports floating point and integer numbers
 \footnote{\url{http://software.intel.com/en-us/articles/intel-xeon-phi-coprocessor-vector-microarchitecture}}
 so either the VPU has an insignificant effect on this application, or the
 compiler isn't mature enough yet to make full use of its capabilities. This
