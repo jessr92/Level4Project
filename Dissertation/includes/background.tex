@@ -376,6 +376,13 @@ A detailed look at the inner workings of the Intel Xeon Phi architecture can be
 found on Intel's website
 \footnote{\url{http://software.intel.com/en-us/articles/intel-xeon-phi-coprocessor-codename-knights-corner}}.
 
+\begin{figure}[H]
+\centering
+\includegraphics{images/intelXeonPhiMicroarchitecture.jpg}
+\caption{Intel Xeon Phi Microarchitecture - Copyright Intel Corporation \textcopyright}
+\label{fig:phiMicroarchitecture}
+\end{figure}
+
 Each CPU core is on a bi-directional ring bus to memory and each core is capable
 of 4-way hyper threading resulting in 240 hardware threads per device. Clock
 speeds are typically lower than a CPU at around 1GHz. The Intel Xeon Phi is
@@ -394,13 +401,6 @@ FORTRAN. The device itself contains a Linux operating system which is
 automatically started up and loads a file system, allows secure shell logins,
 and enables a TCP/IP stack to facilitate communication as if the device was a
 separate internal network device.
-
-\begin{figure}[H]
-\centering
-\includegraphics{images/intelXeonPhiMicroarchitecture.jpg}
-\caption{Intel Xeon Phi Microarchitecture - Copyright Intel Corporation \textcopyright}
-\label{fig:phiMicroarchitecture}
-\end{figure}
 
 \subsubsection{Performance Considerations}
 
@@ -571,8 +571,10 @@ summarised in Equation~\ref{eq:bloomFilter}.
 bf[i] = (i == h_j(term_k) ) ? 1 : 0, \forall i \in 0 .. S_{BF}-1], j \in 1..N_{hfs}, k \in 1..N_{terms}
 \end{equation}
 
-where $term_k$ is sixty bits and $h_j$ hashes sixty bits into ($log_2 S_{BF}$)
-bits
+where $S_BF$ is the bloom filter size in bits, $N_{hfs}$ is the number of hash
+functions, $N_{terms}$ is the number of terms in the profile, $term_k$ is sixty
+bits and $h_j$ is a hash function that hashes sixty bits into ($log_2 S_{BF}$)
+bits.
 
 %\begin{figure}[H]
 %\centering
