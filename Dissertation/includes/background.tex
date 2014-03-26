@@ -568,7 +568,7 @@ summarised in Equation~\ref{eq:bloomFilter}.
 
 \begin{equation}
 \label{eq:bloomFilter}
-bf[i] = (i == h_j(term_k) ) ? 1 : 0, \forall i \in 0 .. S_{BF}-1], j \in 1..N_{hfs}, k \in 1..N_{terms}
+bf[i] = (i = h_j(term_k) ) ? 1 : 0, \forall i \in 0 .. S_{BF}-1], j \in 1..N_{hfs}, k \in 1..N_{terms}
 \end{equation}
 
 where $S_BF$ is the bloom filter size in bits, $N_{hfs}$ is the number of hash
