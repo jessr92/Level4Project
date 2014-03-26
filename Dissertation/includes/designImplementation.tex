@@ -145,6 +145,38 @@ to a host device array, the actual classifications of each document is
 recovered. A document is classed as significant (spam in the spam or not spam
 example) if the score is above a certain threshold.
 
+\subsubsection{Level of Parallelism}
+
+With the kernel written so that a single work item scores a single document,
+this is fairly coarse-grained parallelism. This was chosen as it was believed to
+be most suitable for the target architecture, a GPU. Instead of a work item
+scoring one document, which could result in some work items scoring documents of
+vastly different size, they could score a section of the total number of terms
+thus ensuring each work item would have the same amount of work to do as the
+rest. The problem with this is the extra work required at the beginning of
+the kernel, and when adding part of a document's score to the scores buffer.
+
+At the beginning of the kernel, a work item would have to work out which
+document it was scoring which would involve either a linear or binary search
+over a buffer of document ID locations until it found the highest document
+ID location that was less than the work item's starting location. Also, before
+beginning scoring, the previous n terms would have to be read by the work item
+to populate the n-grams array so not to miss one involving its first term.
+
+During scoring, a work item would be continually looking to see if it had
+reached the end of a document and, if so, executing a globally atomic add on the
+scores buffer to ensure its results aren't overwritten by another work item.
+Atomic operations are expensive and would result in a conditional branch added
+to the main scoring loop, both of which can cost heavily performance-wise,
+especially in a GPU where the SIMT architecture discussed can result in
+divergent warps on nVidia GPUs.
+
+In addition to the complications of having term-level parallelism, as will be
+shown in the Results section, the GPU scored significantly faster than the CPU
+parser, thus the CPU parser was the bottleneck meaning any potential
+improvements to the GPU scorer wouldn't result in overall increases in system
+throughput.
+
 \begin{figure}[H]
 \small\begin{verbatim}
 documentNumber = get_global_id(0) + 1 // work item ID
@@ -218,6 +250,13 @@ method for updating state was investigated, neither had a performance advantage
 so the case statement method was used. States tell the parser to either skip
 characters, write characters to the term, `flush' the term (aka score the term),
 or that a tag has been encountered.
+
+\subsubsection{Level of Parallelism}
+
+With the kernel written so that a single work item parses and scores a single
+document, this has the same coarse-grained parallelism as the scoring-only
+kernel. The reasons for this choice are the same, especially given that the
+parsing and scoring kernel contains the same code for the scoring method.
 
 \section{Optimisations}
 
