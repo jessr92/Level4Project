@@ -238,41 +238,46 @@ on memory accesses other threads are available to run. Latency is thus hidden
 rather than reduced. To help facilitate this latency hiding, the context switch
 for GPU threads is designed to have insignificant cost.
 
+For the Intel CPU used in the experiments, each CPU core has its own private L1
+cache with a L2 cache which is shared between all four cores. For the nVidia GPU
+used in the experiments, there are five streaming multi-processors (SMX) which
+have a private L1 cache. All SMXs share a L2 cache.
+
 \subsubsection{Arithmetic Throughput}
 
 GPUs use more of the transistor budget on arithmetic units than memory cache
 compared to CPUs. This makes GPUs more suitable to high density arithmetic and
 repetitive computations than a CPU.
 
-\subsubsection{Architecture Layout}
-
-Figure~\ref{fig:gulftownArchitecture} shows a block diagram of Intel's
-``Gulftown'' architecture for CPUs. The CPUs have private L1 and L2 caches, not
-labelled in the diagram, with L3 cache shared. The Intel CPU used for
-experiments has a similar architecture known as ``Harpertown''. The primary
-difference is the lack of L3 cache, instead the shared cache is L2 cache, with
-CPUs only having a private L1 cache.
-
-Figure~\ref{fig:gk110Architecture} shows a block diagram of nVidia's GK110
-architecture for GPUs. This is a newer variation to the architecture in the GPU
-used for experiments, the nVidia Tesla C2075, however the layout is very similar
-and still provides a good representation of the chip layout. Each SMX is a
-streaming multiprocessor with a private L1 cache. All streaming multiprocessors
-share a unified L2 cache.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{images/gulftownArchitecture.jpg}
-\caption{Intel CPU Gulftown Architecture - Copyright Intel Corporation \textcopyright}
-\label{fig:gulftownArchitecture}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{images/gk110Architecture.jpg}
-\caption{nVidia GK110 Architecture - Copyright nVidia Corporation \textcopyright}
-\label{fig:gk110Architecture}
-\end{figure}
+%\subsubsection{Architecture Layout}
+%
+%Figure~\ref{fig:gulftownArchitecture} shows a block diagram of Intel's
+%``Gulftown'' architecture for CPUs. The CPUs have private L1 and L2 caches, not
+%labelled in the diagram, with L3 cache shared. The Intel CPU used for
+%experiments has a similar architecture known as ``Harpertown''. The primary
+%difference is the lack of L3 cache, instead the shared cache is L2 cache, with
+%CPUs only having a private L1 cache.
+%
+%Figure~\ref{fig:gk110Architecture} shows a block diagram of nVidia's GK110
+%architecture for GPUs. This is a newer variation to the architecture in the GPU
+%used for experiments, the nVidia Tesla C2075, however the layout is very similar
+%and still provides a good representation of the chip layout. Each SMX is a
+%streaming multiprocessor with a private L1 cache. All streaming multiprocessors
+% a unified L2 cache.
+%
+%\begin{figure}[H]
+%\centering
+%\includegraphics[width=\linewidth]{images/gulftownArchitecture.jpg}
+%\caption{Intel CPU Gulftown Architecture - Copyright Intel Corporation \textcopyright}
+%\label{fig:gulftownArchitecture}
+%\end{figure}
+%
+%\begin{figure}[H]
+%\centering
+%\includegraphics[width=\linewidth]{images/gk110Architecture.jpg}
+%\caption{nVidia GK110 Architecture - Copyright nVidia Corporation \textcopyright}
+%\label{fig:gk110Architecture}
+%\end{figure}
 
 \subsubsection{Execution Model Implementation}
 
@@ -558,22 +563,30 @@ A bloom filter works as follows. It is an array of bit values where 0 indicates
 absent and 1 indicates present. When constructing the bloom filter, each entry
 in the profile is run through a number of hash functions (for example, four) to
 get a number of numerical values. These numerical values are indices for bit
-positions in the bloom filter. These bit positions are set to 1, as illustrated
-in Figure~\ref{fig:bloomFilterSetup}.
+positions in the bloom filter. These bit positions are set to 1. This can be
+summarised in Equation~\ref{eq:bloomFilter}.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.7\linewidth]{images/bloomFilterSetup.png}
-\caption{Bloom Filter Setup}
-\label{fig:bloomFilterSetup}
-\end{figure}
+\begin{equation}
+\label{eq:bloomFilter}
+bf[i] = (i == h_j(term_k) ) ? 1 : 0, \forall i \in 0 .. S_{BF}-1], j \in 1..N_{hfs}, k \in 1..N_{terms}
+\end{equation}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.7\linewidth]{images/bloomFilterLookup.png}
-\caption{Bloom Filter Lookup}
-\label{fig:bloomFilterLookup}
-\end{figure}
+where $term_k$ is sixty bits and $h_j$ hashes sixty bits into ($log_2 S_{BF}$)
+bits
+
+%\begin{figure}[H]
+%\centering
+%\includegraphics[width=0.7\linewidth]{images/bloomFilterSetup.png}
+%\caption{Bloom Filter Setup}
+%\label{fig:bloomFilterSetup}
+%\end{figure}
+
+%\begin{figure}[H]
+%\centering
+%\includegraphics[width=0.7\linewidth]{images/bloomFilterLookup.png}
+%\caption{Bloom Filter Lookup}
+%\label{fig:bloomFilterLookup}
+%\end{figure}
 
 To use the bloom filter, the term to be looked up is run through the same hash
 functions. If all locations returned by the hash functions have their bit set to
@@ -581,12 +594,11 @@ functions. If all locations returned by the hash functions have their bit set to
 are set to 1, with the nth set to 0, the profile is known not to contain the
 term. However, it is possible that a term can have all n bit positions set to 1
 but still be absent from the profile. Think of the case where term 1 sets
-positions a, b, c, and d, and term 2 sets positions c, d, e, and f as shown in
-Figure~\ref{fig:bloomFilterSetup}. An absent term 3 could hash to positions b,
-c, d, and e which, although they are set to 1, aren't contained in the profile
-as shown in Figure~\ref{fig:bloomFilterLookup}. In other words, a bloom filter
-cannot have a false negative result (all terms in profile can be looked up) but
-can have false positive results like term 3.
+positions a, b, c, and d, and term 2 sets positions c, d, e, and f. An absent
+term 3 could hash to positions b, c, d, and e which, although they are set to 1,
+aren't contained in the profile. In other words, a bloom filter cannot have a
+false negative result (all terms in profile can be looked up) but can have false
+positive results like term 3.
 
 This is the space-time trade-off that Bloom discusses. A bloom filter can be
 very small compared to the data structure it's supporting but lookups can take
