@@ -149,12 +149,13 @@ example) if the score is above a certain threshold.
 
 With the kernel written so that a single work item scores a single document,
 this is fairly coarse-grained parallelism. This was chosen as it was believed to
-be most suitable for the target architecture, a GPU. Instead of a work item
-scoring one document, which could result in some work items scoring documents of
-vastly different size, they could score a section of the total number of terms
-thus ensuring each work item would have the same amount of work to do as the
-rest. The problem with this is the extra work required at the beginning of
-the kernel, and when adding part of a document's score to the scores buffer.
+be most suitable for the target architecture, a GPU. However, an alternative was
+looked into. Instead of a work item scoring one document, which could result in
+some work items scoring documents of vastly different size, they could score a
+section of the total number of terms thus ensuring each work item would have the
+same amount of work to do as the rest. The problem with this is the extra work
+required at the beginning of the kernel, and when adding part of a document's
+score to the scores buffer.
 
 At the beginning of the kernel, a work item would have to work out which
 document it was scoring which would involve either a linear or binary search
