@@ -51,7 +51,7 @@ In addition to the large amounts of data which needs to be filtered, there is a
 growing need for large enterprise data centres to be more cost effective, and to
 use less energy. A heterogeneous system can not only improve performance in raw
 terms, but also improve performance when measured against power and cost of
-equipment. These metrics are typically quoted as performance per watt, and
+equipment. These metrics are typically quoted as performance per watt and
 performance per dollar. A slower, cheaper system could be the preferable option
 over a fast, expensive system if the former system is more efficient to buy and
 run, informally referred to by the idiom `more bang for the buck'.
@@ -65,17 +65,20 @@ algorithms. A large number concentrate on Na{\"{\i}}ve Bayes classification
 \cite{androutsopoulos2000evaluation} \cite{androutsopoulos2000learning}  with
 different statistical models (for instance multi-variate Bernoulli model
 \cite{Schneider:2003:CEM:1067807.1067848} or a multinomial model
-\cite{mccallum1998comparison}).
+\cite{mccallum1998comparison}) with a focus on effectiveness rather than
+performance.
 
 There has also been work looking into the efficiency of different architectures
 in the area of information filtering \cite{chen2012invited}
-\cite{he2013massively} in general.
+\cite{he2013massively} which found that GPUs had the highest performance, but
+FPGAs had the highest performance per watt.
 
 This report more specifically relates to, and builds upon, work by Wim
 Vanderbauwhede et al.\ which has primarily focused on the use of Field-
 Programmable Gate Arrays (FPGAs) to accelerate a document parser and scoring
 system \cite{vanderbauwhede2013high} \cite{HybridCPUFPGA}
-\cite{chalamalasetti2012evaluating} with significant success.
+\cite{chalamalasetti2012evaluating} with significant success. Details of the
+work in these papers is discussed throughput this report.
 
 \section{Report Structure}
 
@@ -88,12 +91,12 @@ Chapter 2 will contain details on the background of OpenCL, the architecture
 differences between devices used, and further details of document filtering
 using a Na{\"{\i}}ve Bayes classifier.
 
-Chapter 3 will discuss significant implementation details and optimisations of
-the document filtering software.
+Chapter 3 will discuss implementation details and optimisations of the document
+filtering software.
 
 Chapter 4 will evaluate the performance of the document filtering software over
 a range of different devices, with a comparison to a traditional CPU
-implementation. The chapter will end with an in-depth discussion of the results.
+implementation. The chapter will end with a discussion of the results.
 
 Chapter 5 will summarise and discuss the results from the evaluation, and will
 indicate further work opportunities to increase performance and efficiency

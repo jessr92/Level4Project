@@ -3,10 +3,10 @@
 For the purposes of evaluating the performance of both the scorer and the scorer
 and parser, a Mac Pro (Early 2008 - MacPro3,1) was used. This was fitted with
 two Intel Xeon E5462 processors, and a nVidia Tesla C2075 GPU. In addition,
-there was a separate machine fitted with an Intel Xeon Phi 5110P. An AMD system
-with a traditional CPU setup with 4x AMD Operon 6366 HE CPUs was also used. A
-brief overview of the hardware will be given to provide some perspective to the
-results which follow.
+there was a separate machine fitted with two Intel Xeon Phi 5110P cards. An AMD
+system with a traditional CPU setup with 4x AMD Operon 6366 HE CPUs was also
+used. A brief overview of the hardware will be given to provide some perspective
+to the results which follow.
 
 \subsection{Mac Pro System}
 
@@ -47,7 +47,7 @@ have a graphics card fitted.
 \footnote{\url{http://ark.intel.com/products/64594/intel-xeon-processor-e5-2620-15m-cache-2_00-ghz-7_20-gts-intel-qpi}}
 fitted. This is a six core processor with hyper-threading to give twelve
 hardware threads. The standard clock frequency is 2GHz with a maximum turbo
-frequency of 2.5Ghz. There is a total of 15MB ``Intel Smart Cache'' available
+frequency of 2.5GHz. There is a total of 15MB ``Intel Smart Cache'' available
 which acts as Level 3 cache.
 
 \item[Primary Memory] 16GB DDR3 RAM
@@ -57,9 +57,9 @@ which acts as Level 3 cache.
 variant. There are sixty physical CPU cores running at 1.053GHz, and the cores
 are 4-way hyper-threaded resulting in 240 hardware threads. There is 8GB of on
 board memory running at 5GT/s for a theoretical maximum memory bandwidth of
-320GB/s. It has been installed in a PCIe 2.0 slot with 8x lane bandwidth giving
-a total theoretical bandwidth between its on-board memory and main memory of
-4GB/s (500MB/ per lane).
+320GB/s. Each device has been installed in a PCIe 2.0 slot with 8x lane
+bandwidth giving a total theoretical bandwidth between its on-board memory and
+main memory of 4GB/s (500MB/s per lane).
 
 \end{description}
 
@@ -76,7 +76,7 @@ graphics card fitted.
 (high efficiency) processors fitted. Each processor has 16 cores running at a
 base clock speed of 1.8GHz with a maximum turbo frequency of 3.1GHz. When eight
 or more cores are active, turbo frequency goes down to 2.3GHz. There is 1MB of
-Level 2 and 16MB of Level 3 Cache available per processor.
+Level 2 and 16MB of Level 3 cache available per processor.
 
 \item[Primary Memory] 512GB DDR3 RAM
 
@@ -132,7 +132,8 @@ of bandwidth of nearly 100\% even though the sampling rate only increased by
 
 The Mac Pro system connects the Tesla C2075 to a sixteen lane PCIe 1.0 slot and
 the Intel Phi system connects the Intel Xeon Phi to an eight lane PCIe 2.0 slot
-which theoretically has the same bandwidth as the sixteen lane PCIe 1.0 slot.
+which theoretically has the same bandwidth as the sixteen lane PCIe 1.0 slot (up
+to 4GB/s).
 
 nVidia's CUDA SDK supplies a bandwidth test which was used to determined the
 bandwidth of the Mac Pro system. The tool, called ``bandwidthTest'' has a mode
@@ -152,7 +153,7 @@ For the scoring only system, a pre-parsed collection of terms for the TREC
 collection is given. The parser and scoring only system receives the original
 TREC collection text file. The TREC collection is a 236MB text file containing
 77876 documents in plain text. Each document is enclosed by DOC tags and
-contain a document number, a date and time, a category, headline, and a series
+contains a document number, a date and time, a category, headline, and a series
 of paragraphs for the document itself. An example document from the collection
 is shown in Appendix~\ref{sec:exampleDoc}.
 
@@ -264,8 +265,8 @@ Device & Test & Time (ms) & Throughput (MB/s)\\
 Figure \ref{fig:scoringOnlyBest} takes each device's best result and compares
 them in a bar graph. The AMD system has the clear lead, having nearly three
 times the performance of the second fastest system. It's important to note
-however that these figures are only used for reference, there would need to
-be some part of the system conducting the parsing section making the scoring
+however that the CPU figures are only used for reference, there would need to be
+some part of the system conducting the parsing section making the scoring
 slower.
 
 The Tesla C2075 GPU can score in excess of 1GB/s showing that the CPU parsing
@@ -282,7 +283,7 @@ code is the bottleneck of the system, running at 427MB/s \cite{HybridCPUFPGA}.
 
 Having shown that scoring on the GPU is faster than the parsing on the CPU
 (427MB/s \cite{HybridCPUFPGA}), the parsing and scoring experiment was set up
-to investigate if GPUs and the Intel Xeon Phi was suitable for both parsing
+to investigate if GPUs and the Intel Xeon Phi are suitable for both parsing
 and scoring, in an attempt to remove the CPU parsing bottleneck.
 
 Table \ref{table:parsingScoring} contains the results from the parsing and
@@ -292,9 +293,9 @@ using any of the pre-existing C++ code.
 
 Each profile run is repeated ten times to improve the accuracy and reliability
 of the wall clock times. The exceptions to this rule are the Intel CPU and
-nVidia GPU system which, due to the fact that both devices were running in
-parallel and run at slightly different rates, required different numbers of
-repetitions to finish at the same time. The ``No Bloom Filter'' experiment
+nVidia GPU system which, due to the fact that both devices were running
+simultaneously and run at slightly different rates, required different numbers
+of repetitions to finish at the same time. The ``No Bloom Filter'' experiment
 required twenty repetitions in total (ten for each device), ``Bloom Filter'' and
 ``Bloom Filter No Hits'' required twenty three repetitions (CPU had three
 extra), and ``Bloom Filter All Hits'' required twenty two repetitions (CPU had
@@ -393,12 +394,12 @@ data to be transferred yet the latter does more work thus parsing and scoring on
 the one device is the better option based on data transfer overhead alone. It is
 also worth noting again that due to the speed of parsing on the C++ system being
 low compared to the scoring speed on a GPU, the improved data transfer rates
-would only reduce latency in getting classification results back, but not
-improve throughput overall given that the parser is the bottleneck. For the
-parsing and scoring kernel, the data transfer time reduction is beneficial as
-the CPU isn't the bottleneck given that it has no real computation to execute.
+would only reduce time in getting classification results back, but not improve
+throughput overall given that the parser is the bottleneck. For the parsing and
+scoring kernel, the data transfer time reduction is beneficial as the CPU isn't
+the bottleneck given that it has no real computation to execute.
 
-\subsection{C++ versus OpenCL throughput}
+\subsection{C++ versus OpenCL CPU throughput}
 
 Although the scoring only experiments on the CPU were initially only for
 reference, they also highlight a potential benefit of running a highly data
@@ -416,13 +417,16 @@ explained. With POSIX threads, the document set is split evenly into eight sets,
 one for each hardware thread. In terms of scheduling and memory access, this is
 as granular as things go, each thread goes through its documents one by one. For
 OpenCL, it has the same number of work items as there are documents. For the
-TREC data set, this is 77876 documents. OpenCL is free to schedule work items on
-compute units allowing for more granular scheduling. This can enable the runtime
-system to better hid memory access latency, resulting in the higher throughput.
-Also, given that documents can be of different lengths, if a POSIX thread has
-significantly longer documents than its counterparts, it will still be working
-away while the others have finished. This can still happen on the OpenCL system
-but with the granularity being significantly finer, it can be mitigated.
+TREC data set, this is 77876 documents. OpenCL is free to schedule work groups
+on the CPU cores allowing for more granular scheduling. Each work group has a
+local size of 1 so this is equivalent to scheduling individual documents to CPU
+cores. This can enable the runtime system to better hid memory access latency,
+resulting in the higher throughput. Also, given that documents can be of
+different lengths, if a POSIX thread has significantly longer documents than its
+counterparts, it will still be working away while the others have finished. This
+can still happen on the OpenCL system but with the granularity being
+significantly finer, it can be mitigated as the cores with the work items
+parsing or scoring shorter documents are free to take more work on.
 
 \subsection{Effect of Bloom Filters}
 
@@ -502,21 +506,22 @@ scoring only kernel.
 Considering the Intel CPU system initially, it is the only system which still
 has a performance improvement of up to 20\%. In the scoring code the performance
 improvement exceeded 100\%. The bloom filter is used no more and no less than in
-the scoring only code. The two primary reasons for this are related to the
-amount of extra work in this kernel, and the extra variables required. As was
-identified earlier, the parser is the bottleneck. This fact will remain true
-even in this implementation which parses terms and scores them as soon as a full
-term has been parsed. This means that, in terms of instruction count, a reduced
-proportion is in the part of the code which would benefit from the bloom filter.
-As such it is natural that, percentage wise, throughput will not improve as much
-with a bloom filter. The second relates to cache use itself. The scoring only
-code had very little private variables; it read in a term, created three
-n-grams, had a few variables to denote term range, score, and work item ID. This
-meant that less cache space was being used by private variables, increasing the
-chance that the bloom filter will not only migrate to CPU cache, but stay in
-cache for an extended period of time. The parsing and scoring kernel has around
-twice as many private variables, making fitting a bloom filter into the cache
-unlikely to be possible for an extended period of time.
+the scoring only code. The two primary reasons for the reduced improvement are
+related to the amount of extra work in this kernel, and the extra variables
+required. As was identified earlier, the parser is the bottleneck. This fact
+will remain true even in this implementation which parses terms and scores them
+as soon as a full term has been parsed. This means that, in terms of instruction
+count, a reduced proportion is in the part of the code which would benefit from
+the bloom filter. As such it is natural that, percentage wise, throughput will
+not improve as much with a bloom filter. The second relates to cache use itself.
+The scoring only code had very little in terms of private variables; it read in
+a term, created three n-grams, had a few variables to denote term range, score,
+and work item ID. This meant that less cache space was being used by private
+variables, increasing the chance that the bloom filter will not only migrate to
+CPU cache, but stay in cache for an extended period of time. The parsing and
+scoring kernel has around twice as many private variables, making fitting a
+bloom filter into the cache unlikely to be possible for an extended period of
+time.
 
 The AMD CPU experiences the biggest performance drop of nearly 50\%. This
 contrasts heavily with the larger than 100\% increase in performance for scoring
@@ -539,12 +544,15 @@ programmer, the extra demand of the local memory by the parser can have similar
 effect as on the CPU. The extra variables will affect the occupancy of a compute
 unit as less work items can be assigned simultaneously. The reduced number of
 work items per compute unit could also be affecting the memory latency technique
-effectiveness, resulting in the drop in performance.
+effectiveness, resulting in the drop in performance. Also, unless all threads in
+a warp experience a cache miss, the warp will have to wait for the few threads
+with a hit to retrieve their value from memory, removing all benefit from the
+bloom filter miss by the other threads.
 
 The Intel Xeon Phi again has around a 5\% performance drop, identical to the
 scoring only version. With their being no difference in the bloom filter
-performance change, the reasons discussed in the scoring only section are likely
-just as valid for the parsing and scoring section.
+performance change, the reasons discussed in the scoring only section are just
+as valid for the parsing and scoring section.
 
 In general, the bloom filter has a negative affect on most devices and could
 easily be ignored in a real world implementation. Given that the Intel CPU

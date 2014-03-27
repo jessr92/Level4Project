@@ -8,16 +8,14 @@ processing units (CPUs), graphics processing units (GPUs), and accelerator
 devices such as the Intel Xeon Phi and Field-Programmable Gate Arrays (FPGAs).
 The language is an open standard maintained by the Khronos Group
 \footnote{\url{http://www.khronos.org/opencl}}. OpenCL is based on the C99
-language standard \footnote{\url{http://www.open-
-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf}} and can be loosely thought of as a
-subset of the C99 language with some additional keywords. One of the major
-omissions from the OpenCL language is the lack of dynamic memory allocation. The
-first release of the OpenCL standard (OpenCL 1.0) was on the 8th of December
-2008. There have been three subsequent stable releases of the standard, OpenCL
-1.1 and 1.2, on the 14th of June 2010 and 15th of November 2011 respectively and
-OpenCL 2.0 on the 18th of November 2013. The version with most hardware support
-is OpenCL 1.1
-\footnote{\url{http://www.khronos.org/registry/cl/specs/opencl-1.1.pdf}} and
+language standard \cite{c99standard} and can be loosely thought of as a subset
+of the C99 language with some additional keywords. One of the major omissions
+from the OpenCL language is the lack of dynamic memory allocation. The first
+release of the OpenCL standard (OpenCL 1.0) was on the 8th of December 2008.
+There have been three subsequent stable releases of the standard, OpenCL 1.1 and
+1.2, on the 14th of June 2010 and 15th of November 2011 respectively and OpenCL
+2.0 on the 18th of November 2013. The version with most hardware support is
+OpenCL 1.1 \cite{opencl1.1} and
 this standard forms the basis of all discussion on OpenCL in this report.
 
 OpenCL splits the program code into two sections called `host' and `device'.
@@ -143,30 +141,31 @@ Xeon Phi
 
 \begin{description}
 
-\item[Compute Unit] This is a generic term used to describe a multiprocessor on
-a GPU, or a core of a CPU. For some devices (such as a GPU) a compute unit will
-have dedicated local memory, visible only to itself. A single compute unit can
-be assigned multiple work groups.
+\item[Compute Unit] This is a generic term used to describe a streaming
+multiprocessor (SMX) on a GPU, or a core of a CPU. For some devices (such as a
+GPU) a compute unit will have dedicated programmer-accessible local memory,
+visible only to itself. A single compute unit can be assigned multiple work
+groups.
 
 \item[Kernel] As discussed previously, OpenCL code which runs on an OpenCL
 device is known as a kernel. These are written from the perspective of a single
-work item (thread).
+work item.
 
 \item[Work group] This is a collection of work items. An entire work group is
 assigned to one compute unit. The work items that are associated with the work
 group can share local memory and can synchronise with one another at explicit
 synchronisation points in the kernel.
 
-\item[Work item] This closely resembles a single thread. Each work item is
-assigned a work group. Every work item can access local memory of its work
+\item[Work item] A work item executes the kernel code. Each work item is
+assigned a work group. Every work item can access the local memory of its work
 group and can access all global and constant memory. A work item will also
 have private variables which may or may not fit inside private memory.
 
-\item[Global size] This represents the total number of work items in each
+\item[Global range] This represents the total number of work items in each
 dimension. The result of the multiplication of the global size in each dimension
 is the total number of work items being executed for the corresponding kernel.
 
-\item[Local size] This represents the total number of work items in each
+\item[Local range] This represents the total number of work items in each
 dimension for a single work group. The global size for a dimension has to be an
 integer multiple of the local size for that dimension for the work group size
 to be valid. This is to ensure work groups can fit inside the global dimension
@@ -181,7 +180,7 @@ size evenly.
 \end{figure}
 
 Figure \ref{fig:openCLExecutionModel} shows diagrammatically the relationship
-between global and local size, and work items and work groups. Shown is a two
+between global and local range, and work items and work groups. Shown is a two
 dimensional range, with global size of 15 for dimension 0, and 10 for dimension
 1. Local size is 5 in both directions creating 6 work groups with 25 work items
 each.
@@ -207,31 +206,32 @@ overall controller for the entire system. This necessitated a one-size-fits-all
 style of approach when designing the CPU chip and the corresponding instruction
 set architecture. A CPU typically has a high clock speed, in the range of 3-4GHz
 for a modern desktop. Each die can contain a small number of cores, typically
-four, that execute instructions simultaneously.
+four, that execute instructions simultaneously but independently.
 
 A GPU is the highly parallel oriented chip, with hundreds of cores running at a
-slower clock speed (about one fifth of a CPU core) and with a restricted
-instruction set primarily designed for simple, repetitive tasks needed for
-video output. For instance, an OpenCL kernel is currently unable to call another
-kernel itself, the host CPU needs to do this on the device's behalf. With the
-growth of the use of GPGPUs, the restricted instruction set is becoming less of
-an issue, and CPUs and GPUs are becoming able to communicate and share directly
-with plans to introduce unified memory spaces.
+slower clock speed (about one fifth of a CPU core) and they have a restricted
+instruction set primarily designed for simple, repetitive tasks needed for video
+output. For instance, a kernel on the GPU is unable access the CPUs primary
+memory space, the host CPU needs to explicitly transfer data to the GPU before
+kernel execution can begin. With the growth of the use of GPGPUs, the restricted
+instruction set is becoming less of an issue, and CPUs and GPUs are becoming
+able to communicate and share directly with plans to introduce unified memory
+spaces.
 
 \subsubsection{Threading and Cache}
 
 A CPU has a few hardware threads, typically one per CPU core, with occasional
-context switching. The CPU has multiple levels of cache, typically two or three,
-to reduce memory access latency by exploiting spatial and temporal locality of
-memory accesses. It does this by automatically copying data in the same `cache-
-line' (around 64 bytes) of the requested memory from primary memory into the
-cache. The idea behind this is that a program will likely need data values
-nearby the memory location just accessed, for instance iterating over the array.
-This is called spatial locality. Temporal locality is where a data value used
-now is likely to be used again a short time later on. Exploiting this locality
-can lead to significant gains in performance of one or two orders of magnitude
-as main memory can take tens or hundreds of clock cycles to respond to a
-request.
+context switching between software threads. The CPU has multiple levels of
+cache, typically two or three, to reduce memory access latency by exploiting
+spatial and temporal locality of memory accesses. It does this by automatically
+copying data in the same `cache line' (around 64 bytes) of the requested memory
+from primary memory into the cache. The idea behind this is that a program will
+likely need data values nearby the memory location just accessed, for instance
+iterating over the array. This is called spatial locality. Temporal locality is
+where a data value used now is likely to be used again a short time later on.
+Exploiting these localities can lead to significant gains in performance of one
+or two orders of magnitude as main memory can take tens or hundreds of clock
+cycles to respond to a request.
 
 GPUs have many threads to keep compute units busy, if some threads are waiting
 on memory accesses other threads are available to run. Latency is thus hidden
@@ -240,8 +240,8 @@ for GPU threads is designed to have insignificant cost.
 
 For the Intel CPU used in the experiments, each CPU core has its own private L1
 cache with a L2 cache which is shared between all four cores. For the nVidia GPU
-used in the experiments, there are five streaming multi-processors (SMX) which
-have a private L1 cache. All SMXs share a L2 cache.
+used in the experiments, there are fourteen streaming multi-processors (SMX)
+which have a private L1 cache. All SMXs share a L2 cache.
 
 \subsubsection{Arithmetic Throughput}
 
@@ -289,10 +289,10 @@ GPUs, on the other hand, have a Single Instruction Multiple Threads (SIMT)
 execution model. This means that GPUs have one instruction unit for multiple
 arithmetic units. Threads are partitioned into groups which execute the same
 instruction simultaneously. For nVidia GPUs these are referred to in the CUDA
-model as `warps' and typically contain 32 threads. This can increase performance
-as this reduces the number of fetch and decode operations on instructions
-required. A performance consequence of this is in code with conditional
-branches.
+\footnote{\url{https://developer.nvidia.com/about-cuda}} model as `warps' and
+typically contain 32 threads. This can increase performance as this reduces the
+number of fetch and decode operations on instructions required. A performance
+consequence of this is in code with conditional branches.
 
 \begin{figure}[H]
 \small\begin{verbatim}
@@ -317,7 +317,7 @@ execute their instructions while the other threads remain idle, and only after
 the true branch has been completed, the false branch threads execute. This is
 known as a divergent warp. Divergent warps can considerably reduce performance
 as it reduces the number of threads executing in parallel and should be avoided
-when developing an OpenCL kernel as much as possible.
+when developing an OpenCL kernel for a GPU as much as possible.
 
 In addition to instruction execution, memory accesses to any of the on-board
 memories are done on a per warp basis. For ideal performance, addressing should
@@ -417,11 +417,11 @@ al. The purpose of their work is to classify a stream of text documents based on
 significant terms in the documents. A classic example would be emails, where
 spam emails tend to have specific terms to indicate their class. An assumption
 is that most of the documents will not be of interest (mostly not spam in our
-example) so the profiles of significant terms discriminates highly. This is
-achieved by a Na{\"{\i}}ve Bayes classifier with n-grams, similar to the work by
-the University of Waterloo \cite{peng2003combining} for text classification and
-Greek \cite{metsis2006spam} and German \cite{Schneider:2003:CEM:1067807.1067848}
-academics for spam filtering itself.
+example) so the profiles of significant terms discriminates highly. The
+classification is achieved by a Na{\"{\i}}ve Bayes classifier with n-grams,
+similar to the work by the University of Waterloo \cite{peng2003combining} for
+text classification and Greek \cite{metsis2006spam} and German
+\cite{Schneider:2003:CEM:1067807.1067848} academics for spam filtering itself.
 
 The most recent papers by Wim Vanderbauwhede et al.\ discuss the use of FPGAs
 for high throughput document filtering. The inherent parallelism in document
@@ -450,15 +450,13 @@ four bit number. Each term can contain up to twelve characters, with each
 character being represented by five bits. The last four bits of the term are
 used to identify the number of characters in the term. If a term is larger than
 twelve characters, the remainder of the word is truncated. Given the average
-English word length of 8.23 characters
-\footnote{\url{http://www.ravi.io/language-word-lengths}} this is an acceptable
-encoding.
+English word length of 8.23 characters \cite{englishWordLength} this is an
+acceptable encoding.
 
 \subsubsection{Baudot Encoding}
 
 The encoding used to convert an eight bit ASCII character into five bits is a
-variant of Baudot encoding
-\footnote{\url{http://rabbit.eng.miami.edu/info/baudot.html}}. Most text
+variant of Baudot encoding \cite{baudotEncoding}. Most text
 compression algorithms are lossless, the original text can always be returned
 during a decompression stage. Baudot code is different, it is lossy. The
 compressed text can still be read as English, just with some character
@@ -501,14 +499,15 @@ to 1. Characters which look like a 0 (`o', `O') are converted to 0. `u', `v',
 `U', and `V' are treated to be `U'. All other characters have their ASCII value
 reduced so that they fit into numbers lower than 32. All lower case characters
 are now upper case meaning now, in total, there are 10 (numeric) + 26 (letters)
-- 4 (`I', `J', `O', and `V') = 32 characters.
+- 4 (`I', `J', `O', and `V') = 32 characters and can be represented by five
+bits.
 
 \subsection{Scorer}
 
-The array of terms is passed onto the scorer, prior this report this could be
-another CPU routine, or an FPGA. The beginning of documents is marked by a term
-representing the document ID. The last four bits (term length field) are left
-at 0 to indicate that this is a document start.
+The array of terms from the parser is passed onto the scorer, prior this report
+this could be another CPU routine, or an FPGA. The beginning of documents is
+marked by a term representing the document ID. The last four bits, the term
+length field, are left at 0 to indicate that this is a document start.
 
 \subsubsection{Terms and N-Grams}
 
@@ -526,10 +525,12 @@ likely spam.
 
 After the n-grams have been generated, each one is taken in turn and looked up
 in the profile of terms. The profile is a hashed data structure of (term,
-weight) pairs. If the term exists in the profile, the weight of the term is
-added to the document's score. It is this score which is ultimately used to
+weight) pairs. The weight represents how common the term is in one class,
+compared to the other. If the term exists in the profile, the weight of the term
+is added to the document's score. It is this score which is ultimately used to
 determine a document's classification. If the score is above a certain user
-defined threshold value, the document is significant to us, otherwise it isn't.
+defined threshold value, the document is significant to us and classified as
+\emph{spam}, otherwise it is classed as \emph{not spam} in our example.
 
 A profile is typically quite large, 128MB in this case. As such, the profile is
 organised in such a way that it is a hashed array allowing for O(1) (constant
@@ -538,7 +539,8 @@ O(log n) time respectively (where n is the number of elements in the profile).
 To work out where a term is in the profile, a simple bit shift and masking
 operation is executed to obtain an offset into the profile array. This allows
 for the possibility of collisions with other terms thus probing is used (up to
-four addresses) to reduce the likelihood of missing a term in the profile.
+four addresses from location calculated by hash function) to reduce the
+likelihood of missing a term in the profile.
 
 \subsubsection{Bloom Filters}
 
@@ -597,10 +599,10 @@ are set to 1, with the nth set to 0, the profile is known not to contain the
 term. However, it is possible that a term can have all n bit positions set to 1
 but still be absent from the profile. Think of the case where term 1 sets
 positions a, b, c, and d, and term 2 sets positions c, d, e, and f. An absent
-term 3 could hash to positions b, c, d, and e which, although they are set to 1,
-aren't contained in the profile. In other words, a bloom filter cannot have a
-false negative result (all terms in profile can be looked up) but can have false
-positive results like term 3.
+term 3 could hash to positions b, c, d, and e which, although they are all set
+to 1, the term isn't contained in the profile. In other words, a bloom filter
+cannot have a false negative result (all terms in profile can be looked up) but
+can have false positive results like term 3.
 
 This is the space-time trade-off that Bloom discusses. A bloom filter can be
 very small compared to the data structure it's supporting but lookups can take

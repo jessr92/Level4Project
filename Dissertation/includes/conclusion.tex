@@ -47,18 +47,19 @@ targeted application being the classification of documents on a network stream
 and that Ethernet utilisation is rarely in excess of 30\% of capacity for a
 sustained period of time, this 32Gbit/s rate is enough to handle 100Gbit/s
 Ethernet. As such, further work would be to make use of a more modern, high end
-multiple GPU set up to investigate the amount of performance that can be
-achieved from devices attached to a single motherboard.
+multiple GPU set up to investigate the performance that can be achieved from
+devices attached to a single motherboard.
 
-Neither the data structures or the algorithm was designed with the Intel Xeon
+Neither the data structures or the algorithm were designed with the Intel Xeon
 Phi architecture in mind thus the performance of the device has the potential
 for improvement. With an in-depth review of the inner workings of the
 architecture, a more efficient implementation is perhaps possible.
 
 With Wim Vanderbauwhede et al.\ having implemented scoring code on the FPGA,
-with the view of also implementing the parsing code on the FPGA
+with the view of also implementing the parsing code on an FPGA
 \cite{HybridCPUFPGA}, the success of the parsing and scoring implementation on
-the GPU further suggests significant benefits can be obtained by doing so.
+the GPU further suggests significant benefits can be obtained by doing the same
+for an FPGA.
 
 In addition to the above, a detailed analysis of both the performance per watt
 and performance per dollar values of each set up will be of benefit to large

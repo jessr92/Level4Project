@@ -13,10 +13,10 @@ This section will detail the implementation of both systems before going on to
 discuss optimisations in the next section.
 
 A note on terminology when discussing blocks of contiguous memory. When a
-contiguous block of memory is allocated on the host device it is normally
-referred to as an array. When the array is transferred to an OpenCL device it is
-referred to as a buffer. These are functionally the same with the primary
-distinction being where they are allocated.
+contiguous block of memory is allocated on the host CPU it is normally referred
+to as an array. When the array is transferred to an OpenCL device it is referred
+to as a buffer. These are functionally the same with the primary distinction
+being where they are allocated.
 
 \begin{figure}[H]
 \small\begin{verbatim}
@@ -60,13 +60,13 @@ device selected, it's compiled at run time. After compilation has completed, the
 kernel's arguments are set to the appropriate device buffers. The host's arrays
 that contain data the kernel needs are then transferred to the device's buffers
 and the kernel is executed. After the kernel has finished executing, any buffers
-relating to results, in this case the document scores, are written back by en-
-queuing a read buffer command.
+relating to results, in this case the document scores, are written to the host
+CPU program back by en-queuing a read buffer command.
 
 As discussed in the background, the Na{\"{\i}}ve-Bayes classifier makes use of a
 profile. This is a 128MB file containing the terms and associated term weights.
 This is read in from disk to main memory by the C++ host device code, and
-transferred to the Opencl device as a buffer of unsigned long values to the
+transferred to the OpenCL device as a buffer of unsigned long values to the
 OpenCL kernel. It does not change between invocations of the kernel, as all sets
 of documents are scored using the same profile.
 
@@ -132,30 +132,34 @@ After the kernel has the arguments set to the appropriate buffer, and the data
 has been transferred to the device, the kernel can execute. During kernel
 execution, each work item iterates over the terms for their associated document.
 A work item knows which document to score because the location of the document
-starting term is the work item's ID + 1, up to the work item's ID + 2 into the
-document index buffer. Each term in this range is scored and the total score for
-the document is stored in a scores buffer at location equal to the work item's
-ID.
+starting term is the work item's ID + 1, up to the term at the work item's ID +
+2 into the document index buffer. Each term in this range is scored and the
+total score for the document is stored in a scores buffer at location equal to
+the work item's ID.
 
 The OpenCL kernel code is summarised in the pseudo-code in
-Figure~\ref{fig:scoringPseudocode}.
+Figure~\ref{fig:scoringPseudocode}. For the actual OpenCL kernel, the method
+calls for getTermAddress() and getWeight() are written as a single line
+containing the required bitwise operators such as shift and exclusive or.
 
 After the kernel has finished executing, and the scores buffer has been written
 to a host device array, the actual classifications of each document is
 recovered. A document is classed as significant (spam in the spam or not spam
-example) if the score is above a certain threshold.
+example) if the score is above a certain user defined threshold.
 
 \subsubsection{Level of Parallelism}
 
 With the kernel written so that a single work item scores a single document,
 this is fairly coarse-grained parallelism. This was chosen as it was believed to
-be most suitable for the target architecture, a GPU. However, an alternative was
-looked into. Instead of a work item scoring one document, which could result in
-some work items scoring documents of vastly different size, they could score a
-section of the total number of terms thus ensuring each work item would have the
-same amount of work to do as the rest. The problem with this is the extra work
-required at the beginning of the kernel, and when adding part of a document's
-score to the scores buffer.
+be most suitable for the target architecture, a GPU, even though that documents
+of differing lengths can cause performance issues as work items will end up
+waiting on other work items in the same warp to finish. However, an alternative
+was looked into. Instead of a work item scoring one document, which could result
+in some work items scoring documents of vastly different sizes, they could score
+a section of the total number of terms thus ensuring each work item would have
+the same amount of work to do as the rest. The problem with this is the extra
+work required at the beginning of the kernel, and when adding part of a
+document's score to the scores buffer.
 
 At the beginning of the kernel, a work item would have to work out which
 document it was scoring which would involve either a linear or binary search
@@ -167,10 +171,10 @@ to populate the n-grams array so not to miss one involving its first term.
 During scoring, a work item would be continually looking to see if it had
 reached the end of a document and, if so, executing a globally atomic add on the
 scores buffer to ensure its results aren't overwritten by another work item.
-Atomic operations are expensive and would result in a conditional branch added
-to the main scoring loop, both of which can cost heavily performance-wise,
-especially in a GPU where the SIMT architecture discussed can result in
-divergent warps on nVidia GPUs.
+Atomic operations are expensive and their placement would result in a
+conditional branch added to the main scoring loop, both of which can cost
+heavily performance-wise, especially in a GPU where the SIMT architecture
+discussed can result in divergent warps on GPUs.
 
 In addition to the complications of having term-level parallelism, as will be
 shown in the Results section, the GPU scored significantly faster than the CPU
@@ -223,17 +227,17 @@ were already parsed and represented by terms. For parsing and scoring, the plain
 text is instead read in. The TREC data collection is read in as a single text
 file and passed to the OpenCL kernel as-is. For the document marker array,
 instead of detecting zero length terms, the C++ code searches through the plain
-text and stores the character locations where the sub-string ``$<$DOC$>$''
+text and stores the character locations where the sub-string \emph{$<$DOC$>$}
 begins. This sub-string acts as a direct replacement to the zero length term
 locations, and is transferred to the OpenCL kernel in the same way.
 
 Again, each work item is responsible for a single document. During the kernel
-invocation, each work item parses the documents character by character and, as
-soon as a full term has been parsed, scores the term. A term is ready to score
-when a white space character has been reached and the term is of non-zero
-length. Any characters inside tags, for instance the start and end doc tags, are
-ignored. After all characters have been parsed, the scores are stored in the
-same way as the scoring code.
+invocation, each work item parses their respective document character by
+character and, as soon as a full term has been parsed, scores the term. A term
+is ready to score when a white space character has been reached and the term is
+of non-zero length. Any characters inside tags, for instance the start and end
+\emph{DOC} tags, are ignored. After all characters have been parsed, the scores
+are stored in the scores buffer, the same way as in the scoring code.
 
 After the kernel has finished, the scores are written back to the host and the
 classifications are calculated as before.
@@ -244,13 +248,13 @@ The OpenCL kernel code is summarised in the pseudo-code in
 Figure~\ref{fig:parsingScoringPseudocode} where to5BitEncoding(char) is the
 Baudot encoding discussed and shown in Figure~\ref{baudotCode}, scoreTerm(term)
 contains the profile lookup and scoring addition code from
-Figure~\ref{fig:scoringPseudocode}, and updateState(state) works out the parser
-state machine transition based on the current state, and what character has just
-been found. During implementation, an array-based and a case statement based
-method for updating state was investigated, neither had a performance advantage
-so the case statement method was used. States tell the parser to either skip
-characters, write characters to the term, `flush' the term (aka score the term),
-or that a tag has been encountered.
+Figure~\ref{fig:scoringPseudocode}, and updateState(state, number) works out the
+parser state machine transition based on the current state, and what character
+has just been found. During implementation, an array-based and a case statement
+based method for updating state was investigated, neither had a performance
+advantage so the case statement method was used. States tell the parser to
+either skip characters, write characters to the term, `flush' the term (aka
+score the term), or that a tag has been encountered.
 
 \subsubsection{Level of Parallelism}
 
@@ -258,6 +262,18 @@ With the kernel written so that a single work item parses and scores a single
 document, this has the same coarse-grained parallelism as the scoring-only
 kernel. The reasons for this choice are the same, especially given that the
 parsing and scoring kernel contains the same code for the scoring method.
+
+If a more fine grained method is considered, where each work item scores part of
+a document such that all work items parse the same number of characters then, in
+addition to the scoring concerns, the parsing stage has its own concerns. A work
+item would not only need to work out which document it is parsing but also work
+out where in the document it is starting from. The work item would initially
+need to work backwards to see whether it is inside a tag or not and, if the work
+item is outside a tag, start parsing from n words back from its starting
+location to generate the correct n-grams. Even if this situation was viable, the
+five branches in the parsing code still pose a performance issue as each work
+item will still be parsing and scoring different sizes of words thus the work
+items in a single warp will still diverge.
 
 \section{Optimisations}
 
@@ -275,7 +291,7 @@ group to suit the target device. The second optimisation, ``Mapped Buffers''
 discussed in Section~\ref{sec:mappedBuffers}, is a simple optimisation to remove
 any unnecessary data transfers.
 
-A third optimisation, using bloom filters, was also employed however this is
+A third optimisation using bloom filters was also employed however this is
 discussed in the next section as the three bloom filters, and their effect on
 performance, demands a more thorough analysis.
 
@@ -302,7 +318,7 @@ that it must be a factor of the global size (for instance a local size of 64 and
 a global size of 4096). Given that global size can be any number, for instance
 the number of documents, it is common to round up the global size to the nearest
 number that makes the desired local size a factor. The kernel can then conduct a
-bounds check on work item global IDs and have the few work items extra to return
+bounds check on work item global IDs and have the few work items extra return
 straight away. These extra work items do not affect performance as they only
 appear as part of the last work group.
 
@@ -368,8 +384,8 @@ a factor of three.
 
 Regarding overall performance changes, the Tesla C2075 has a greater benefit of
 an optimum local size to the Intel Xeon Phi however the Intel Xeon Phi has a
-much sharper reaction when nearing the optimal value whereas the Tesla has a
-more gradual change.
+much sharper reaction when nearing the optimal value whereas the Tesla C2075 has
+a more gradual change to its throughput.
 
 \begin{figure}[H]
 \includegraphics[width=\linewidth]{images/phiLocalSize.png}
@@ -385,17 +401,17 @@ kernel has to be transferred over the PCIe bus by en-queueing a write buffer
 command. This incurs an unavoidable time cost as the PCIe bus has limited
 bandwidth. When running OpenCL code on the CPU this is not the case as the
 OpenCL buffers can stay in primary memory. Unfortunately, the write buffer
-command does not realise that this is the case, and when executing a write
+command does not realise that this is the case and, when executing a write
 buffer command for the CPU, copies the host array from primary memory to another
 location in primary memory. As well as duplicating memory usage this incurs an
 avoidable time cost.
 
 The solution to the issue is to map the OpenCL buffer to the host array. This is
-done by executing an en-queue map buffer command. The OpenCL buffer can then
-read from the host address space and removes the requirement for the unnecessary
-duplication of memory. The benefits of mapping a buffer come with very little
-overhead as the command takes an insignificant amount of time to execute. This
-speeds up the CPU implementation by up to ten milliseconds. This in practice
-only increases throughput by up to 5\% in the best case for this application
-however, given that it's a simple optimisation, removing a small overhead is
-still worthwhile.
+done by executing an en-queue map buffer command instead of a write buffer
+command. The OpenCL buffer can then read from the host address space and removes
+the requirement for the unnecessary duplication of memory. The benefits of
+mapping a buffer come with very little overhead as the command takes an
+insignificant amount of time to execute. This speeds up the CPU implementation
+by up to ten milliseconds. This in practice only increases throughput by up to
+5\% in the best case for this application however, given that it's a simple
+optimisation, removing a small overhead is still worthwhile.
