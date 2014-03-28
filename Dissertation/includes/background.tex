@@ -80,8 +80,8 @@ and for variables whose values never change. Constant memory is denoted as
 
 \item[Local memory] This is scratch pad memory which is only visible to a single
 compute unit on the device. Local memory can be split up into distinct sections
-if a single compute unit is executing multiple work- groups simultaneously.
-Local memory is generally on- chip memory and thus has faster access time than
+if a single compute unit is executing multiple work groups simultaneously.
+Local memory is generally on-chip memory and thus has faster access time than
 global memory. Local memory is typically on the order of tens of kilobytes in
 size. Use of local memory is either statically declared in the kernel (e.g
 `\_\_local float[64] localArray') or dynamically allocated at runtime by the
@@ -105,9 +105,10 @@ available.
 
 As shown in Figure \ref{fig:openCLMemoryModel}, OpenCL uses a number of
 different terms to describe its execution model. There is no explicit `thread'
-so instead OpenCL has work items which are the closest relative to traditional
-threads. The OpenCL Concurrency and Execution Model is split into two parts,
-host and device, and both will be outlined below.
+in the OpenCL model, OpenCL has work items which are the closest relative to
+traditional threads and, for the most part, the terms can be used
+interchangeably. The OpenCL Concurrency and Execution Model is split into two
+parts, host and device, and both will be outlined below.
 
 \paragraph{Host}
 
@@ -143,7 +144,7 @@ Xeon Phi
 
 \item[Compute Unit] This is a generic term used to describe a streaming
 multiprocessor (SMX) on a GPU, or a core of a CPU. For some devices (such as a
-GPU) a compute unit will have dedicated programmer-accessible local memory,
+GPU) a compute unit will have dedicated programmer accessible local memory,
 visible only to itself. A single compute unit can be assigned multiple work
 groups.
 
@@ -193,7 +194,7 @@ section.
 \section{Device comparisons}
 
 There are numerous important architecture differences between different classes
-of device. At the high level, CPUs are aimed at being good all-rounders,
+of device. At the high level, CPUs are aimed at being good all rounders,
 suitable for a multitude of tasks whereas GPUs have focused on the problem of
 pixel value generation in a highly parallel fashion. This had led to the
 evolution of different device architectures that are suitable for different
@@ -209,7 +210,7 @@ set architecture. A CPU typically has a high clock speed, in the range of 3-4GHz
 for a modern desktop. Each die can contain a small number of cores, typically
 four, that execute instructions simultaneously but independently.
 
-A GPU is the highly parallel oriented chip, with hundreds of cores running at a
+A GPU is a highly parallel oriented chip, with hundreds of cores running at a
 slower clock speed (about one fifth of a CPU core) and they have a restricted
 instruction set primarily designed for simple, repetitive tasks needed for video
 output. For instance, a kernel on the GPU is unable access the CPUs primary

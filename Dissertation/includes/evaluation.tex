@@ -171,7 +171,7 @@ filter runs.
 
 The third is the ``no hits'' bloom filter. This bloom filter is created to be
 completely empty and thus never results in a hit, irrespective of whether or not
-the term is in the profile. This is seen as a best-case scenario performance-
+the term is in the profile. This is seen as a best-case scenario performance
 wise when running with a bloom filter, the case where all reads from main memory
 are prevented. This results in a completely zero score classification for all
 documents however, alongside the ``all hits'' bloom filter, results in a range
@@ -545,9 +545,9 @@ effect as on the CPU. The extra variables will affect the occupancy of a compute
 unit as less work items can be assigned simultaneously. The reduced number of
 work items per compute unit could also be affecting the memory latency technique
 effectiveness, resulting in the drop in performance. Also, unless all threads in
-a warp experience a cache miss, the warp will have to wait for the few threads
-with a hit to retrieve their value from memory, removing all benefit from the
-bloom filter miss by the other threads.
+a warp experience a miss, the warp will have to wait for the few threads with a
+hit to retrieve their value from memory, removing all benefit from the bloom
+filter miss by the other threads.
 
 The Intel Xeon Phi again has around a 5\% performance drop, identical to the
 scoring only version. With their being no difference in the bloom filter
