@@ -8,13 +8,13 @@ reasonably modern desktop machine would have a similar throughput. To place the
 throughput rate in the context of classifying documents in a network stream,
 363.6MB/s is 2.84Gbit/s. If this machine was asked to classify an Ethernet
 stream, it could handle nearly 10Gbit/s Ethernet connection on its own as
-Ethernet utilisation is typically sustained at no more than 30\%. By using the
-CPU as well, the 622.7MB/s (4.86Gbit/s) throughput could handle a 15Gbit/s
-Ethernet connection. If, instead of a network feed, the system was asked to
-filter documents from disk then the GPU could filter the documents in real time
-from a hard drive where sustained read speeds are typically less than 150MB/s.
-The CPU and GPU hybrid system could filter documents in real time from a solid
-state drive where read speeds don't exceed 550MB/s.
+average Ethernet utilisation is typically no more than 30\%. By using the CPU as
+well, the 622.7MB/s (4.86Gbit/s) throughput could handle a 15Gbit/s Ethernet
+connection. If, instead of a network feed, the system was asked to filter
+documents from disk then the GPU could filter the documents in real time from a
+hard drive where sustained read speeds are typically less than 150MB/s. The CPU
+and GPU hybrid system could filter documents in real time from a solid state
+drive where read speeds don't exceed 550MB/s.
 
 The use of bloom filters is a mixed bag when it comes to improving performance,
 as such the recommendation would be to investigate the performance difference
@@ -44,8 +44,8 @@ scenario as double floating point precision and other enterprise class features
 are not required in the document filtering system. A single system can handle
 four GPUs so it could then process documents at a rate of 4GB/s. Given the
 targeted application being the classification of documents on a network stream
-and that Ethernet utilisation is rarely in excess of 30\% of capacity for a
-sustained period of time, this 32Gbit/s rate is enough to handle 100Gbit/s
+and that Ethernet utilisation is rarely in excess of 30\% of capacity for an
+extended period of time, this 32Gbit/s rate is enough to handle 100Gbit/s
 Ethernet. As such, further work would be to make use of a more modern, high end
 multiple GPU set up to investigate the performance that can be achieved from
 devices attached to a single motherboard.
