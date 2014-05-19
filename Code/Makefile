@@ -33,6 +33,11 @@ DUMP_CL_OBJS_LIB=$(DUMP_CL_OBJS) -lpthread $(OPENCL_LIB)
 OPENCL_FULL_OBJS_LIB=$(OPENCL_FULL_OBJS) -lpthread $(OPENCL_LIB)
 OPENCL_FULL_FORK_OBJS_LIB=$(OPENCL_FULL_FORK_OBJS) -lpthread $(OPENCL_LIB)
 
+ifeq "$(shell hostname)" "curieuse"
+	CC = gcc-mp-4.8
+	CXX = g++-4.8
+endif
+
 ifeq "$(shell uname)" "Darwin"
 	CFLAGS+=-framework OpenCL
 	GPU_NO_WRAPPER_OBJS_LIB=$(GPU_NO_WRAPPER_OBJS)

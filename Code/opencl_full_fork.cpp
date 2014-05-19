@@ -83,7 +83,11 @@ void executeFullOpenCL(const std::string *documents,
         {
 #ifdef PHIPHI
             platforms[0].getDevices(CL_DEVICE_TYPE_ALL, &devices);
+#ifdef GPUGPU
+            std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
+#else
             std::cout << "Device name: " << devices[1].getInfo<CL_DEVICE_NAME>() << std::endl;
+#endif
 #else
             platforms[0].getDevices(CL_DEVICE_TYPE_CPU, &devices);
             std::cout << "Device name: " << devices[0].getInfo<CL_DEVICE_NAME>() << std::endl;
@@ -92,7 +96,11 @@ void executeFullOpenCL(const std::string *documents,
         else
         {
             platforms[0].getDevices(CL_DEVICE_TYPE_ALL, &devices);
+#ifdef GPUGPU
+            std::cout << "Device name: " << devices[1].getInfo<CL_DEVICE_NAME>() << std::endl;
+#else
             std::cout << "Device name: " << devices[2].getInfo<CL_DEVICE_NAME>() << std::endl;
+#endif
         }
 #else
         if (pid != 0)
@@ -113,14 +121,22 @@ void executeFullOpenCL(const std::string *documents,
         if (pid != 0)
         {
 #ifdef PHIPHI
+#ifdef GPUGPU
+            queue = cl::CommandQueue(context, devices[0]);
+#else
             queue = cl::CommandQueue(context, devices[1]);
+#endif
 #else
             queue = cl::CommandQueue(context, devices[0]);
 #endif
         }
         else
         {
+#if GPUGPU
+            queue = cl::CommandQueue(context, devices[1]);
+#else
             queue = cl::CommandQueue(context, devices[2]);
+#endif
         }
 #else
         cl::CommandQueue queue = cl::CommandQueue(context, devices[0]);
@@ -232,7 +248,11 @@ void executeFullOpenCL(const std::string *documents,
             mark_time();
             int localSize;
 #ifdef PHIPHI
+#ifdef GPUGPU
+            localSize = 128;
+#else
             localSize = 4;
+#endif
 #else
             if (pid != 0)
             {

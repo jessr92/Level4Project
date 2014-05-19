@@ -102,6 +102,57 @@ if [ "$HOSTNAME" = "fara.dcs.gla.ac.uk" ]; then
     echo "Testing full system with bloom filter all ones on CPU"
     OPENCL_FULL "htmlResultsBloomAll1/CPU"
 fi
+# Curieuse GTX 590
+if [ "$HOSTNAME" = "curieuse" ]; then
+    # No Bloom 1x GTX 590
+    make clean
+    make CPPFLAGS+=-DHTML_PARSE
+    mkdir -p htmlResultsNoBloom/HalfGTX590
+    echo "Testing full system without bloom filter on one half of 590"
+    OPENCL_FULL "htmlResultsNoBloom/HalfGTX590"
+    # Bloom 1x GTX 590
+    make clean
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilter.raw\"'
+    mkdir -p htmlResultsBloom/HalfGTX590
+    echo "Testing full system with bloom filter on one half of 590"
+    OPENCL_FULL "htmlResultsBloom/HalfGTX590"
+    # BloomAll0 1x GTX 590
+    make clean
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll0.raw\"'
+    mkdir -p htmlResultsBloomAll0/HalfGTX590
+    echo "Testing full system with all 0 bloom filter on one half of 590"
+    OPENCL_FULL "htmlResultsBloomAll0/HalfGTX590"
+    # Bloom 1x GTX 590
+    make clean
+    make CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll1.raw\"'
+    mkdir -p htmlResultsBloomAll1/HalfGTX590
+    echo "Testing full system with all 1 bloom filter on one half of 590"
+    OPENCL_FULL "htmlResultsBloomAll1/HalfGTX590"
+    # No Bloom Full GTX 590
+    make clean
+    make CPPFLAGS+=-DDEVACC CPPFLAGS+=-DPHIPHI CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DGPUGPU
+    mkdir -p htmlResultsNoBloom/FullGTX590
+    echo "Testing full system without bloom filter on full 590"
+    OPENCL_FULL_FORK "htmlResultsNoBloom/FullGTX590"
+    # Bloom Full GTX 590
+    make clean
+    make CPPFLAGS+=-DDEVACC CPPFLAGS+=-DPHIPHI CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilter.raw\"' CPPFLAGS+=-DGPUGPU
+    mkdir -p htmlResultsBloom/FullGTX590
+    echo "Testing full system with bloom filter on full 590"
+    OPENCL_FULL_FORK "htmlResultsBloom/FullGTX590"
+    # BloomAll0 Full GTX 590
+    make clean
+    make CPPFLAGS+=-DDEVACC CPPFLAGS+=-DPHIPHI CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll0.raw\"' CPPFLAGS+=-DGPUGPU
+    mkdir -p htmlResultsBloomAll0/FullGTX590
+    echo "Testing full system with all 0 bloom filter on full 590"
+    OPENCL_FULL_FORK "htmlResultsBloomAll0/FullGTX590"
+    # Bloom Full GTX 590
+    make clean
+    make CPPFLAGS+=-DDEVACC CPPFLAGS+=-DPHIPHI CPPFLAGS+=-DHTML_PARSE CPPFLAGS+=-DBLOOM_FILTER CPPFLAGS+=-DBLOOM_FILTER_FILE='\"bloomfilterAll1.raw\"' CPPFLAGS+=-DGPUGPU
+    mkdir -p htmlResultsBloomAll1/FullGTX590
+    echo "Testing full system with all 1 bloom filter on full 590"
+    OPENCL_FULL_FORK "htmlResultsBloomAll1/FullGTX590"
+fi
 # Manipa has the Intel Phi we're testing with
 if [ "$HOSTNAME" = "manipa" ]; then
     # No Bloom Phi
