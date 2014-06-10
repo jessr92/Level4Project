@@ -227,7 +227,9 @@ ulong score_term(ulong term,
             // Left shift not required in OpenCL Kernel since we're using vectors.
             // The ulong4 part has already been sorted by declaring profile in the
             // kernel as ulong4.
-            ulong profileAddress = ((term >> 42) & PROF_MASK);
+            ulong h1term = (term >>32) ^ term;
+            ulong profileAddress = ((h1term >>10) ^ (h1term & 0x3FF)) & PROF_MASK;
+            // ulong profileAddress = ((term >> 42) & PROF_MASK);
             // Get profile entry and add score to total document score.
             // score = Lowest 26th elements of the profile entry.
             // The upper 38 bits represent the specific term which needs to
